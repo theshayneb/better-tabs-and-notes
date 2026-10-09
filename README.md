@@ -1,0 +1,142 @@
+# Better Tabs and Notes
+
+One Obsidian plugin that replaces six:
+
+| Feature | Replaces |
+| --- | --- |
+| **Home tab**: a start page with search, bookmarks and recent files | [Home tab](https://github.com/olrenso/obsidian-home-tab) |
+| **Tab behaviour**: open in new tab, no duplicate tabs, tab placement, preview tabs | [Open Tab Settings](https://github.com/jesse-r-s-hines/obsidian-open-tab-settings) and [Mononote](https://github.com/czottmann/obsidian-mononote) |
+| **Edit mode switch**: a header button for live preview / source / reading | [Edit mode switch](https://github.com/mara-li/obsidian-edit-shortcut) |
+| **Pinned daily note**: today's note in one pinned tab | [Pinned Daily Notes](https://github.com/docmarionum1/obsidian-pinned-daily-notes) |
+| **Pinned tab icons**: shrink pinned tabs to custom icons | [Pinned Tabs Customizer](https://github.com/diegomarzaa/obsidian-pinned-tabs-customizer) |
+
+Every feature can be turned on or off on its own in the settings, and also
+turned off on just one device (handy for desktop-only features like compact
+pinned tabs).
+
+## Moving over from the original plugins
+
+1. Install and enable Better Tabs and Notes.
+2. In its settings, click **Import** under *Import from the original plugins*.
+   It reads the originals' settings from `.obsidian/plugins/*/data.json`.
+3. Turn the six original plugins off. Running both versions of a feature at the
+   same time makes them fight over the same tabs.
+
+## Features
+
+### Home tab
+
+- Replaces empty new tabs with a start page (can also open on startup and
+  close the previous session's tabs, keeping pinned tabs).
+- Search box that fuzzy-matches file names and aliases, highlights the match,
+  and offers to create the note if it doesn't exist.
+  - <kbd>↑</kbd>/<kbd>↓</kbd> to move, <kbd>Enter</kbd> to open,
+    <kbd>Ctrl/Cmd</kbd>+<kbd>Enter</kbd> to open in a new tab,
+    <kbd>Shift</kbd>+<kbd>Enter</kbd> to create.
+  - Type a file type (`image`, `pdf`, `canvas`, `audio`, `video`, `markdown`)
+    or an extension (`png`, `.excalidraw`...) and press <kbd>Tab</kbd> to
+    filter. <kbd>Backspace</kbd> on an empty box removes the filter.
+  - Type `omni` + <kbd>Tab</kbd> to search note contents with
+    [Omnisearch](https://github.com/scambier/obsidian-omnisearch), or make it
+    the default in the settings.
+  - Type `web` + <kbd>Tab</kbd> to search the web (search engine is
+    configurable).
+- Lists of bookmarked and recent files.
+- Customisable logo (Obsidian logo, any icon, or an image), title, font, size
+  and colours.
+- Put the page inside a note with a code block:
+
+  ````
+  ```home-search
+  show bookmarked files
+  show recent files
+  ```
+  ````
+
+  Add `only search bar` to leave out the logo and title. The old
+  `search-bar` code block from the Home tab plugin still works.
+
+### Tab behaviour
+
+- **Always open in new tab**: links, the file explorer, search, the quick
+  switcher and so on open in a new tab.
+- **Prevent duplicate tabs**: if the file is already open, switch to it,
+  optionally across splits and popout windows too.
+- **Preview tabs** (like VS Code): a new tab stays an italic preview that the
+  next file replaces, until you edit it or double-click its tab.
+- **New tab position**: after the active tab, after pinned tabs, at the
+  beginning or at the end, and which split to use.
+- **Ctrl/Cmd/middle click**: choose what it does (new tab, same tab, duplicate
+  tab, opposite split...).
+- File menu items: *Open in same tab*, *Open in duplicate tab*, *Open in
+  opposite tab group*.
+- **Close duplicates that slip through** (off by default): Mononote's
+  after-the-fact check, for duplicates opened by other plugins in ways the
+  main hook can't see.
+- Commands to toggle the main options and to open a new tab at a given
+  position.
+
+### Edit mode switch
+
+- A button in the note header that switches between live preview and source
+  mode, or cycles through reading view too, in an order you choose.
+- Or one button per mode, with the current one highlighted.
+- Optionally hides Obsidian's own reading/editing button.
+- Command: *Switch to next editing mode*.
+
+### Pinned daily note
+
+- Ribbon button and command that open today's daily note in a pinned tab,
+  reusing the same pinned tab every day. Move it wherever you like.
+- Creates today's note if needed, using the folder, date format and template
+  from the Daily notes core plugin or the Periodic Notes plugin.
+- Optional: open on startup, and switch to the new day's note at midnight.
+
+### Pinned tab icons
+
+- Shrink pinned tabs to a fixed width that shows only an icon.
+- Icon rules by exact file name, folder, name pattern (starts with, ends
+  with, contains, regex, with presets and a live preview), or tag. The first
+  matching rule wins, and rules that are shadowed by earlier ones are flagged.
+- A frontmatter property (default `pinned-icon`) can override the rules per
+  note.
+- Icons can be emoji, text or any of Obsidian's built-in icons.
+- *Set pinned tab icon* in the file menu, plus commands.
+
+## Development
+
+```
+npm install
+npm run dev         # rebuild main.js on change
+npm run lint        # eslint + tsc
+npm run lint:css
+npm test
+npm run build
+```
+
+Copy `main.js`, `manifest.json` and `styles.css` into
+`<vault>/.obsidian/plugins/better-tabs-and-notes/` to try it out.
+
+### Layout
+
+```
+src/
+  main.ts              plugin entry; loads/unloads features as settings change
+  feature.ts           base class for a switchable feature
+  settings.ts          all settings and defaults
+  settingsTab.ts       the settings screen
+  legacyImport.ts      import from the original plugins
+  types.d.ts           undocumented Obsidian internals we rely on
+  features/
+    homeTab/           home view, search bar, recent files, bookmarks
+    tabs/              tab opening patches (Open Tab Settings + Mononote)
+    editMode/          header mode button
+    dailyNote/         pinned daily note
+    pinnedIcons/       compact pinned tabs, icon rules and pickers
+tests/                 unit tests for the Obsidian-free logic
+```
+
+## License
+
+GPL-3.0, because Edit mode switch is GPL-3.0. The other original plugins are
+MIT or 0BSD; see [NOTICE.md](NOTICE.md) for credits and their license texts.

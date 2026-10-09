@@ -1,0 +1,10 @@
+{
+	"id": "better-tabs-and-notes",
+	"name": "Better Tabs and Notes",
+	"version": "0.0.1",
+	"minAppVersion": "1.8.7",
+	"description": "Home tab, smarter tab opening, one tab per note, an edit mode button, a pinned daily note and custom pinned tab icons in one plugin.",
+	"author": "theshayneb",
+	"authorUrl": "https://github.com/theshayneb",
+	"isDesktopOnly": false
+}

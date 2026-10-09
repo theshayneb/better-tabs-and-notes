@@ -1,0 +1,41 @@
+{
+  "name": "better-tabs-and-notes",
+  "version": "0.0.1",
+  "description": "Home tab, smarter tab opening, one-tab-per-note, edit mode button, pinned daily note and pinned tab icons in one Obsidian plugin.",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "node esbuild.config.mjs production",
+    "lint": "eslint \"src/**/*.ts\" && tsc --noEmit --pretty",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix && tsc --noEmit --pretty",
+    "lint:css": "stylelint styles.css",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "obsidian",
+    "tabs",
+    "home",
+    "daily notes",
+    "pinned tabs"
+  ],
+  "author": "theshayneb",
+  "license": "GPL-3.0-only",
+  "dependencies": {
+    "monkey-around": "^3.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@eslint/json": "^0.14.0",
+    "@types/node": "^26.6.4",
+    "esbuild": "^0.28.2",
+    "eslint": "^9.39.5",
+    "eslint-plugin-obsidianmd": "^0.1.9",
+    "globals": "^17.13.0",
+    "obsidian": "^1.12.3",
+    "stylelint": "^17.16.0",
+    "tslib": "^2.8.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.1",
+    "vitest": "^4.1.2"
+  }
+}
