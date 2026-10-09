@@ -45,13 +45,19 @@ export class HomeTabFeature extends Feature {
 	registerPluginParts(): void {
 		this.plugin.registerView(HOME_VIEW_TYPE, leaf => new HomeView(leaf, this));
 		for (const lang of [HOME_CODE_BLOCK, LEGACY_HOME_CODE_BLOCK]) {
-			this.plugin.registerMarkdownCodeBlockProcessor(lang, (source, el, ctx) => {
-				if (!this.isLoaded) {
-					el.createDiv({ cls: 'btn-muted', text: 'The home tab feature is turned off.' });
-					return;
-				}
-				ctx.addChild(new EmbeddedHome(el, this, source));
-			});
+			try {
+				this.plugin.registerMarkdownCodeBlockProcessor(lang, (source, el, ctx) => {
+					if (!this.isLoaded) {
+						el.createDiv({ cls: 'btn-muted', text: 'The home tab feature is turned off.' });
+						return;
+					}
+					ctx.addChild(new EmbeddedHome(el, this, source));
+				});
+			} catch (e) {
+				// Obsidian refuses a second processor for the same language, e.g. when
+				// the original Home tab plugin (which owns `search-bar`) is still on.
+				console.warn(`Better Tabs and Notes: couldn't register the ${lang} code block`, e);
+			}
 		}
 	}
 

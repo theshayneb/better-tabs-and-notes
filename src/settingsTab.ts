@@ -4,7 +4,7 @@ import {
 	DEFAULT_SETTINGS, MOD_CLICK_BEHAVIORS, NEW_TAB_GROUP_PLACEMENTS, NEW_TAB_PLACEMENTS,
 	type ColorChoice, type EditMode, type FeatureId, type FontChoice, type LogoType, type TabSettings,
 } from './settings';
-import { importLegacySettings } from './legacyImport';
+import { LEGACY_PLUGINS, importLegacySettings } from './legacyImport';
 import { FilePickerModal, FolderPickerModal, PatternEditorModal, TagPickerModal } from './features/pinnedIcons/modals';
 import { RULE_TYPE_LABELS, findConflicts, ruleMatches } from './features/pinnedIcons/rules';
 import { renderIcon } from './features/pinnedIcons/pinnedIcons';
@@ -43,6 +43,16 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 		containerEl.addClass('btn-settings');
+
+		const stillOn = LEGACY_PLUGINS
+			.filter(([id]) => this.app.plugins.enabledPlugins.has(id))
+			.map(([, name]) => name);
+		if (stillOn.length > 0) {
+			containerEl.createDiv({
+				cls: 'btn-settings-warning',
+				text: `Still turned on: ${stillOn.join(', ')}. Import their settings below, then turn them off in Community plugins; running both versions makes them fight over the same tabs.`,
+			});
+		}
 
 		new Setting(containerEl)
 			.setName('Import from the original plugins')

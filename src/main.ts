@@ -1,4 +1,4 @@
-import { Plugin, type Command } from 'obsidian';
+import { Notice, Plugin, type Command } from 'obsidian';
 import type { Feature } from './feature';
 import { DEFAULT_SETTINGS, FEATURE_IDS, mergeSettings, type FeatureId, type PluginSettings } from './settings';
 import { BetterTabsSettingTab } from './settingsTab';
@@ -9,6 +9,13 @@ import { PinnedDailyNoteFeature } from './features/dailyNote/pinnedDailyNote';
 import { PinnedIconsFeature } from './features/pinnedIcons/pinnedIcons';
 
 const DEVICE_DISABLED_PREFIX = 'better-tabs-and-notes:disabled-on-device:';
+
+/** Log a failure and show it, without stopping the rest of the plugin. */
+export function reportError(what: string, error: unknown): void {
+	console.error(`Better Tabs and Notes: ${what}`, error);
+	const message = error instanceof Error ? error.message : String(error);
+	new Notice(`Better Tabs and Notes: ${what}. ${message}`, 10000);
+}
 
 export default class BetterTabsPlugin extends Plugin {
 	settings: PluginSettings = structuredClone(DEFAULT_SETTINGS);
@@ -31,15 +38,21 @@ export default class BetterTabsPlugin extends Plugin {
 			pinnedIcons: new PinnedIconsFeature(this),
 		};
 
+		// Register the settings tab first, so it's there even if a feature fails.
+		this.addSettingTab(new BetterTabsSettingTab(this.app, this));
+
 		// Views and code block processors can only be registered by the plugin
 		// itself, and must exist before the workspace restores saved tabs.
 		this.features.homeTab.registerPluginParts();
 
-		for (const feature of Object.values(this.features)) {
-			for (const command of feature.commands()) this.addFeatureCommand(feature, command);
+		for (const feature of Object.values(this.features) as Feature[]) {
+			try {
+				for (const command of feature.commands()) this.addFeatureCommand(feature, command);
+			} catch (e) {
+				reportError(`couldn't add the ${feature.name.toLowerCase()} commands`, e);
+			}
 		}
 
-		this.addSettingTab(new BetterTabsSettingTab(this.app, this));
 		this.syncFeatures();
 	}
 
@@ -57,8 +70,12 @@ export default class BetterTabsPlugin extends Plugin {
 		for (const id of FEATURE_IDS) {
 			const feature = this.features[id] as Feature;
 			const wanted = this.isFeatureActive(id);
-			if (wanted && !feature.isLoaded) this.addChild(feature);
-			else if (!wanted && feature.isLoaded) this.removeChild(feature);
+			try {
+				if (wanted && !feature.isLoaded) this.addChild(feature);
+				else if (!wanted && feature.isLoaded) this.removeChild(feature);
+			} catch (e) {
+				reportError(`${feature.name} failed to ${wanted ? 'start' : 'stop'}`, e);
+			}
 		}
 	}
 

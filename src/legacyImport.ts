@@ -12,6 +12,16 @@ const LEGACY_IDS = {
 	pinnedTabs: 'pinned-tabs-customizer',
 } as const;
 
+/** Plugin id and display name of each original plugin. */
+export const LEGACY_PLUGINS: [string, string][] = [
+	[LEGACY_IDS.homeTab, 'Home tab'],
+	[LEGACY_IDS.openTabSettings, 'Open Tab Settings'],
+	[LEGACY_IDS.mononote, 'Mononote'],
+	[LEGACY_IDS.editMode, 'Edit mode switch'],
+	[LEGACY_IDS.dailyNote, 'Pinned Daily Notes'],
+	[LEGACY_IDS.pinnedTabs, 'Pinned Tabs Customizer'],
+];
+
 type Json = Record<string, unknown>;
 
 const isRecord = (v: unknown): v is Json => typeof v === 'object' && v !== null && !Array.isArray(v);

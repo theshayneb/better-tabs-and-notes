@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.2] - 2026-10-09
+
+- Fix the plugin not starting (and its settings tab not showing) when the original Home tab plugin is still enabled. Both tried to register the `search-bar` code block, and Obsidian refused the second one.
+- A feature that fails to start no longer stops the rest of the plugin; you get a notice saying which one failed.
+- The settings warn when any of the six original plugins are still turned on.
+
 ## [0.0.1] - 2026-10-09
 
 First version: the features of six plugins combined into one.
