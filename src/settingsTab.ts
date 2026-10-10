@@ -337,6 +337,11 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 			el.createDiv({ cls: 'btn-settings-warning', text: 'Live preview is turned off in Obsidian\'s editor settings, so switching to it won\'t work.' });
 		}
 
+		new Setting(el).setName('Button in the note header')
+			// eslint-disable-next-line obsidianmd/ui/sentence-case -- names of other plugins and apps are proper nouns
+			.setDesc('Turn off to use the commands instead, e.g. as a Commander button: "Switch to next editing mode", or "Switch to live preview", "Switch to source mode" and "Switch to reading view".')
+			.addToggle(t => t.setValue(s.showHeaderButton).onChange(v => { s.showHeaderButton = v; void save(true); }));
+
 		new Setting(el).setName('Include reading view')
 			.setDesc('Cycle through reading view too, in the order below.')
 			.addToggle(t => t.setValue(s.includeReadingMode).onChange(v => {
@@ -344,10 +349,12 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 				if (!v) s.hideDefaultButton = false;
 				void save(true);
 			}));
-		new Setting(el).setName('One button per mode')
-			.setDesc('Show a button for every mode, with the current one highlighted, instead of one button that cycles.')
-			.addToggle(t => t.setValue(s.oneButtonPerMode).onChange(v => { s.oneButtonPerMode = v; void save(true); }));
-		if (!s.oneButtonPerMode) {
+		if (s.showHeaderButton) {
+			new Setting(el).setName('One button per mode')
+				.setDesc('Show a button for every mode, with the current one highlighted, instead of one button that cycles.')
+				.addToggle(t => t.setValue(s.oneButtonPerMode).onChange(v => { s.oneButtonPerMode = v; void save(true); }));
+		}
+		if (s.showHeaderButton && !s.oneButtonPerMode) {
 			new Setting(el).setName('Show the next mode\'s icon')
 				.setDesc('Show the icon of the mode a click switches to, instead of the current mode.')
 				.addToggle(t => t.setValue(s.showNextModeIcon).onChange(v => { s.showNextModeIcon = v; void save(); }));

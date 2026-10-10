@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.4] - 2026-10-10
+
+- Edit mode switch: new "Button in the note header" setting. Turn it off to drop the header button (which could crowd out other plugins' header buttons, such as Commander's) and use the commands instead.
+- New commands: switch to live preview, switch to source mode and switch to reading view. All edit mode commands now have icons, for use as Commander buttons.
+
 ## [0.0.3] - 2026-10-10
 
 - The settings page no longer jumps back to the top when you change a setting that shows or hides other settings.

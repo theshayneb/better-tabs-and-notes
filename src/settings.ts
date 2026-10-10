@@ -97,6 +97,8 @@ export interface HomeTabSettings {
 export type EditMode = 'live' | 'source' | 'preview';
 
 export interface EditModeSettings {
+	/** Off: no header button, only the commands (e.g. for a Commander button). */
+	showHeaderButton: boolean;
 	includeReadingMode: boolean;
 	order: EditMode[];
 	/** Show the icon of the mode a click switches to instead of the current one. */
@@ -210,6 +212,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		accentSelection: false,
 	},
 	editMode: {
+		showHeaderButton: true,
 		includeReadingMode: false,
 		order: ['live', 'source', 'preview'],
 		showNextModeIcon: false,

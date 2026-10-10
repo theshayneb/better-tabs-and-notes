@@ -82,7 +82,9 @@ pinned tabs).
   mode, or cycles through reading view too, in an order you choose.
 - Or one button per mode, with the current one highlighted.
 - Optionally hides Obsidian's own reading/editing button.
-- Command: *Switch to next editing mode*.
+- Or no header button at all: use the commands *Switch to next editing mode*,
+  *Switch to live preview*, *Switch to source mode* and *Switch to reading
+  view* instead, e.g. as Commander buttons.
 
 ### Pinned daily note
 

@@ -53,16 +53,23 @@ export class EditModeFeature extends Feature {
 	}
 
 	override commands(): Command[] {
-		return [{
-			id: 'cycle-edit-mode',
-			name: 'Switch to next editing mode',
+		const command = (id: string, name: string, icon: string, target: (view: MarkdownView) => EditMode): Command => ({
+			id,
+			name,
+			icon,
 			checkCallback: (checking: boolean) => {
 				const view = this.app.workspace.getActiveViewOfType(MarkdownView);
 				if (!view) return false;
-				if (!checking) void this.setMode(view, nextMode(getMode(view), this.settings));
+				if (!checking) void this.setMode(view, target(view));
 				return true;
 			},
-		}];
+		});
+		return [
+			command('cycle-edit-mode', 'Switch to next editing mode', 'pencil-ruler', view => nextMode(getMode(view), this.settings)),
+			command('switch-to-live-preview', 'Switch to live preview', MODE_INFO.live.icon, () => 'live'),
+			command('switch-to-source-mode', 'Switch to source mode', MODE_INFO.source.icon, () => 'source'),
+			command('switch-to-reading-view', 'Switch to reading view', MODE_INFO.preview.icon, () => 'preview'),
+		];
 	}
 
 	private forEachMarkdownView(fn: (view: MarkdownView) => void): void {
@@ -84,6 +91,14 @@ export class EditModeFeature extends Feature {
 	private refresh(view: MarkdownView): void {
 		const mode = getMode(view);
 		const settings = this.settings;
+
+		const hideDefault = settings.hideDefaultButton && settings.includeReadingMode;
+		(view as ViewWithModeButton).modeButtonEl?.toggleClass(HIDDEN_DEFAULT_CLASS, hideDefault);
+		if (!settings.showHeaderButton) {
+			this.removeButtons(view);
+			return;
+		}
+
 		const modes = settings.oneButtonPerMode ? modeCycle(settings) : [null];
 
 		let buttons = this.buttons.get(view);
@@ -120,9 +135,6 @@ export class EditModeFeature extends Feature {
 				? `Switch to ${MODE_INFO[next].label.toLowerCase()}`
 				: `${MODE_INFO[mode].label} (click for ${MODE_INFO[next].label.toLowerCase()})`);
 		});
-
-		const hideDefault = settings.hideDefaultButton && settings.includeReadingMode;
-		(view as ViewWithModeButton).modeButtonEl?.toggleClass(HIDDEN_DEFAULT_CLASS, hideDefault);
 	}
 
 	async setMode(view: MarkdownView, mode: EditMode): Promise<void> {
