@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.6] - 2026-10-10
+
+- Fix "Hide Obsidian's reading/editing button" not hiding anything. It now finds the button the way the original Edit mode switch plugin did. With it on, the switch (or a Commander button for it) takes the place of Obsidian's button instead of adding one, so other header buttons are no longer pushed out.
+
 ## [0.0.5] - 2026-10-10
 
 - A Commander button in the note header for "Switch to next editing mode" now shows the current editing mode's icon (or the next mode's, with "Show the next mode's icon" on), and changes when you switch.

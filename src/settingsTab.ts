@@ -362,6 +362,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		}
 		if (s.includeReadingMode) {
 			new Setting(el).setName('Hide Obsidian\'s reading/editing button')
+				.setDesc('The switch replaces it, so the note header keeps the same number of buttons and nothing else gets pushed out.')
 				.addToggle(t => t.setValue(s.hideDefaultButton).onChange(v => { s.hideDefaultButton = v; void save(); }));
 
 			new Setting(el).setName('Order').setHeading();

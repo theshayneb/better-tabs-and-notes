@@ -20,8 +20,26 @@ const COMMANDER_BUTTON_CLASS = 'cmdr-page-header';
 const COMMANDER_DELAY_MS = 250;
 const HIDDEN_DEFAULT_CLASS = 'btn-edit-mode-hidden';
 
-/** MarkdownView keeps its own reading/editing toggle here (undocumented). */
-type ViewWithModeButton = MarkdownView & { modeButtonEl?: HTMLElement };
+/** Obsidian's own translation function (undocumented global). */
+interface I18next {
+	t(key: string): string;
+}
+
+/**
+ * Obsidian's own reading/editing toggle in a note's header. Found by its
+ * label, in whatever language Obsidian is set to, like the original Edit mode
+ * switch plugin did; `modeButtonEl` is an undocumented fallback.
+ */
+function findDefaultModeButton(view: MarkdownView): HTMLElement | null {
+	const i18n = (window as unknown as { i18next?: I18next }).i18next;
+	const labels = i18n
+		? ['interface.menu.read-view', 'interface.menu.edit-view'].map(key => i18n.t(key)).filter(Boolean)
+		: [];
+	const actions = Array.from(view.containerEl.querySelectorAll<HTMLElement>('.view-actions .view-action'));
+	const byLabel = actions.find(el =>
+		!el.hasClass(BUTTON_CLASS) && labels.some(label => el.getAttribute('aria-label')?.includes(label)));
+	return byLabel ?? (view as MarkdownView & { modeButtonEl?: HTMLElement }).modeButtonEl ?? null;
+}
 
 export function getMode(view: MarkdownView): EditMode {
 	const state = view.getState() as { mode?: string; source?: boolean };
@@ -54,7 +72,7 @@ export class EditModeFeature extends Feature {
 	override onunload(): void {
 		this.forEachMarkdownView(view => {
 			this.removeButtons(view);
-			(view as ViewWithModeButton).modeButtonEl?.removeClass(HIDDEN_DEFAULT_CLASS);
+			findDefaultModeButton(view)?.removeClass(HIDDEN_DEFAULT_CLASS);
 		});
 		this.restoreCommanderIcons();
 	}
@@ -141,7 +159,7 @@ export class EditModeFeature extends Feature {
 		const settings = this.settings;
 
 		const hideDefault = settings.hideDefaultButton && settings.includeReadingMode;
-		(view as ViewWithModeButton).modeButtonEl?.toggleClass(HIDDEN_DEFAULT_CLASS, hideDefault);
+		findDefaultModeButton(view)?.toggleClass(HIDDEN_DEFAULT_CLASS, hideDefault);
 		this.updateCommanderButtons(view, mode);
 		if (!settings.showHeaderButton) {
 			this.removeButtons(view);
