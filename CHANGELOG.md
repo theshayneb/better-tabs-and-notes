@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.7] - 2026-10-10
+
+- Edit mode switch: new default, "Take over Obsidian's reading/editing button". The switch now uses Obsidian's own button instead of adding one, so it no longer takes the place of other header buttons, such as Commander's. Its icon shows the current mode, and a click cycles through the modes in your order. "Add a separate button" and "No button (commands only)" are still available. This replaces "Hide Obsidian's reading/editing button".
+- New command "Copy the note header buttons (for troubleshooting)", which copies a list of the buttons in the current note's header.
+- Commander's buttons are never mistaken for Obsidian's reading/editing button.
+
 ## [0.0.6] - 2026-10-10
 
 - Fix "Hide Obsidian's reading/editing button" not hiding anything. It now finds the button the way the original Edit mode switch plugin did. With it on, the switch (or a Commander button for it) takes the place of Obsidian's button instead of adding one, so other header buttons are no longer pushed out.

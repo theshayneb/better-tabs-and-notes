@@ -8,10 +8,6 @@
 
 /* ===== Edit mode switch ===== */
 
-.view-action.btn-edit-mode-hidden {
-	display: none;
-}
-
 .view-action.btn-edit-mode-button.is-active {
 	color: var(--interactive-accent);
 }

@@ -78,10 +78,16 @@ pinned tabs).
 
 ### Edit mode switch
 
-- A button in the note header that switches between live preview and source
-  mode, or cycles through reading view too, in an order you choose.
-- Or one button per mode, with the current one highlighted.
-- Optionally hides Obsidian's own reading/editing button.
+- By default it takes over Obsidian's own reading/editing button: same place,
+  but a click cycles through live preview, source mode and reading view (in an
+  order you choose), and its icon shows the current mode. Nothing is added to
+  the note header, so other plugins' header buttons (like Commander's) keep
+  their place.
+- Or a separate button that switches between live preview and source mode
+  (optionally reading view too), or one button per mode with the current one
+  highlighted.
+- *Copy the note header buttons* lists what's in the current note's header,
+  for troubleshooting.
 - Or no header button at all: use the commands *Switch to next editing mode*,
   *Switch to live preview*, *Switch to source mode* and *Switch to reading
   view* instead, e.g. as Commander buttons. A Commander note header button

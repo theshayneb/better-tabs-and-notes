@@ -22,6 +22,12 @@ describe('mergeSettings', () => {
 		expect(merged.pinnedIcons.rules).toHaveLength(1);
 	});
 
+	it('migrates the old on/off edit mode header button', () => {
+		expect(mergeSettings({ editMode: { showHeaderButton: false } }).editMode.buttonPlace).toBe('none');
+		expect(mergeSettings({ editMode: { showHeaderButton: true } }).editMode.buttonPlace).toBe('replace');
+		expect(mergeSettings({ editMode: { buttonPlace: 'extra', showHeaderButton: false } }).editMode.buttonPlace).toBe('extra');
+	});
+
 	it('does not share objects with the defaults', () => {
 		const merged = mergeSettings({});
 		merged.pinnedIcons.rules.push({ type: 'exact', match: 'a', icon: 'b' });

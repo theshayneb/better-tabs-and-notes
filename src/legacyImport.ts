@@ -130,7 +130,8 @@ export async function importLegacySettings(app: App, settings: PluginSettings): 
 		assign(e, 'includeReadingMode', bool(edit.includeReadingMode));
 		assign(e, 'showNextModeIcon', bool(edit.reverseButtonGraphics));
 		assign(e, 'oneButtonPerMode', bool(edit.allButtonMode));
-		assign(e, 'hideDefaultButton', bool(edit.removeReadingButton));
+		// "All button" mode needs buttons of its own; otherwise take over Obsidian's button.
+		e.buttonPlace = edit.allButtonMode === true ? 'extra' : 'replace';
 		if (Array.isArray(edit.order)) e.order = edit.order.filter((m): m is EditMode => m === 'live' || m === 'source' || m === 'preview');
 		imported.push('Edit mode switch');
 	}

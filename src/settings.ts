@@ -96,16 +96,20 @@ export interface HomeTabSettings {
 
 export type EditMode = 'live' | 'source' | 'preview';
 
+/**
+ * replace: take over Obsidian's own reading/editing button (adds nothing to the header).
+ * extra: add our own button(s). none: commands only, e.g. for a Commander button.
+ */
+export type EditButtonPlace = 'replace' | 'extra' | 'none';
+
 export interface EditModeSettings {
-	/** Off: no header button, only the commands (e.g. for a Commander button). */
-	showHeaderButton: boolean;
+	buttonPlace: EditButtonPlace;
 	includeReadingMode: boolean;
 	order: EditMode[];
 	/** Show the icon of the mode a click switches to instead of the current one. */
 	showNextModeIcon: boolean;
 	/** One button per mode instead of a single cycling button. */
 	oneButtonPerMode: boolean;
-	hideDefaultButton: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -212,12 +216,11 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		accentSelection: false,
 	},
 	editMode: {
-		showHeaderButton: true,
+		buttonPlace: 'replace',
 		includeReadingMode: false,
 		order: ['live', 'source', 'preview'],
 		showNextModeIcon: false,
 		oneButtonPerMode: false,
-		hideDefaultButton: false,
 	},
 	dailyNote: {
 		pinLocation: 'editor',
@@ -263,6 +266,11 @@ export function mergeSettings(stored: unknown): PluginSettings {
 				target[key] = structuredClone(value[key]);
 			}
 		}
+	}
+	// 0.0.4-0.0.6 had an on/off header button instead of buttonPlace.
+	const storedEdit = data.editMode;
+	if (isRecord(storedEdit) && !('buttonPlace' in storedEdit) && storedEdit.showHeaderButton === false) {
+		result.editMode.buttonPlace = 'none';
 	}
 	return result;
 }

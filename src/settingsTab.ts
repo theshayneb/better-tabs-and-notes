@@ -337,34 +337,34 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 			el.createDiv({ cls: 'btn-settings-warning', text: 'Live preview is turned off in Obsidian\'s editor settings, so switching to it won\'t work.' });
 		}
 
-		new Setting(el).setName('Button in the note header')
-			// eslint-disable-next-line obsidianmd/ui/sentence-case -- names of other plugins and apps are proper nouns
-			.setDesc('Turn off to use the commands instead, e.g. as a Commander button: "Switch to next editing mode", or "Switch to live preview", "Switch to source mode" and "Switch to reading view".')
-			.addToggle(t => t.setValue(s.showHeaderButton).onChange(v => { s.showHeaderButton = v; void save(true); }));
+		new Setting(el).setName('Switch button')
+			.setDesc('Taking over Obsidian\'s reading/editing button adds nothing to the note header, so other plugins\' header buttons (like Commander\'s) keep their place. With no button, use the commands instead, e.g. as Commander buttons: "Switch to next editing mode", "Switch to live preview", "Switch to source mode" and "Switch to reading view".')
+			.addDropdown(dd => dd
+				.addOptions({
+					replace: 'Take over Obsidian\'s reading/editing button',
+					extra: 'Add a separate button',
+					none: 'No button (commands only)',
+				})
+				.setValue(s.buttonPlace)
+				.onChange(v => { s.buttonPlace = v as typeof s.buttonPlace; void save(true); }));
 
-		new Setting(el).setName('Include reading view')
-			.setDesc('Cycle through reading view too, in the order below.')
-			.addToggle(t => t.setValue(s.includeReadingMode).onChange(v => {
-				s.includeReadingMode = v;
-				if (!v) s.hideDefaultButton = false;
-				void save(true);
-			}));
-		if (s.showHeaderButton) {
+		if (s.buttonPlace !== 'replace') {
+			new Setting(el).setName('Include reading view')
+				.setDesc('Cycle through reading view too, in the order below.')
+				.addToggle(t => t.setValue(s.includeReadingMode).onChange(v => { s.includeReadingMode = v; void save(true); }));
+		}
+		if (s.buttonPlace === 'extra') {
 			new Setting(el).setName('One button per mode')
 				.setDesc('Show a button for every mode, with the current one highlighted, instead of one button that cycles.')
 				.addToggle(t => t.setValue(s.oneButtonPerMode).onChange(v => { s.oneButtonPerMode = v; void save(true); }));
 		}
-		if (!s.oneButtonPerMode || !s.showHeaderButton) {
+		if (!s.oneButtonPerMode || s.buttonPlace !== 'extra') {
 			new Setting(el).setName('Show the next mode\'s icon')
 				// eslint-disable-next-line obsidianmd/ui/sentence-case -- names of other plugins and apps are proper nouns
 				.setDesc('Show the icon of the mode a click switches to, instead of the current mode. Also applies to a Commander button for "Switch to next editing mode".')
 				.addToggle(t => t.setValue(s.showNextModeIcon).onChange(v => { s.showNextModeIcon = v; void save(); }));
 		}
-		if (s.includeReadingMode) {
-			new Setting(el).setName('Hide Obsidian\'s reading/editing button')
-				.setDesc('The switch replaces it, so the note header keeps the same number of buttons and nothing else gets pushed out.')
-				.addToggle(t => t.setValue(s.hideDefaultButton).onChange(v => { s.hideDefaultButton = v; void save(); }));
-
+		if (s.includeReadingMode || s.buttonPlace === 'replace') {
 			new Setting(el).setName('Order').setHeading();
 			const labels: Record<EditMode, string> = { live: 'Live preview', source: 'Source mode', preview: 'Reading view' };
 			const order = [...new Set([...s.order, 'live', 'source', 'preview'] as EditMode[])];
