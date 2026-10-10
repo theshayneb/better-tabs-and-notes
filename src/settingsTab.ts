@@ -69,7 +69,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 					if (feature.isLoaded) feature.onSettingsChange();
 				}
 				new Notice(`Imported settings from: ${imported.join(', ')}.`);
-				this.display();
+				this.redraw();
 			}));
 
 		this.section('homeTab', el => this.renderHomeTab(el));
@@ -91,7 +91,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 				plugin.settings.features[id] = value;
 				await plugin.saveSettings();
 				plugin.syncFeatures();
-				this.display();
+				this.redraw();
 			}));
 		if (!plugin.settings.features[id]) return;
 		new Setting(containerEl)
@@ -99,15 +99,29 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 			.setDesc('Not synced. Useful when a feature only makes sense on desktop or on mobile.')
 			.addToggle(t => t.setValue(plugin.isDisabledOnDevice(id)).onChange(value => {
 				plugin.setDisabledOnDevice(id, value);
-				this.display();
+				this.redraw();
 			}));
 		if (plugin.isDisabledOnDevice(id)) return;
 		render(containerEl.createDiv({ cls: 'btn-settings-group' }));
 	}
 
+	/**
+	 * Rebuild the page after a setting that shows or hides other settings,
+	 * keeping the scroll position instead of jumping back to the top.
+	 */
+	private redraw(): void {
+		const scrollers = [this.containerEl, this.containerEl.parentElement].filter((el): el is HTMLElement => !!el);
+		const positions = scrollers.map(el => el.scrollTop);
+		this.display();
+		const restore = () => scrollers.forEach((el, i) => { el.scrollTop = positions[i]; });
+		restore();
+		// Some controls finish laying out a frame later; restore again then.
+		window.requestAnimationFrame(restore);
+	}
+
 	private save(id: FeatureId, redraw = false): Promise<void> {
 		return this.plugin.saveSettings(id).then(() => {
-			if (redraw) this.display();
+			if (redraw) this.redraw();
 		});
 	}
 
@@ -256,7 +270,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		const s = this.plugin.settings.tabs;
 		const update = async (changes: Partial<TabSettings>) => {
 			await tabs.updateSettings(changes);
-			this.display();
+			this.redraw();
 		};
 
 		new Setting(el).setName('Always open in new tab')

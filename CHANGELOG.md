@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.3] - 2026-10-10
+
+- The settings page no longer jumps back to the top when you change a setting that shows or hides other settings.
+
 ## [0.0.2] - 2026-10-09
 
 - Fix the plugin not starting (and its settings tab not showing) when the original Home tab plugin is still enabled. Both tried to register the `search-bar` code block, and Obsidian refused the second one.
