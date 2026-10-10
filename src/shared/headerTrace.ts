@@ -60,6 +60,48 @@ export function startHeaderTrace(): () => void {
 	};
 }
 
+/** Where a stylesheet comes from: a file, a plugin, the theme or a snippet, as far as the page tells. */
+function describeSheet(sheet: CSSStyleSheet): string {
+	if (sheet.href) return decodeURIComponent(sheet.href.split('/').slice(-3).join('/'));
+	const node = sheet.ownerNode;
+	if (node instanceof HTMLElement) {
+		const attrs = Array.from(node.attributes).map(a => `${a.name}="${a.value}"`).join(' ');
+		const start = (node.textContent ?? '').trim().slice(0, 60).replace(/\s+/g, ' ');
+		return `<${node.tagName.toLowerCase()}${attrs ? ` ${attrs}` : ''}> starting "${start}"`;
+	}
+	return 'unknown stylesheet';
+}
+
+/** CSS rules that hide `el`, with the stylesheet each comes from. */
+function hidingRules(el: HTMLElement): string[] {
+	const found: string[] = [];
+	const visit = (rules: CSSRuleList, sheet: CSSStyleSheet) => {
+		for (const rule of Array.from(rules)) {
+			if (rule instanceof CSSStyleRule) {
+				const hides = rule.style.display === 'none' || rule.style.visibility === 'hidden';
+				let matches = false;
+				try {
+					matches = hides && el.matches(rule.selectorText);
+				} catch {
+					// Selector the browser can't test (e.g. pseudo-elements).
+				}
+				if (matches) found.push(`${rule.cssText.slice(0, 300)}\n      from ${describeSheet(sheet)}`);
+				if (rule.cssRules?.length) visit(rule.cssRules, sheet);
+			} else if ('cssRules' in rule) {
+				visit((rule as CSSGroupingRule).cssRules, sheet);
+			}
+		}
+	};
+	for (const sheet of Array.from(document.styleSheets)) {
+		try {
+			visit(sheet.cssRules, sheet);
+		} catch {
+			// Stylesheets from other origins can't be read.
+		}
+	}
+	return found;
+}
+
 /** Copy a description of the active note's header buttons, plus recorded hides. */
 export async function copyHeaderReport(app: App, plugin: Plugin, extra: string[]): Promise<void> {
 	const view = app.workspace.getActiveViewOfType(MarkdownView);
@@ -83,6 +125,10 @@ export async function copyHeaderReport(app: App, plugin: Plugin, extra: string[]
 		lines.push(`- "${el.getAttribute('aria-label') ?? ''}" [${Array.from(el.classList).join(' ')}]`
 			+ `${hidden ? ` HIDDEN (display ${style.display}, visibility ${style.visibility})` : ''}`
 			+ `${inline ? ` style="${inline}"` : ''} width ${el.offsetWidth}px`);
+		if (hidden) {
+			const rules = hidingRules(el);
+			lines.push(rules.length ? rules.map(r => `    hidden by CSS: ${r}`).join('\n') : '    no CSS rule found that hides it');
+		}
 	}
 	lines.push('', records.length ? 'Header buttons hidden since Obsidian started (newest last):' : 'No header button was hidden by code since Obsidian started.');
 	for (const r of records) lines.push(`- ${r.time} "${r.label}" by ${r.how}\n    ${r.stack}`);

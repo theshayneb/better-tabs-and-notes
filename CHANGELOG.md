@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.9] - 2026-10-10
+
+- The troubleshooting report now names the CSS rule that hides each hidden note header button, and the stylesheet it comes from (a plugin, the theme or a CSS snippet).
+
 ## [0.0.8] - 2026-10-10
 
 - "Copy the note header buttons (for troubleshooting)" now works with any feature turned off, shows how each hidden button is hidden, and lists which code hid header buttons since Obsidian started.
