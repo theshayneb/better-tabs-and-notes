@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.11] - 2026-10-10
+
+- Edit mode switch: "Hide properties in reading view" is now "Fold properties in reading view". Instead of hiding the properties, it collapses them each time a note switches into reading view, so they're one click away. If you had the old setting on, the new one is on too.
+
 ## [0.0.10] - 2026-10-10
 
 - Edit mode switch: new "Hide properties in reading view" setting. When a note is in reading view its properties are hidden; they still show while editing.

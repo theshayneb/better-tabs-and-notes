@@ -110,8 +110,8 @@ export interface EditModeSettings {
 	showNextModeIcon: boolean;
 	/** One button per mode instead of a single cycling button. */
 	oneButtonPerMode: boolean;
-	/** Hide the properties block in reading view. */
-	hidePropertiesInReading: boolean;
+	/** Fold the properties block when a note switches into reading view. */
+	collapsePropertiesInReading: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -223,7 +223,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		order: ['live', 'source', 'preview'],
 		showNextModeIcon: false,
 		oneButtonPerMode: false,
-		hidePropertiesInReading: false,
+		collapsePropertiesInReading: false,
 	},
 	dailyNote: {
 		pinLocation: 'editor',
@@ -270,8 +270,12 @@ export function mergeSettings(stored: unknown): PluginSettings {
 			}
 		}
 	}
-	// 0.0.4-0.0.6 had an on/off header button instead of buttonPlace.
 	const storedEdit = data.editMode;
+	// 0.0.10 hid properties in reading view; 0.0.11 folds them instead.
+	if (isRecord(storedEdit) && storedEdit.hidePropertiesInReading === true && !('collapsePropertiesInReading' in storedEdit)) {
+		result.editMode.collapsePropertiesInReading = true;
+	}
+	// 0.0.4-0.0.6 had an on/off header button instead of buttonPlace.
 	if (isRecord(storedEdit) && !('buttonPlace' in storedEdit) && storedEdit.showHeaderButton === false) {
 		result.editMode.buttonPlace = 'none';
 	}

@@ -28,6 +28,11 @@ describe('mergeSettings', () => {
 		expect(mergeSettings({ editMode: { buttonPlace: 'extra', showHeaderButton: false } }).editMode.buttonPlace).toBe('extra');
 	});
 
+	it('turns the old hide-properties setting into folding', () => {
+		expect(mergeSettings({ editMode: { hidePropertiesInReading: true } }).editMode.collapsePropertiesInReading).toBe(true);
+		expect(mergeSettings({ editMode: {} }).editMode.collapsePropertiesInReading).toBe(false);
+	});
+
 	it('does not share objects with the defaults', () => {
 		const merged = mergeSettings({});
 		merged.pinnedIcons.rules.push({ type: 'exact', match: 'a', icon: 'b' });

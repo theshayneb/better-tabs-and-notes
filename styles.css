@@ -12,11 +12,6 @@
 	color: var(--interactive-accent);
 }
 
-/* Obsidian's own variable for showing properties in reading view. */
-.btn-hide-props-reading {
-	--metadata-display-reading: none;
-}
-
 /* ===== Pinned tab icons ===== */
 
 .workspace-tab-header.btn-pinned-compact {

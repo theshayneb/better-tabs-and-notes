@@ -17,8 +17,8 @@ const BUTTON_CLASS = 'btn-edit-mode-button';
 /** Marks Obsidian's reading/editing button while we've taken it over. */
 const TAKEN_OVER_CLASS = 'btn-edit-mode-taken-over';
 const CYCLE_COMMAND = 'cycle-edit-mode';
-/** On a note's container: hide its properties in reading view (see styles.css). */
-const HIDE_PROPS_CLASS = 'btn-hide-props-reading';
+/** Retry delays while waiting for the properties block to render in reading view. */
+const COLLAPSE_RETRY_MS = [0, 100, 300, 800];
 /** Class Commander gives the note header buttons it adds; each also has the command id as a class. */
 const COMMANDER_BUTTON_CLASS = 'cmdr-page-header';
 /** Commander adds its header buttons a moment after the layout changes. */
@@ -80,6 +80,8 @@ export class EditModeFeature extends Feature {
 	/** Commander's original icon for buttons whose icon we've replaced. */
 	private commanderIcons = new Map<HTMLElement, Node[]>();
 	private delayedRefresh: number | null = null;
+	/** Last mode (and file, in reading view) seen per note, to fold properties only on a switch. */
+	private lastReadingKey = new WeakMap<MarkdownView, string>();
 
 	get settings(): EditModeSettings {
 		return this.plugin.settings.editMode;
@@ -103,7 +105,6 @@ export class EditModeFeature extends Feature {
 	override onunload(): void {
 		this.forEachMarkdownView(view => {
 			this.removeButtons(view);
-			view.containerEl.removeClass(HIDE_PROPS_CLASS);
 		});
 		this.releaseAll();
 		this.restoreCommanderIcons();
@@ -160,7 +161,7 @@ export class EditModeFeature extends Feature {
 
 	private refresh(view: MarkdownView): void {
 		const mode = getMode(view);
-		view.containerEl.toggleClass(HIDE_PROPS_CLASS, this.settings.hidePropertiesInReading);
+		this.collapsePropertiesOnEnteringReading(view, mode);
 		this.updateCommanderButtons(view, mode);
 		switch (this.settings.buttonPlace) {
 			case 'replace':
@@ -176,6 +177,34 @@ export class EditModeFeature extends Feature {
 				this.release(view);
 				break;
 		}
+	}
+
+	/**
+	 * Fold the properties block once each time a note goes into reading view
+	 * (or a different note is shown in reading view). Unfolding it by hand
+	 * sticks until the next switch.
+	 */
+	private collapsePropertiesOnEnteringReading(view: MarkdownView, mode: EditMode): void {
+		const key = mode === 'preview' ? `preview:${view.file?.path ?? ''}` : mode;
+		const previous = this.lastReadingKey.get(view);
+		this.lastReadingKey.set(view, key);
+		if (!this.settings.collapsePropertiesInReading || mode !== 'preview' || key === previous) return;
+
+		const tryCollapse = (attempt: number) => {
+			if (getMode(view) !== 'preview') return;
+			const container = view.containerEl.querySelector<HTMLElement>('.markdown-reading-view .metadata-container');
+			if (!container) {
+				// Not rendered yet.
+				if (attempt + 1 < COLLAPSE_RETRY_MS.length) window.setTimeout(() => tryCollapse(attempt + 1), COLLAPSE_RETRY_MS[attempt + 1]);
+				return;
+			}
+			if (container.hasClass('is-collapsed')) return;
+			// Click Obsidian's own "Properties" heading so it folds the normal way.
+			const heading = container.querySelector<HTMLElement>('.metadata-properties-heading');
+			if (heading) heading.click();
+			else container.addClass('is-collapsed');
+		};
+		tryCollapse(0);
 	}
 
 	private iconFor(view: MarkdownView): { icon: string; tooltip: string } {

@@ -364,9 +364,9 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 				.setDesc('Show the icon of the mode a click switches to, instead of the current mode. Also applies to a Commander button for "Switch to next editing mode".')
 				.addToggle(t => t.setValue(s.showNextModeIcon).onChange(v => { s.showNextModeIcon = v; void save(); }));
 		}
-		new Setting(el).setName('Hide properties in reading view')
-			.setDesc('Leave the properties out when a note is in reading view. They still show while editing.')
-			.addToggle(t => t.setValue(s.hidePropertiesInReading).onChange(v => { s.hidePropertiesInReading = v; void save(); }));
+		new Setting(el).setName('Fold properties in reading view')
+			.setDesc('Collapse the properties block whenever a note switches into reading view. Click its heading to unfold it.')
+			.addToggle(t => t.setValue(s.collapsePropertiesInReading).onChange(v => { s.collapsePropertiesInReading = v; void save(); }));
 
 		if (s.includeReadingMode || s.buttonPlace === 'replace') {
 			new Setting(el).setName('Order').setHeading();

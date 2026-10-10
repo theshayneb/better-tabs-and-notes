@@ -86,8 +86,8 @@ pinned tabs).
 - Or a separate button that switches between live preview and source mode
   (optionally reading view too), or one button per mode with the current one
   highlighted.
-- Optionally hides the properties block in reading view (it still shows while
-  editing).
+- Optionally folds the properties block whenever a note switches into reading
+  view (click *Properties* to unfold it).
 - *Copy the note header buttons* lists what's in the current note's header,
   for troubleshooting.
 - Or no header button at all: use the commands *Switch to next editing mode*,
