@@ -2,6 +2,7 @@ import { Notice, Plugin, type Command } from 'obsidian';
 import type { Feature } from './feature';
 import { DEFAULT_SETTINGS, FEATURE_IDS, mergeSettings, type FeatureId, type PluginSettings } from './settings';
 import { BetterTabsSettingTab } from './settingsTab';
+import { copyHeaderReport, startHeaderTrace } from './shared/headerTrace';
 import { TabBehaviorFeature } from './features/tabs/tabBehavior';
 import { HomeTabFeature } from './features/homeTab/homeTab';
 import { EditModeFeature } from './features/editMode/editMode';
@@ -40,6 +41,19 @@ export default class BetterTabsPlugin extends Plugin {
 
 		// Register the settings tab first, so it's there even if a feature fails.
 		this.addSettingTab(new BetterTabsSettingTab(this.app, this));
+
+		this.register(startHeaderTrace());
+		this.addCommand({
+			id: 'copy-note-header-buttons',
+			name: 'Copy the note header buttons (for troubleshooting)',
+			icon: 'clipboard-copy',
+			callback: () => {
+				const features = FEATURE_IDS.map(id => `${id} ${this.isFeatureActive(id) ? 'on' : 'off'}`).join(', ');
+				const extra = [`Features: ${features}`];
+				if (this.features.editMode.isLoaded) extra.push(...this.features.editMode.describe());
+				void copyHeaderReport(this.app, this, extra);
+			},
+		});
 
 		// Views and code block processors can only be registered by the plugin
 		// itself, and must exist before the workspace restores saved tabs.

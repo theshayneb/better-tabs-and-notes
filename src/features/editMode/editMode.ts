@@ -1,7 +1,7 @@
 // Switching between live preview, source and reading mode from the note header.
 // Based on the idea of Edit Mode Switch by Mara-Li (GPL-3.0); see NOTICE.md.
 
-import { MarkdownView, Notice, setIcon, setTooltip, type Command } from 'obsidian';
+import { MarkdownView, setIcon, setTooltip, type Command } from 'obsidian';
 import { Feature } from '../../feature';
 import type { EditMode, EditModeSettings } from '../../settings';
 import { modeCycle, nextMode } from './modes';
@@ -127,17 +127,6 @@ export class EditModeFeature extends Feature {
 			command('switch-to-live-preview', 'Switch to live preview', MODE_INFO.live.icon, () => 'live'),
 			command('switch-to-source-mode', 'Switch to source mode', MODE_INFO.source.icon, () => 'source'),
 			command('switch-to-reading-view', 'Switch to reading view', MODE_INFO.preview.icon, () => 'preview'),
-			{
-				id: 'copy-note-header-buttons',
-				name: 'Copy the note header buttons (for troubleshooting)',
-				icon: 'clipboard-copy',
-				checkCallback: (checking: boolean) => {
-					const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-					if (!view) return false;
-					if (!checking) void this.copyHeaderReport(view);
-					return true;
-				},
-			},
 		];
 	}
 
@@ -333,30 +322,12 @@ export class EditModeFeature extends Feature {
 
 	// -----------------------------------------------------------------------
 
-	/** Copy what's in the note header, so a layout problem can be diagnosed without dev tools. */
-	private async copyHeaderReport(view: MarkdownView): Promise<void> {
-		const header = view.containerEl.querySelector<HTMLElement>('.view-header');
-		const actions = view.containerEl.querySelector<HTMLElement>('.view-header .view-actions');
-		const lines = [
-			`Better Tabs and Notes ${this.plugin.manifest.version}, edit mode switch: ${this.settings.buttonPlace}`,
-			`Mode: ${getMode(view)}, phone: ${document.body.hasClass('is-phone')}, mobile: ${document.body.hasClass('is-mobile')}`,
-			`Header width: ${header?.clientWidth ?? '?'}px, buttons area: ${actions?.clientWidth ?? '?'}px visible of ${actions?.scrollWidth ?? '?'}px`,
-			`Obsidian's button found: ${findDefaultModeButton(view) ? 'yes' : 'no'}`,
-			'Buttons, left to right:',
+	/** Lines for the troubleshooting report. */
+	describe(): string[] {
+		const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+		return [
+			`Edit mode switch: ${this.settings.buttonPlace}${view ? `, mode ${getMode(view)}, Obsidian's button found: ${findDefaultModeButton(view) ? 'yes' : 'no'}` : ''}`,
 		];
-		for (const el of Array.from(actions?.children ?? []) as HTMLElement[]) {
-			const style = window.getComputedStyle(el);
-			const hidden = style.display === 'none' || style.visibility === 'hidden';
-			lines.push(`- "${el.getAttribute('aria-label') ?? ''}" [${Array.from(el.classList).join(' ')}]${hidden ? ' HIDDEN' : ''} width ${el.offsetWidth}px`);
-		}
-		const report = lines.join('\n');
-		try {
-			await navigator.clipboard.writeText(report);
-			new Notice('Copied the note header buttons. Paste them into your message.');
-		} catch {
-			console.warn(report);
-			new Notice('Couldn\'t copy. The list is in the developer console.');
-		}
 	}
 
 	async setMode(view: MarkdownView, mode: EditMode): Promise<void> {
