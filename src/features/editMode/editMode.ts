@@ -17,6 +17,8 @@ const BUTTON_CLASS = 'btn-edit-mode-button';
 /** Marks Obsidian's reading/editing button while we've taken it over. */
 const TAKEN_OVER_CLASS = 'btn-edit-mode-taken-over';
 const CYCLE_COMMAND = 'cycle-edit-mode';
+/** On a note's container: hide its properties in reading view (see styles.css). */
+const HIDE_PROPS_CLASS = 'btn-hide-props-reading';
 /** Class Commander gives the note header buttons it adds; each also has the command id as a class. */
 const COMMANDER_BUTTON_CLASS = 'cmdr-page-header';
 /** Commander adds its header buttons a moment after the layout changes. */
@@ -99,7 +101,10 @@ export class EditModeFeature extends Feature {
 	}
 
 	override onunload(): void {
-		this.forEachMarkdownView(view => this.removeButtons(view));
+		this.forEachMarkdownView(view => {
+			this.removeButtons(view);
+			view.containerEl.removeClass(HIDE_PROPS_CLASS);
+		});
 		this.releaseAll();
 		this.restoreCommanderIcons();
 	}
@@ -155,6 +160,7 @@ export class EditModeFeature extends Feature {
 
 	private refresh(view: MarkdownView): void {
 		const mode = getMode(view);
+		view.containerEl.toggleClass(HIDE_PROPS_CLASS, this.settings.hidePropertiesInReading);
 		this.updateCommanderButtons(view, mode);
 		switch (this.settings.buttonPlace) {
 			case 'replace':

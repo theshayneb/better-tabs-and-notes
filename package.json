@@ -1,6 +1,6 @@
 {
   "name": "better-tabs-and-notes",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Home tab, smarter tab opening, one-tab-per-note, edit mode button, pinned daily note and pinned tab icons in one Obsidian plugin.",
   "main": "main.js",
   "scripts": {

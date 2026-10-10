@@ -364,6 +364,10 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 				.setDesc('Show the icon of the mode a click switches to, instead of the current mode. Also applies to a Commander button for "Switch to next editing mode".')
 				.addToggle(t => t.setValue(s.showNextModeIcon).onChange(v => { s.showNextModeIcon = v; void save(); }));
 		}
+		new Setting(el).setName('Hide properties in reading view')
+			.setDesc('Leave the properties out when a note is in reading view. They still show while editing.')
+			.addToggle(t => t.setValue(s.hidePropertiesInReading).onChange(v => { s.hidePropertiesInReading = v; void save(); }));
+
 		if (s.includeReadingMode || s.buttonPlace === 'replace') {
 			new Setting(el).setName('Order').setHeading();
 			const labels: Record<EditMode, string> = { live: 'Live preview', source: 'Source mode', preview: 'Reading view' };

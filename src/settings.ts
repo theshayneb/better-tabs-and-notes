@@ -110,6 +110,8 @@ export interface EditModeSettings {
 	showNextModeIcon: boolean;
 	/** One button per mode instead of a single cycling button. */
 	oneButtonPerMode: boolean;
+	/** Hide the properties block in reading view. */
+	hidePropertiesInReading: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -221,6 +223,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		order: ['live', 'source', 'preview'],
 		showNextModeIcon: false,
 		oneButtonPerMode: false,
+		hidePropertiesInReading: false,
 	},
 	dailyNote: {
 		pinLocation: 'editor',

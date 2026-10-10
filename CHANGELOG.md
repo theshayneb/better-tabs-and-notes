@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.10] - 2026-10-10
+
+- Edit mode switch: new "Hide properties in reading view" setting. When a note is in reading view its properties are hidden; they still show while editing.
+
 ## [0.0.9] - 2026-10-10
 
 - The troubleshooting report now names the CSS rule that hides each hidden note header button, and the stylesheet it comes from (a plugin, the theme or a CSS snippet).
