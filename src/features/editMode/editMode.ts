@@ -13,6 +13,11 @@ const MODE_INFO: Record<EditMode, { icon: string; label: string }> = {
 };
 
 const BUTTON_CLASS = 'btn-edit-mode-button';
+const CYCLE_COMMAND = 'cycle-edit-mode';
+/** Class Commander gives the note header buttons it adds; each also has the command id as a class. */
+const COMMANDER_BUTTON_CLASS = 'cmdr-page-header';
+/** Commander adds its header buttons a moment after the layout changes. */
+const COMMANDER_DELAY_MS = 250;
 const HIDDEN_DEFAULT_CLASS = 'btn-edit-mode-hidden';
 
 /** MarkdownView keeps its own reading/editing toggle here (undocumented). */
@@ -29,6 +34,9 @@ export class EditModeFeature extends Feature {
 	readonly name = 'Edit mode switch';
 
 	private buttons = new WeakMap<MarkdownView, HTMLElement[]>();
+	/** Commander's original icon for buttons whose icon we've replaced. */
+	private commanderIcons = new Map<HTMLElement, Node[]>();
+	private delayedRefresh: number | null = null;
 
 	get settings(): EditModeSettings {
 		return this.plugin.settings.editMode;
@@ -38,6 +46,9 @@ export class EditModeFeature extends Feature {
 		this.app.workspace.onLayoutReady(() => this.refreshAll());
 		this.registerEvent(this.app.workspace.on('layout-change', () => this.refreshAll()));
 		this.registerEvent(this.app.workspace.on('active-leaf-change', () => this.refreshAll()));
+		this.register(() => {
+			if (this.delayedRefresh !== null) window.clearTimeout(this.delayedRefresh);
+		});
 	}
 
 	override onunload(): void {
@@ -45,6 +56,7 @@ export class EditModeFeature extends Feature {
 			this.removeButtons(view);
 			(view as ViewWithModeButton).modeButtonEl?.removeClass(HIDDEN_DEFAULT_CLASS);
 		});
+		this.restoreCommanderIcons();
 	}
 
 	override onSettingsChange(): void {
@@ -80,6 +92,42 @@ export class EditModeFeature extends Feature {
 
 	private refreshAll(): void {
 		this.forEachMarkdownView(view => this.refresh(view));
+		// Catch Commander buttons added after this layout change.
+		if (this.delayedRefresh !== null) window.clearTimeout(this.delayedRefresh);
+		this.delayedRefresh = window.setTimeout(() => {
+			this.delayedRefresh = null;
+			this.forEachMarkdownView(view => this.updateCommanderButtons(view, getMode(view)));
+		}, COMMANDER_DELAY_MS);
+	}
+
+	/**
+	 * Make a Commander header button for "Switch to next editing mode" show the
+	 * current mode's icon (or the next one's, per the settings), like our own button.
+	 */
+	private updateCommanderButtons(view: MarkdownView, mode: EditMode): void {
+		const commandId = `${this.plugin.manifest.id}:${CYCLE_COMMAND}`;
+		const buttons = view.containerEl.querySelectorAll<HTMLElement>(`.${COMMANDER_BUTTON_CLASS}`);
+		for (const el of Array.from(buttons)) {
+			if (!el.classList.contains(commandId)) continue;
+			const next = nextMode(mode, this.settings);
+			const icon = MODE_INFO[this.settings.showNextModeIcon ? next : mode].icon;
+			if (el.dataset.btnModeIcon === icon) continue;
+			if (!this.commanderIcons.has(el)) this.commanderIcons.set(el, Array.from(el.childNodes).map(n => n.cloneNode(true)));
+			setIcon(el, icon);
+			el.dataset.btnModeIcon = icon;
+		}
+		// Forget buttons Commander has since removed.
+		for (const el of this.commanderIcons.keys()) {
+			if (!el.isConnected) this.commanderIcons.delete(el);
+		}
+	}
+
+	private restoreCommanderIcons(): void {
+		for (const [el, nodes] of this.commanderIcons) {
+			el.replaceChildren(...nodes);
+			delete el.dataset.btnModeIcon;
+		}
+		this.commanderIcons.clear();
 	}
 
 	private removeButtons(view: MarkdownView): void {
@@ -94,6 +142,7 @@ export class EditModeFeature extends Feature {
 
 		const hideDefault = settings.hideDefaultButton && settings.includeReadingMode;
 		(view as ViewWithModeButton).modeButtonEl?.toggleClass(HIDDEN_DEFAULT_CLASS, hideDefault);
+		this.updateCommanderButtons(view, mode);
 		if (!settings.showHeaderButton) {
 			this.removeButtons(view);
 			return;

@@ -84,7 +84,8 @@ pinned tabs).
 - Optionally hides Obsidian's own reading/editing button.
 - Or no header button at all: use the commands *Switch to next editing mode*,
   *Switch to live preview*, *Switch to source mode* and *Switch to reading
-  view* instead, e.g. as Commander buttons.
+  view* instead, e.g. as Commander buttons. A Commander note header button
+  for *Switch to next editing mode* shows the current mode's icon.
 
 ### Pinned daily note
 

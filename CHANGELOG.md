@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.5] - 2026-10-10
+
+- A Commander button in the note header for "Switch to next editing mode" now shows the current editing mode's icon (or the next mode's, with "Show the next mode's icon" on), and changes when you switch.
+
 ## [0.0.4] - 2026-10-10
 
 - Edit mode switch: new "Button in the note header" setting. Turn it off to drop the header button (which could crowd out other plugins' header buttons, such as Commander's) and use the commands instead.

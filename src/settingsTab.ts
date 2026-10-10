@@ -354,9 +354,10 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 				.setDesc('Show a button for every mode, with the current one highlighted, instead of one button that cycles.')
 				.addToggle(t => t.setValue(s.oneButtonPerMode).onChange(v => { s.oneButtonPerMode = v; void save(true); }));
 		}
-		if (s.showHeaderButton && !s.oneButtonPerMode) {
+		if (!s.oneButtonPerMode || !s.showHeaderButton) {
 			new Setting(el).setName('Show the next mode\'s icon')
-				.setDesc('Show the icon of the mode a click switches to, instead of the current mode.')
+				// eslint-disable-next-line obsidianmd/ui/sentence-case -- names of other plugins and apps are proper nouns
+				.setDesc('Show the icon of the mode a click switches to, instead of the current mode. Also applies to a Commander button for "Switch to next editing mode".')
 				.addToggle(t => t.setValue(s.showNextModeIcon).onChange(v => { s.showNextModeIcon = v; void save(); }));
 		}
 		if (s.includeReadingMode) {
