@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-	canCreateWith, fileTypeOf, matchesFilter, parentFolderName, parseCodeBlockOptions, parseFilter, pushRecent, type SearchItem,
+	canCreateWith, fileTypeOf, orderResults, matchesFilter, parentFolderName, parseCodeBlockOptions, parseFilter, pushRecent, type SearchItem,
 } from '../src/features/homeTab/searchIndex';
 
 const item = (path: string): SearchItem => {
@@ -48,5 +48,18 @@ describe('home tab search helpers', () => {
 	it('keeps recent files unique and capped', () => {
 		expect(pushRecent(['a', 'b', 'c'], 'b', 3)).toEqual(['b', 'a', 'c']);
 		expect(pushRecent(['a', 'b', 'c'], 'd', 2)).toEqual(['d', 'a']);
+	});
+
+	it('puts notes, then bases, then other files with the same name together', () => {
+		const r = (path: string, score: number) => ({ item: item(path), score });
+		const ordered = orderResults([
+			r('Plans.pdf', -1),
+			r('Plan B.md', -2),
+			r('Plans.base', -3),
+			r('Plans.md', -4),
+			r('Other.png', -5),
+			r('Other.base', -6),
+		]);
+		expect(ordered.map(x => x.item.path)).toEqual(['Plans.md', 'Plans.base', 'Plans.pdf', 'Plan B.md', 'Other.base', 'Other.png']);
 	});
 });

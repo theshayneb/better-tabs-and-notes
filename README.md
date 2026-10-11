@@ -29,7 +29,8 @@ pinned tabs).
 - Replaces empty new tabs with a start page (can also open on startup and
   close the previous session's tabs, keeping pinned tabs).
 - Search box that fuzzy-matches file names and aliases, highlights the match,
-  and offers to create the note if it doesn't exist.
+  and offers to create the note if it doesn't exist. Files with the same name
+  are listed together: notes first, then bases, then other file types.
   - <kbd>↑</kbd>/<kbd>↓</kbd> to move, <kbd>Enter</kbd> to open,
     <kbd>Ctrl/Cmd</kbd>+<kbd>Enter</kbd> to open in a new tab,
     <kbd>Shift</kbd>+<kbd>Enter</kbd> to create.

@@ -2,7 +2,7 @@ import { Component, Keymap, Notice, Platform, TFile, normalizePath, prepareFuzzy
 import type { HomeTabFeature } from './homeTab';
 import { iconFor } from './homePage';
 import {
-	canCreateWith, filterLabel, matchesFilter, parentFolderName, parseFilter, type SearchFilter, type SearchItem,
+	canCreateWith, filterLabel, matchesFilter, orderResults, parentFolderName, parseFilter, type SearchFilter, type SearchItem,
 } from './searchIndex';
 
 /** Subset of the Omnisearch plugin's public API (window.omnisearch). */
@@ -181,7 +181,7 @@ export class SearchBar extends Component {
 
 	private searchFiles(query: string): Result[] {
 		const fuzzy = prepareFuzzySearch(query);
-		const scored: Result[] = [];
+		const scored: Extract<Result, { kind: 'file' }>[] = [];
 		let exactMatch = false;
 		for (const item of this.feature.getSearchItems()) {
 			if (item.unresolved && !this.settings.showUnresolved) continue;
@@ -199,8 +199,7 @@ export class SearchBar extends Component {
 			const score = best.score + (item.unresolved ? -0.5 : 0) + (best.text === item.basename ? 0.1 : 0);
 			scored.push({ kind: 'file', item, text: best.text, matches: best.matches, score });
 		}
-		scored.sort((a, b) => (b.kind === 'file' ? b.score : 0) - (a.kind === 'file' ? a.score : 0));
-		const results = scored.slice(0, this.settings.maxResults);
+		const results: Result[] = orderResults(scored).slice(0, this.settings.maxResults);
 		if (!exactMatch && canCreateWith(this.filter)) results.push({ kind: 'create', name: query });
 		return results;
 	}

@@ -91,6 +91,31 @@ export function parseCodeBlockOptions(source: string): { searchOnly: boolean; re
 	};
 }
 
+/** Where a file type goes among files with the same name: notes, then bases, then everything else. */
+export function typeRank(extension: string): number {
+	const ext = extension.toLowerCase();
+	if (ext === 'md') return 0;
+	if (ext === 'base') return 1;
+	return 2;
+}
+
+/**
+ * Order search results best match first. Files that share a name stay together,
+ * at the place of the best-matching one, ordered .md, .base, then other types.
+ */
+export function orderResults<T extends { score: number; item: Pick<SearchItem, 'basename' | 'extension'> }>(results: T[]): T[] {
+	const byScore = [...results].sort((a, b) => b.score - a.score);
+	const groups = new Map<string, T[]>();
+	for (const result of byScore) {
+		const key = result.item.basename.toLowerCase();
+		const group = groups.get(key);
+		if (group) group.push(result);
+		else groups.set(key, [result]);
+	}
+	return [...groups.values()].flatMap(group =>
+		group.sort((a, b) => typeRank(a.item.extension) - typeRank(b.item.extension) || b.score - a.score));
+}
+
 /** Add `path` to the front of a recent files list, without duplicates, capped at `max`. */
 export function pushRecent(list: string[], path: string, max: number): string[] {
 	return [path, ...list.filter(p => p !== path)].slice(0, Math.max(0, max));

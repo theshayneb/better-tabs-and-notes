@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.14] - 2026-10-11
+
+- Home tab search: files with the same name are listed together, notes (.md) first, then bases (.base), then other file types. Results are still ordered by how well they match.
+
 ## [0.0.13] - 2026-10-11
 
 - Tab behaviour: new "On this device only" settings, which don't sync. Choose per device whether new tabs come to the front (always, only for normal clicks, or never), where new tabs open, and where they open when split. Each defaults to "same as other devices".
