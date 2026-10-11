@@ -11,6 +11,7 @@ const LEGACY_IDS = {
 	dailyNote: 'pinned-daily-notes',
 	pinnedTabs: 'pinned-tabs-customizer',
 	scrollToTop: 'obsidian-scroll-to-top-plugin',
+	frontmatterCleaner: 'frontmatter-cleaner',
 } as const;
 
 /** Plugin id and display name of each original plugin. */
@@ -22,6 +23,7 @@ export const LEGACY_PLUGINS: [string, string][] = [
 	[LEGACY_IDS.dailyNote, 'Pinned Daily Notes'],
 	[LEGACY_IDS.pinnedTabs, 'Pinned Tabs Customizer'],
 	[LEGACY_IDS.scrollToTop, 'Scroll to Top'],
+	[LEGACY_IDS.frontmatterCleaner, 'Frontmatter Cleaner'],
 ];
 
 type Json = Record<string, unknown>;
@@ -183,6 +185,20 @@ export async function importLegacySettings(app: App, settings: PluginSettings): 
 		assign(b, 'size', num(scroll.resizeButton));
 		assign(b, 'includeWebPages', bool(scroll.enableSurfingPlugin));
 		imported.push('Scroll to Top');
+	}
+
+	const cleaner = await readData(app, LEGACY_IDS.frontmatterCleaner);
+	if (cleaner) {
+		const c = settings.frontmatterCleaner;
+		assign(c, 'keepRecordByDefault', bool(cleaner.keepRecordByDefault));
+		const format = str(cleaner.recordFormat);
+		if (format === 'table' || format === 'colon' || format === 'dataview') c.recordFormat = format;
+		const location = str(cleaner.recordLocation);
+		if (location === 'top' || location === 'bottom' || location === 'heading') c.recordLocation = location;
+		assign(c, 'headingText', str(cleaner.headingText));
+		const level = num(cleaner.headingLevel);
+		if (level && level >= 1 && level <= 6) c.headingLevel = level;
+		imported.push('Frontmatter Cleaner');
 	}
 
 	return imported;

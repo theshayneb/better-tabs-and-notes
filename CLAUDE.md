@@ -1,7 +1,7 @@
 # Better Tabs and Notes: notes for Claude Code
 
 An Obsidian plugin that combines Home tab, Open Tab Settings, Mononote, Edit
-mode switch, Pinned Daily Notes, Pinned Tabs Customizer and Scroll to Top. The owner is the
+mode switch, Pinned Daily Notes, Pinned Tabs Customizer, Scroll to Top and Frontmatter Cleaner. The owner is the
 only user.
 
 ## Workflow

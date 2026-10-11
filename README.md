@@ -1,6 +1,6 @@
 # Better Tabs and Notes
 
-One Obsidian plugin that replaces seven:
+One Obsidian plugin that replaces eight:
 
 | Feature | Replaces |
 | --- | --- |
@@ -10,6 +10,7 @@ One Obsidian plugin that replaces seven:
 | **Pinned daily note**: today's note in one pinned tab | [Pinned Daily Notes](https://github.com/docmarionum1/obsidian-pinned-daily-notes) |
 | **Pinned tab icons**: shrink pinned tabs to custom icons | [Pinned Tabs Customizer](https://github.com/diegomarzaa/obsidian-pinned-tabs-customizer) |
 | **Scroll buttons**: jump to the top, bottom or cursor of a note | [Scroll to Top](https://github.com/cloudhao1999/obsidian-scroll-to-top-plugin) |
+| **Frontmatter cleaner**: delete a note's properties from a list | [Frontmatter Cleaner](https://github.com/sharfaroz7/frontmatter-cleaner) |
 
 Every feature can be turned on or off on its own in the settings, and also
 turned off on just one device (handy for desktop-only features like compact
@@ -127,6 +128,17 @@ pinned tabs).
 - Commands for each, e.g. to bind to hotkeys or Commander buttons.
 - Optionally also on web pages opened with the Surfing plugin.
 
+### Frontmatter cleaner
+
+- *Clean properties of current file* (command or ribbon button) lists the
+  note's properties with their values. Tap rows to select them, or use
+  *Select all*, *Select none* or *Empty*, then *Delete selected*.
+- *Delete empty properties of current file* removes blank, null and empty-list
+  properties in one go, without the list.
+- Optionally keep a record of what was deleted in the note's text: as a table,
+  `property: value` or `property:: value` lines, at the top, at the bottom or
+  under a heading.
+
 ## Development
 
 ```
@@ -158,6 +170,7 @@ src/
     dailyNote/         pinned daily note
     pinnedIcons/       compact pinned tabs, icon rules and pickers
     scrollButtons/     scroll to top / bottom / cursor buttons
+    frontmatterCleaner/ property cleaner list and commands
 tests/                 unit tests for the Obsidian-free logic
 ```
 

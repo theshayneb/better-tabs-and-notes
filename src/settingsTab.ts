@@ -35,6 +35,10 @@ const FEATURE_INFO: Record<FeatureId, { name: string; desc: string }> = {
 		name: 'Scroll buttons',
 		desc: 'Small buttons in the corner of each note to jump to the top, the bottom, or back to the cursor.',
 	},
+	frontmatterCleaner: {
+		name: 'Frontmatter cleaner',
+		desc: 'Review the current note\'s properties in a list and delete the ones you pick, or all the empty ones at once.',
+	},
 };
 
 const COLOR_OPTIONS: Record<ColorChoice, string> = { default: 'Theme default', accent: 'Accent color', custom: 'Custom' };
@@ -62,7 +66,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Import from the original plugins')
 			// eslint-disable-next-line obsidianmd/ui/sentence-case -- names of other plugins and apps are proper nouns
-			.setDesc('Copy settings from Home tab, Open Tab Settings, Mononote, Edit mode switch, Pinned Daily Notes, Pinned Tabs Customizer and Scroll to Top if they are still installed. Turn the originals off afterwards so they don\'t fight with this plugin.')
+			.setDesc('Copy settings from Home tab, Open Tab Settings, Mononote, Edit mode switch, Pinned Daily Notes, Pinned Tabs Customizer, Scroll to Top and Frontmatter Cleaner if they are still installed. Turn the originals off afterwards so they don\'t fight with this plugin.')
 			.addButton(btn => btn.setButtonText('Import').onClick(async () => {
 				const imported = await importLegacySettings(this.app, this.plugin.settings);
 				if (imported.length === 0) {
@@ -83,6 +87,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		this.section('dailyNote', el => this.renderDailyNote(el));
 		this.section('pinnedIcons', el => this.renderPinnedIcons(el));
 		this.section('scrollButtons', el => this.renderScrollButtons(el));
+		this.section('frontmatterCleaner', el => this.renderFrontmatterCleaner(el));
 	}
 
 	/** Heading, on/off toggles, and the feature's own settings when it's on. */
@@ -452,6 +457,45 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 	}
 
 	// -----------------------------------------------------------------------
+
+	private renderFrontmatterCleaner(el: HTMLElement): void {
+		const s = this.plugin.settings.frontmatterCleaner;
+		const save = (redraw = false) => this.save('frontmatterCleaner', redraw);
+
+		el.createDiv({
+			cls: 'setting-item-description btn-settings-note',
+			text: 'Commands: "Clean properties of current file" opens the list; "Delete empty properties of current file" removes blank ones without asking.',
+		});
+		new Setting(el).setName('Show ribbon button')
+			.addToggle(t => t.setValue(s.showRibbonIcon).onChange(v => { s.showRibbonIcon = v; void save(); }));
+
+		new Setting(el).setName('Keeping a record').setHeading()
+			.setDesc('Optional: write deleted properties into the note\'s text instead of discarding them.');
+		new Setting(el).setName('Keep a record by default')
+			.setDesc('Pre-check "keep a record" when the list opens.')
+			.addToggle(t => t.setValue(s.keepRecordByDefault).onChange(v => { s.keepRecordByDefault = v; void save(); }));
+		new Setting(el).setName('Record format')
+			.addDropdown(dd => dd
+				.addOptions({ table: 'Markdown table', colon: 'property: value', dataview: 'property:: value' })
+				.setValue(s.recordFormat).onChange(v => { s.recordFormat = v as typeof s.recordFormat; void save(); }));
+		new Setting(el).setName('Record location')
+			.addDropdown(dd => dd
+				.addOptions({ top: 'Top of note', bottom: 'Bottom of note', heading: 'Under a heading' })
+				.setValue(s.recordLocation).onChange(v => { s.recordLocation = v as typeof s.recordLocation; void save(true); }));
+		if (s.recordLocation === 'heading') {
+			new Setting(el).setName('Heading text')
+				.setDesc('Created if the note doesn\'t have it yet.')
+				.addText(t => t.setValue(s.headingText).onChange(v => {
+					s.headingText = v.trim() || DEFAULT_SETTINGS.frontmatterCleaner.headingText;
+					void save();
+				}));
+			new Setting(el).setName('Heading level')
+				.addDropdown(dd => {
+					for (let level = 1; level <= 6; level++) dd.addOption(String(level), `H${level}`);
+					dd.setValue(String(s.headingLevel)).onChange(v => { s.headingLevel = Number(v); void save(); });
+				});
+		}
+	}
 
 	private renderScrollButtons(el: HTMLElement): void {
 		const s = this.plugin.settings.scrollButtons;

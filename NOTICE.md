@@ -1,8 +1,8 @@
 # Third-party notices
 
-Better Tabs and Notes combines the features of seven Obsidian plugins. It is
+Better Tabs and Notes combines the features of eight Obsidian plugins. It is
 licensed under the GNU General Public License v3.0 (see `LICENSE`), because
-one of them, Edit mode switch, is GPL-3.0. The other six are under permissive
+one of them, Edit mode switch, is GPL-3.0. The other seven are under permissive
 licenses whose notices are reproduced below as they require.
 
 | Feature here | Original plugin | Author | License |
@@ -14,6 +14,7 @@ licenses whose notices are reproduced below as they require.
 | Pinned daily note | [obsidian-pinned-daily-notes](https://github.com/docmarionum1/obsidian-pinned-daily-notes) | Jeremy Neiman | MIT |
 | Pinned tab icons | [obsidian-pinned-tabs-customizer](https://github.com/diegomarzaa/obsidian-pinned-tabs-customizer) | Diego | 0BSD |
 | Scroll buttons | [obsidian-scroll-to-top-plugin](https://github.com/cloudhao1999/obsidian-scroll-to-top-plugin) | cloudhao1999 | MIT |
+| Frontmatter cleaner | [frontmatter-cleaner](https://github.com/sharfaroz7/frontmatter-cleaner) | sharfaroz | MIT |
 
 ---
 
@@ -136,6 +137,32 @@ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH RE
 MIT License
 
 Copyright (c) 2022 干巴爹兔
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## frontmatter-cleaner
+
+MIT License
+
+Copyright (c) 2026 sharfaroz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

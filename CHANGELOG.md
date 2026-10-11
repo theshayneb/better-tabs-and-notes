@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.16] - 2026-10-11
+
+- New feature, from the Frontmatter Cleaner plugin: frontmatter cleaner. "Clean properties of current file" (command or ribbon button) lists the note's properties so you can select and delete them, with shortcuts to select all, none or the empty ones. Optionally keeps a record of deleted properties in the note. "Import" in the settings now also reads Frontmatter Cleaner's settings.
+- New command "Delete empty properties of current file", which removes blank, null and empty-list properties without opening the list.
+
 ## [0.0.15] - 2026-10-11
 
 - New feature, from the Scroll to Top plugin: scroll buttons. Small buttons in the corner of each note jump to the top, to the bottom, or (while editing) back to the cursor. Choose which buttons show, their icons, size and tooltips. Also available as commands, and optionally on Surfing web pages. "Import" in the settings now also reads Scroll to Top's settings.

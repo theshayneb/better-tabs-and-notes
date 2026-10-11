@@ -1,6 +1,6 @@
 // All settings live in the plugin's data.json. Each feature owns one section.
 
-export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons'] as const;
+export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner'] as const;
 export type FeatureId = typeof FEATURE_IDS[number];
 
 // ---------------------------------------------------------------------------
@@ -176,6 +176,20 @@ export interface ScrollButtonSettings {
 }
 
 // ---------------------------------------------------------------------------
+// Frontmatter cleaner
+// ---------------------------------------------------------------------------
+
+export interface FrontmatterCleanerSettings {
+	showRibbonIcon: boolean;
+	/** Pre-check "Keep a record" when the cleaner opens. */
+	keepRecordByDefault: boolean;
+	recordFormat: 'table' | 'colon' | 'dataview';
+	recordLocation: 'top' | 'bottom' | 'heading';
+	headingText: string;
+	headingLevel: number;
+}
+
+// ---------------------------------------------------------------------------
 
 export interface PluginSettings {
 	features: Record<FeatureId, boolean>;
@@ -185,6 +199,7 @@ export interface PluginSettings {
 	dailyNote: DailyNoteSettings;
 	pinnedIcons: PinnedIconSettings;
 	scrollButtons: ScrollButtonSettings;
+	frontmatterCleaner: FrontmatterCleanerSettings;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -195,6 +210,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		dailyNote: true,
 		pinnedIcons: true,
 		scrollButtons: true,
+		frontmatterCleaner: true,
 	},
 	tabs: {
 		openInNewTab: true,
@@ -276,10 +292,18 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		size: 1,
 		includeWebPages: false,
 	},
+	frontmatterCleaner: {
+		showRibbonIcon: true,
+		keepRecordByDefault: false,
+		recordFormat: 'table',
+		recordLocation: 'bottom',
+		headingText: 'Removed Properties',
+		headingLevel: 2,
+	},
 };
 
 type Section = Exclude<keyof PluginSettings, 'features'>;
-const SECTIONS: Section[] = ['tabs', 'homeTab', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons'];
+const SECTIONS: Section[] = ['tabs', 'homeTab', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner'];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);
