@@ -27,6 +27,11 @@ declare module 'obsidian' {
 		saveLocalStorage(key: string, value: unknown): void;
 	}
 
+	interface MetadataCache {
+		/** Every property name in the vault with its registered type, keyed by lower-case name. */
+		getAllPropertyInfos?(): Record<string, { name: string; widget?: string; type?: string; occurrences?: number }>;
+	}
+
 	interface Vault {
 		getConfig(key: string): unknown;
 		setConfig(key: string, value: unknown): void;

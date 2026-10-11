@@ -256,6 +256,71 @@
 	}
 }
 
+/* ===== Bulk properties ===== */
+
+.btn-bulk-modal {
+	max-width: 560px;
+}
+
+.btn-bulk-rows {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-2);
+	margin: var(--size-4-3) 0;
+}
+
+.btn-bulk-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--size-4-2);
+}
+
+.btn-bulk-name,
+.btn-bulk-value {
+	flex: 1 1 140px;
+	min-width: 0;
+}
+
+.btn-bulk-type {
+	flex: 0 0 auto;
+}
+
+.btn-bulk-value[type="checkbox"] {
+	flex: 0 0 auto;
+}
+
+.btn-bulk-remove {
+	flex: 0 0 auto;
+	font-size: var(--font-ui-large);
+}
+
+.btn-bulk-remove-list {
+	display: flex;
+	flex-direction: column;
+	max-height: 50vh;
+	overflow-y: auto;
+	margin: var(--size-4-3) 0;
+}
+
+.btn-bulk-remove-row {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-2);
+	padding: var(--size-4-1) var(--size-4-2);
+	border-radius: var(--radius-s);
+	cursor: pointer;
+}
+
+.btn-bulk-remove-row:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.btn-bulk-remove-name {
+	flex: 1;
+	overflow-wrap: anywhere;
+}
+
 /* ===== Icon picker ===== */
 
 .btn-icon-picker .btn-icon-search {

@@ -1,6 +1,6 @@
 // All settings live in the plugin's data.json. Each feature owns one section.
 
-export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner'] as const;
+export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties'] as const;
 export type FeatureId = typeof FEATURE_IDS[number];
 
 // ---------------------------------------------------------------------------
@@ -190,6 +190,19 @@ export interface FrontmatterCleanerSettings {
 }
 
 // ---------------------------------------------------------------------------
+// Bulk properties (Multi Properties)
+// ---------------------------------------------------------------------------
+
+export interface BulkPropertiesSettings {
+	/** What to do when a note already has a property being added. */
+	existingMode: 'ignore' | 'overwrite' | 'append';
+	/** Folder actions also include notes in subfolders. */
+	includeSubfolders: boolean;
+	/** Separator that turns a text value into a list. */
+	delimiter: string;
+}
+
+// ---------------------------------------------------------------------------
 
 export interface PluginSettings {
 	features: Record<FeatureId, boolean>;
@@ -200,6 +213,7 @@ export interface PluginSettings {
 	pinnedIcons: PinnedIconSettings;
 	scrollButtons: ScrollButtonSettings;
 	frontmatterCleaner: FrontmatterCleanerSettings;
+	bulkProperties: BulkPropertiesSettings;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -211,6 +225,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		pinnedIcons: true,
 		scrollButtons: true,
 		frontmatterCleaner: true,
+		bulkProperties: true,
 	},
 	tabs: {
 		openInNewTab: true,
@@ -300,10 +315,15 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		headingText: 'Removed Properties',
 		headingLevel: 2,
 	},
+	bulkProperties: {
+		existingMode: 'ignore',
+		includeSubfolders: true,
+		delimiter: ',',
+	},
 };
 
 type Section = Exclude<keyof PluginSettings, 'features'>;
-const SECTIONS: Section[] = ['tabs', 'homeTab', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner'];
+const SECTIONS: Section[] = ['tabs', 'homeTab', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties'];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);

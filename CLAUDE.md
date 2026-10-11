@@ -1,7 +1,7 @@
 # Better Tabs and Notes: notes for Claude Code
 
 An Obsidian plugin that combines Home tab, Open Tab Settings, Mononote, Edit
-mode switch, Pinned Daily Notes, Pinned Tabs Customizer, Scroll to Top and Frontmatter Cleaner. The owner is the
+mode switch, Pinned Daily Notes, Pinned Tabs Customizer, Scroll to Top, Frontmatter Cleaner and Multi Properties. The owner is the
 only user.
 
 ## Workflow
@@ -35,5 +35,5 @@ eslint-plugin-obsidianmd pins an older `obsidian` peer.
 - `src/types.d.ts` lists the undocumented Obsidian internals in use. Check them first when an Obsidian update breaks something.
 - The tab behaviour feature monkey-patches `Workspace.getLeaf`, `getUnpinnedLeaf`, `WorkspaceLeaf.openFile` and `Keymap.isModEvent`. Code that must open a file in one specific tab (e.g. the pinned daily note) wraps it in `withoutDedupe` from `src/shared/openFlags.ts`.
 - Don't give subclasses of Obsidian classes members that may clash with undocumented internals; use a `pw` prefix (as in `leaf.pwBtn`).
-- Keep logic that doesn't need Obsidian in plain modules (`rules.ts`, `searchIndex.ts`, `dailyNotePaths.ts`, `modes.ts`, `overrides.ts`) and test it in `tests/`.
+- Keep logic that doesn't need Obsidian in plain modules (`rules.ts`, `searchIndex.ts`, `dailyNotePaths.ts`, `modes.ts`, `overrides.ts`, `bulkLogic.ts`) and test it in `tests/`.
 - The plugin is GPL-3.0 because one original plugin is; keep `NOTICE.md` up to date when porting more code from elsewhere.

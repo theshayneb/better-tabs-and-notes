@@ -39,6 +39,10 @@ const FEATURE_INFO: Record<FeatureId, { name: string; desc: string }> = {
 		name: 'Frontmatter cleaner',
 		desc: 'Review the current note\'s properties in a list and delete the ones you pick, or all the empty ones at once.',
 	},
+	bulkProperties: {
+		name: 'Bulk properties',
+		desc: 'Add, change or remove properties in every note of a folder, or in the notes selected in the file explorer.',
+	},
 };
 
 const COLOR_OPTIONS: Record<ColorChoice, string> = { default: 'Theme default', accent: 'Accent color', custom: 'Custom' };
@@ -66,7 +70,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Import from the original plugins')
 			// eslint-disable-next-line obsidianmd/ui/sentence-case -- names of other plugins and apps are proper nouns
-			.setDesc('Copy settings from Home tab, Open Tab Settings, Mononote, Edit mode switch, Pinned Daily Notes, Pinned Tabs Customizer, Scroll to Top and Frontmatter Cleaner if they are still installed. Turn the originals off afterwards so they don\'t fight with this plugin.')
+			.setDesc('Copy settings from Home tab, Open Tab Settings, Mononote, Edit mode switch, Pinned Daily Notes, Pinned Tabs Customizer, Scroll to Top, Frontmatter Cleaner and Multi Properties if they are still installed. Turn the originals off afterwards so they don\'t fight with this plugin.')
 			.addButton(btn => btn.setButtonText('Import').onClick(async () => {
 				const imported = await importLegacySettings(this.app, this.plugin.settings);
 				if (imported.length === 0) {
@@ -88,6 +92,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		this.section('pinnedIcons', el => this.renderPinnedIcons(el));
 		this.section('scrollButtons', el => this.renderScrollButtons(el));
 		this.section('frontmatterCleaner', el => this.renderFrontmatterCleaner(el));
+		this.section('bulkProperties', el => this.renderBulkProperties(el));
 	}
 
 	/** Heading, on/off toggles, and the feature's own settings when it's on. */
@@ -457,6 +462,30 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 	}
 
 	// -----------------------------------------------------------------------
+
+	private renderBulkProperties(el: HTMLElement): void {
+		const s = this.plugin.settings.bulkProperties;
+		const save = () => this.save('bulkProperties');
+
+		el.createDiv({
+			cls: 'setting-item-description btn-settings-note',
+			text: 'Right-click a folder, or select several notes in the file explorer and right-click them, then choose "Add or change properties" or "Remove properties".',
+		});
+		new Setting(el).setName('If a note already has the property')
+			.setDesc('The default when adding properties; you can change it in the form each time.')
+			.addDropdown(dd => dd
+				.addOptions({ ignore: 'Leave it as it is', overwrite: 'Replace its value', append: 'Add to its list of values' })
+				.setValue(s.existingMode).onChange(v => { s.existingMode = v as typeof s.existingMode; void save(); }));
+		new Setting(el).setName('Include subfolders')
+			.setDesc('When working on a folder, also change the notes in the folders inside it.')
+			.addToggle(t => t.setValue(s.includeSubfolders).onChange(v => { s.includeSubfolders = v; void save(); }));
+		new Setting(el).setName('List separator')
+			.setDesc('Typing this between values in a text property makes it a list.')
+			.addText(t => t.setPlaceholder(',').setValue(s.delimiter).onChange(v => {
+				s.delimiter = v || DEFAULT_SETTINGS.bulkProperties.delimiter;
+				void save();
+			}));
+	}
 
 	private renderFrontmatterCleaner(el: HTMLElement): void {
 		const s = this.plugin.settings.frontmatterCleaner;

@@ -1,6 +1,6 @@
 # Better Tabs and Notes
 
-One Obsidian plugin that replaces eight:
+One Obsidian plugin that replaces nine:
 
 | Feature | Replaces |
 | --- | --- |
@@ -11,6 +11,7 @@ One Obsidian plugin that replaces eight:
 | **Pinned tab icons**: shrink pinned tabs to custom icons | [Pinned Tabs Customizer](https://github.com/diegomarzaa/obsidian-pinned-tabs-customizer) |
 | **Scroll buttons**: jump to the top, bottom or cursor of a note | [Scroll to Top](https://github.com/cloudhao1999/obsidian-scroll-to-top-plugin) |
 | **Frontmatter cleaner**: delete a note's properties from a list | [Frontmatter Cleaner](https://github.com/sharfaroz7/frontmatter-cleaner) |
+| **Bulk properties**: add, change or remove properties in many notes at once | [Multi Properties](https://github.com/technohiker/obsidian-multi-properties) |
 
 Every feature can be turned on or off on its own in the settings, and also
 turned off on just one device (handy for desktop-only features like compact
@@ -139,6 +140,22 @@ pinned tabs).
   `property: value` or `property:: value` lines, at the top, at the bottom or
   under a heading.
 
+### Bulk properties
+
+- Right-click a folder and choose *Add or change properties in folder* or
+  *Remove properties from folder*. Subfolders are included unless you turn
+  that off.
+- Or select several notes (and folders) in the file explorer, right-click the
+  selection and choose *Add or change properties in selected notes* or
+  *Remove properties from selected notes*.
+- Adding: type one or more property names (existing ones are suggested and
+  keep their type), pick a type and a value. Separate values with a comma to
+  make a list. Choose what happens when a note already has the property:
+  leave it, replace it, or add to its list.
+- Removing: tick properties from a list of those found in the notes, with how
+  many notes have each.
+- Both ask for confirmation first.
+
 ## Development
 
 ```
@@ -171,6 +188,7 @@ src/
     pinnedIcons/       compact pinned tabs, icon rules and pickers
     scrollButtons/     scroll to top / bottom / cursor buttons
     frontmatterCleaner/ property cleaner list and commands
+    bulkProperties/    add, change or remove properties in many notes
 tests/                 unit tests for the Obsidian-free logic
 ```
 

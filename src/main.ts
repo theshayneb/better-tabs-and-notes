@@ -11,6 +11,7 @@ import { PinnedDailyNoteFeature } from './features/dailyNote/pinnedDailyNote';
 import { PinnedIconsFeature } from './features/pinnedIcons/pinnedIcons';
 import { ScrollButtonsFeature } from './features/scrollButtons/scrollButtons';
 import { FrontmatterCleanerFeature } from './features/frontmatterCleaner/frontmatterCleaner';
+import { BulkPropertiesFeature } from './features/bulkProperties/bulkProperties';
 
 const DEVICE_DISABLED_PREFIX = 'better-tabs-and-notes:disabled-on-device:';
 const DEVICE_TABS_KEY = 'better-tabs-and-notes:device-tab-settings';
@@ -32,6 +33,7 @@ export default class BetterTabsPlugin extends Plugin {
 		pinnedIcons: PinnedIconsFeature;
 		scrollButtons: ScrollButtonsFeature;
 		frontmatterCleaner: FrontmatterCleanerFeature;
+		bulkProperties: BulkPropertiesFeature;
 	};
 
 	override async onload(): Promise<void> {
@@ -45,6 +47,7 @@ export default class BetterTabsPlugin extends Plugin {
 			pinnedIcons: new PinnedIconsFeature(this),
 			scrollButtons: new ScrollButtonsFeature(this),
 			frontmatterCleaner: new FrontmatterCleanerFeature(this),
+			bulkProperties: new BulkPropertiesFeature(this),
 		};
 
 		// Register the settings tab first, so it's there even if a feature fails.

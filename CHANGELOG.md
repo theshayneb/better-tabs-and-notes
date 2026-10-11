@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.17] - 2026-10-11
+
+- New feature, from the Multi Properties plugin: bulk properties. Right-click a folder, or a selection of notes in the file explorer, to add or change properties in all of them at once, or to remove properties from them. Adding suggests existing property names and keeps their type; a comma-separated value becomes a list; you choose whether notes that already have the property keep it, get it replaced, or get the new values added to its list. Both ask for confirmation first. "Import" in the settings now also reads Multi Properties' settings.
+
 ## [0.0.16] - 2026-10-11
 
 - New feature, from the Frontmatter Cleaner plugin: frontmatter cleaner. "Clean properties of current file" (command or ribbon button) lists the note's properties so you can select and delete them, with shortcuts to select all, none or the empty ones. Optionally keeps a record of deleted properties in the note. "Import" in the settings now also reads Frontmatter Cleaner's settings.

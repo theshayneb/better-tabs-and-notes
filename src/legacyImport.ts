@@ -1,4 +1,4 @@
-// One-off import of settings from the six original plugins' data.json files.
+// One-off import of settings from the original plugins' data.json files.
 
 import { normalizePath, type App } from 'obsidian';
 import type { EditMode, IconRule, PluginSettings, RuleType } from './settings';
@@ -12,6 +12,7 @@ const LEGACY_IDS = {
 	pinnedTabs: 'pinned-tabs-customizer',
 	scrollToTop: 'obsidian-scroll-to-top-plugin',
 	frontmatterCleaner: 'frontmatter-cleaner',
+	multiProperties: 'multi-properties',
 } as const;
 
 /** Plugin id and display name of each original plugin. */
@@ -24,6 +25,7 @@ export const LEGACY_PLUGINS: [string, string][] = [
 	[LEGACY_IDS.pinnedTabs, 'Pinned Tabs Customizer'],
 	[LEGACY_IDS.scrollToTop, 'Scroll to Top'],
 	[LEGACY_IDS.frontmatterCleaner, 'Frontmatter Cleaner'],
+	[LEGACY_IDS.multiProperties, 'Multi Properties'],
 ];
 
 type Json = Record<string, unknown>;
@@ -199,6 +201,17 @@ export async function importLegacySettings(app: App, settings: PluginSettings): 
 		const level = num(cleaner.headingLevel);
 		if (level && level >= 1 && level <= 6) c.headingLevel = level;
 		imported.push('Frontmatter Cleaner');
+	}
+
+	const multi = await readData(app, LEGACY_IDS.multiProperties);
+	if (multi) {
+		const m = settings.bulkProperties;
+		const mode = str(multi.alterProp);
+		if (mode === 'ignore' || mode === 'overwrite' || mode === 'append') m.existingMode = mode;
+		assign(m, 'includeSubfolders', bool(multi.recursive));
+		const delimiter = str(multi.delimiter);
+		if (delimiter) m.delimiter = delimiter;
+		imported.push('Multi Properties');
 	}
 
 	return imported;
