@@ -3,6 +3,7 @@ import type { Feature } from './feature';
 import { DEFAULT_SETTINGS, FEATURE_IDS, mergeSettings, type FeatureId, type PluginSettings } from './settings';
 import { BetterTabsSettingTab } from './settingsTab';
 import { copyHeaderReport, startHeaderTrace } from './shared/headerTrace';
+import { sanitizeDeviceTabSettings, type DeviceTabSettings } from './shared/deviceSettings';
 import { TabBehaviorFeature } from './features/tabs/tabBehavior';
 import { HomeTabFeature } from './features/homeTab/homeTab';
 import { EditModeFeature } from './features/editMode/editMode';
@@ -10,6 +11,7 @@ import { PinnedDailyNoteFeature } from './features/dailyNote/pinnedDailyNote';
 import { PinnedIconsFeature } from './features/pinnedIcons/pinnedIcons';
 
 const DEVICE_DISABLED_PREFIX = 'better-tabs-and-notes:disabled-on-device:';
+const DEVICE_TABS_KEY = 'better-tabs-and-notes:device-tab-settings';
 
 /** Log a failure and show it, without stopping the rest of the plugin. */
 export function reportError(what: string, error: unknown): void {
@@ -99,6 +101,16 @@ export default class BetterTabsPlugin extends Plugin {
 
 	isDisabledOnDevice(id: FeatureId): boolean {
 		return !!this.app.loadLocalStorage(DEVICE_DISABLED_PREFIX + id);
+	}
+
+	/** Tab settings for this device only (not synced). */
+	getDeviceTabSettings(): DeviceTabSettings {
+		return sanitizeDeviceTabSettings(this.app.loadLocalStorage(DEVICE_TABS_KEY));
+	}
+
+	setDeviceTabSettings(settings: DeviceTabSettings): void {
+		const clean = sanitizeDeviceTabSettings(settings);
+		this.app.saveLocalStorage(DEVICE_TABS_KEY, Object.keys(clean).length ? clean : null);
 	}
 
 	setDisabledOnDevice(id: FeatureId, disabled: boolean): void {

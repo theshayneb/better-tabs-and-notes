@@ -66,6 +66,9 @@ pinned tabs).
   next file replaces, until you edit it or double-click its tab.
 - **New tab position**: after the active tab, after pinned tabs, at the
   beginning or at the end, and which split to use.
+- **On this device only** (not synced): whether new tabs come to the front,
+  and where they open, can differ per device, e.g. switch to new tabs on your
+  phone but open them in the background on desktop.
 - **Ctrl/Cmd/middle click**: choose what it does (new tab, same tab, duplicate
   tab, opposite split...).
 - File menu items: *Open in same tab*, *Open in duplicate tab*, *Open in

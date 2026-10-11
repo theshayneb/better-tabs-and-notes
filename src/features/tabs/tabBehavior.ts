@@ -12,6 +12,7 @@ import type { TabGroup } from '../../types';
 import { HOME_VIEW_TYPE } from '../homeTab/constants';
 import { openFlags } from '../../shared/openFlags';
 import { OVERRIDES, parseOverride } from './overrides';
+import { applyDeviceTabSettings, shouldFocusNewTab } from '../../shared/deviceSettings';
 
 /**
  * Views added by other plugins that should be deduplicated like normal files.
@@ -41,8 +42,14 @@ export class TabBehaviorFeature extends Feature {
 
 	private processingLeaves = new Set<string>();
 
+	/** The shared tab settings with this device's own choices applied. */
 	get settings(): TabSettings {
-		return this.plugin.settings.tabs;
+		return applyDeviceTabSettings(this.plugin.settings.tabs, this.plugin.getDeviceTabSettings());
+	}
+
+	/** Whether a new tab comes to the front, per this device's setting. */
+	focusNewTab(normalClick: boolean): boolean {
+		return shouldFocusNewTab(this.plugin.getDeviceTabSettings(), normalClick, !!this.app.vault.getConfig('focusNewTab'));
 	}
 
 	override onload(): void {
@@ -68,7 +75,8 @@ export class TabBehaviorFeature extends Feature {
 	}
 
 	async updateSettings(changes: Partial<TabSettings>): Promise<void> {
-		this.plugin.settings.tabs = normalizeTabSettings({ ...this.settings, ...changes });
+		// Only the shared settings; this device's own choices are stored separately.
+		this.plugin.settings.tabs = normalizeTabSettings({ ...this.plugin.settings.tabs, ...changes });
 		await this.plugin.saveSettings('tabs');
 	}
 
@@ -134,8 +142,9 @@ export class TabBehaviorFeature extends Feature {
 
 					let leaf: WorkspaceLeaf;
 					if (openMode === 'tab' || (!openMode && settings.openInNewTab)) {
-						// Normal clicks always focus the new tab, whatever focusNewTab says.
-						leaf = feature.createNewLeaf(!openMode ? true : undefined, settings);
+						// By default normal clicks focus the new tab whatever focusNewTab says;
+						// the per-device setting can change that.
+						leaf = feature.createNewLeaf(feature.focusNewTab(!openMode), settings);
 					} else if (!openMode) {
 						leaf = feature.getUnpinnedLeaf(true, settings);
 					} else {
@@ -446,11 +455,11 @@ export class TabBehaviorFeature extends Feature {
 	/**
 	 * Our version of the internal workspace.createLeafInTabGroup that follows the
 	 * placement settings.
-	 * @param focus Whether to focus the new tab. Undefined follows Obsidian's "Always focus new tabs".
+	 * @param focus Whether to focus the new tab. Undefined follows this device's setting for ctrl/middle click.
 	 */
 	createNewLeaf(focus?: boolean, override: NewLeafOverride = {}): WorkspaceLeaf {
 		const workspace = this.app.workspace;
-		const shouldFocus = focus ?? !!this.app.vault.getConfig('focusNewTab');
+		const shouldFocus = focus ?? this.focusNewTab(false);
 		const settings = { ...this.settings, replaceEmptyTabs: true, ...override };
 
 		const activeLeaf = workspace.getMostRecentLeaf();

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.13] - 2026-10-11
+
+- Tab behaviour: new "On this device only" settings, which don't sync. Choose per device whether new tabs come to the front (always, only for normal clicks, or never), where new tabs open, and where they open when split. Each defaults to "same as other devices".
+- Fix "Fold properties in reading view" sometimes leaving the properties half open. Obsidian marks the heading as folded, which the check missed, so it could click twice while the fold was still animating. It now recognises the folded heading, clicks only once per note, and waits for the reading view to finish drawing first.
+
 ## [0.0.12] - 2026-10-11
 
 - Fix "Fold properties in reading view" leaving the properties looking folded while Obsidian thought they were open, so the first click seemed to do nothing. It now finds the Properties heading more reliably and clicks it the way you would, and never just makes the block look folded.

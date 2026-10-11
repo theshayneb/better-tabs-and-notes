@@ -5,6 +5,7 @@ import {
 	type ColorChoice, type EditMode, type FeatureId, type FontChoice, type LogoType, type TabSettings,
 } from './settings';
 import { LEGACY_PLUGINS, importLegacySettings } from './legacyImport';
+import { FOCUS_NEW_TABS, type DeviceTabSettings } from './shared/deviceSettings';
 import { FilePickerModal, FolderPickerModal, PatternEditorModal, TagPickerModal } from './features/pinnedIcons/modals';
 import { RULE_TYPE_LABELS, findConflicts, ruleMatches } from './features/pinnedIcons/rules';
 import { renderIcon } from './features/pinnedIcons/pinnedIcons';
@@ -301,6 +302,8 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 			.addDropdown(dd => dd.addOptions(NEW_TAB_GROUP_PLACEMENTS).setValue(s.newTabTabGroupPlacement)
 				.onChange(v => void update({ newTabTabGroupPlacement: v as TabSettings['newTabTabGroupPlacement'] })));
 
+		this.renderDeviceTabSettings(el);
+
 		const modOptions: Partial<Record<TabSettings['modClickBehavior'], string>> = { tab: MOD_CLICK_BEHAVIORS.tab };
 		if (s.openInNewTab) modOptions.same = MOD_CLICK_BEHAVIORS.same;
 		if (s.deduplicateTabs) modOptions.allowDuplicate = MOD_CLICK_BEHAVIORS.allowDuplicate;
@@ -325,6 +328,35 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 					dd.setValue(String(s.lateDuplicateDelayMs)).onChange(v => void update({ lateDuplicateDelayMs: Number(v) }));
 				});
 		}
+	}
+
+	/** Tab choices stored on this device only, overriding the shared ones above. */
+	private renderDeviceTabSettings(el: HTMLElement): void {
+		const device = this.plugin.getDeviceTabSettings();
+		const SHARED = '';
+		const set = (changes: Partial<DeviceTabSettings>) => {
+			this.plugin.setDeviceTabSettings({ ...device, ...changes });
+			this.redraw();
+		};
+
+		new Setting(el).setName('On this device only').setHeading()
+			.setDesc('Not synced. Leave on "same as other devices" to use the settings above.');
+		new Setting(el).setName('Switch to new tabs')
+			.setDesc('Whether a newly opened tab comes to the front.')
+			.addDropdown(dd => dd
+				.addOptions({ [SHARED]: 'Same as other devices', ...FOCUS_NEW_TABS })
+				.setValue(device.focusNewTabs ?? SHARED)
+				.onChange(v => set({ focusNewTabs: (v || undefined) as DeviceTabSettings['focusNewTabs'] })));
+		new Setting(el).setName('New tab position')
+			.addDropdown(dd => dd
+				.addOptions({ [SHARED]: 'Same as other devices', ...NEW_TAB_PLACEMENTS })
+				.setValue(device.newTabPlacement ?? SHARED)
+				.onChange(v => set({ newTabPlacement: (v || undefined) as DeviceTabSettings['newTabPlacement'] })));
+		new Setting(el).setName('New tab position when split')
+			.addDropdown(dd => dd
+				.addOptions({ [SHARED]: 'Same as other devices', ...NEW_TAB_GROUP_PLACEMENTS })
+				.setValue(device.newTabTabGroupPlacement ?? SHARED)
+				.onChange(v => set({ newTabTabGroupPlacement: (v || undefined) as DeviceTabSettings['newTabTabGroupPlacement'] })));
 	}
 
 	// -----------------------------------------------------------------------

@@ -18,7 +18,9 @@ const BUTTON_CLASS = 'btn-edit-mode-button';
 const TAKEN_OVER_CLASS = 'btn-edit-mode-taken-over';
 const CYCLE_COMMAND = 'cycle-edit-mode';
 /** Retry delays while waiting for the properties block to render in reading view. */
-const COLLAPSE_RETRY_MS = [0, 100, 300, 800];
+const COLLAPSE_RETRY_MS = [150, 150, 300, 600];
+/** Never fold the same note twice within this time: a second click mid-animation leaves it half open. */
+const COLLAPSE_GUARD_MS = 2000;
 /** Class Commander gives the note header buttons it adds; each also has the command id as a class. */
 const COMMANDER_BUTTON_CLASS = 'cmdr-page-header';
 /** Commander adds its header buttons a moment after the layout changes. */
@@ -99,6 +101,7 @@ export class EditModeFeature extends Feature {
 	private delayedRefresh: number | null = null;
 	/** Last mode (and file, in reading view) seen per note, to fold properties only on a switch. */
 	private lastReadingKey = new WeakMap<MarkdownView, string>();
+	private lastCollapseTime = new WeakMap<MarkdownView, { key: string; time: number }>();
 	/** What the last attempt to fold properties did, for the troubleshooting report. */
 	private lastCollapse = 'not tried yet';
 
@@ -204,10 +207,15 @@ export class EditModeFeature extends Feature {
 	 * sticks until the next switch.
 	 */
 	private collapsePropertiesOnEnteringReading(view: MarkdownView, mode: EditMode): void {
-		const key = mode === 'preview' ? `preview:${view.file?.path ?? ''}` : mode;
+		// The view state's file is set before view.file, so use it to avoid seeing the same note twice.
+		const file = view.leaf.getViewState().state?.file;
+		const key = mode === 'preview' ? `preview:${typeof file === 'string' ? file : ''}` : mode;
 		const previous = this.lastReadingKey.get(view);
 		this.lastReadingKey.set(view, key);
 		if (!this.settings.collapsePropertiesInReading || mode !== 'preview' || key === previous) return;
+		const last = this.lastCollapseTime.get(view);
+		if (last && last.key === key && Date.now() - last.time < COLLAPSE_GUARD_MS) return;
+		this.lastCollapseTime.set(view, { key, time: Date.now() });
 
 		const tryCollapse = (attempt: number) => {
 			if (getMode(view) !== 'preview') return;
@@ -217,24 +225,25 @@ export class EditModeFeature extends Feature {
 				if (attempt + 1 < COLLAPSE_RETRY_MS.length) window.setTimeout(() => tryCollapse(attempt + 1), COLLAPSE_RETRY_MS[attempt + 1]);
 				return;
 			}
-			if (container.hasClass('is-collapsed')) {
+			const heading = findPropertiesHeading(container);
+			// Obsidian marks the heading as folded (and, in some versions, the block too).
+			if (container.hasClass('is-collapsed') || heading?.hasClass('is-collapsed')) {
 				this.lastCollapse = 'already folded';
 				return;
 			}
-			// Click Obsidian's own "Properties" heading so it folds the normal way. Never
-			// just add the collapsed class: Obsidian wouldn't know, and the next click
-			// would seem to do nothing.
-			const heading = findPropertiesHeading(container);
+			// Click Obsidian's own "Properties" heading, once, so it folds the normal way.
+			// Never just add the collapsed class: Obsidian wouldn't know, and the next
+			// click would seem to do nothing.
 			if (!heading) {
 				this.lastCollapse = `no heading found in ${describeTree(container)}`;
 				return;
 			}
-			for (const type of ['mousedown', 'mouseup', 'click']) {
-				heading.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window }));
-			}
-			this.lastCollapse = `clicked ${describeElement(heading)}, folded: ${container.hasClass('is-collapsed') ? 'yes' : 'no'}`;
+			heading.click();
+			const folded = container.hasClass('is-collapsed') || heading.hasClass('is-collapsed');
+			this.lastCollapse = `clicked ${describeElement(heading)}, folded: ${folded ? 'yes' : 'no'}`;
 		};
-		tryCollapse(0);
+		// Wait for the reading view to finish rendering before the first attempt.
+		window.setTimeout(() => tryCollapse(0), COLLAPSE_RETRY_MS[0]);
 	}
 
 	private iconFor(view: MarkdownView): { icon: string; tooltip: string } {
