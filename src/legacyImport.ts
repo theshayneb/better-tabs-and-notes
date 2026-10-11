@@ -10,6 +10,7 @@ const LEGACY_IDS = {
 	editMode: 'shortcut-edit-mode',
 	dailyNote: 'pinned-daily-notes',
 	pinnedTabs: 'pinned-tabs-customizer',
+	scrollToTop: 'obsidian-scroll-to-top-plugin',
 } as const;
 
 /** Plugin id and display name of each original plugin. */
@@ -20,6 +21,7 @@ export const LEGACY_PLUGINS: [string, string][] = [
 	[LEGACY_IDS.editMode, 'Edit mode switch'],
 	[LEGACY_IDS.dailyNote, 'Pinned Daily Notes'],
 	[LEGACY_IDS.pinnedTabs, 'Pinned Tabs Customizer'],
+	[LEGACY_IDS.scrollToTop, 'Scroll to Top'],
 ];
 
 type Json = Record<string, unknown>;
@@ -166,6 +168,21 @@ export async function importLegacySettings(app: App, settings: PluginSettings): 
 		}
 		if (Array.isArray(pinned.recentIcons)) p.recentIcons = pinned.recentIcons.filter((i): i is string => typeof i === 'string');
 		imported.push('Pinned Tabs Customizer');
+	}
+
+	const scroll = await readData(app, LEGACY_IDS.scrollToTop);
+	if (scroll) {
+		const b = settings.scrollButtons;
+		assign(b, 'showTop', bool(scroll.enabledScrollToTop));
+		assign(b, 'showBottom', bool(scroll.enabledScrollToBottom));
+		assign(b, 'showCursor', bool(scroll.enabledScrollToCursor));
+		assign(b, 'iconTop', str(scroll.iconScrollToTop));
+		assign(b, 'iconBottom', str(scroll.iconScrollToBottom));
+		assign(b, 'iconCursor', str(scroll.iconScrollToCursor));
+		assign(b, 'showTooltips', bool(scroll.showTooltip));
+		assign(b, 'size', num(scroll.resizeButton));
+		assign(b, 'includeWebPages', bool(scroll.enableSurfingPlugin));
+		imported.push('Scroll to Top');
 	}
 
 	return imported;

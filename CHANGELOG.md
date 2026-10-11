@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.15] - 2026-10-11
+
+- New feature, from the Scroll to Top plugin: scroll buttons. Small buttons in the corner of each note jump to the top, to the bottom, or (while editing) back to the cursor. Choose which buttons show, their icons, size and tooltips. Also available as commands, and optionally on Surfing web pages. "Import" in the settings now also reads Scroll to Top's settings.
+
 ## [0.0.14] - 2026-10-11
 
 - Home tab search: files with the same name are listed together, notes (.md) first, then bases (.base), then other file types. Results are still ordered by how well they match.

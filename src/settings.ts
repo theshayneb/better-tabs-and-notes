@@ -1,6 +1,6 @@
 // All settings live in the plugin's data.json. Each feature owns one section.
 
-export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons'] as const;
+export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons'] as const;
 export type FeatureId = typeof FEATURE_IDS[number];
 
 // ---------------------------------------------------------------------------
@@ -156,6 +156,27 @@ export interface PinnedIconSettings {
 
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Scroll buttons (Scroll to Top)
+// ---------------------------------------------------------------------------
+
+export interface ScrollButtonSettings {
+	showTop: boolean;
+	showBottom: boolean;
+	/** Only shown while editing. */
+	showCursor: boolean;
+	iconTop: string;
+	iconBottom: string;
+	iconCursor: string;
+	showTooltips: boolean;
+	/** Button size relative to the default. */
+	size: number;
+	/** Also show the buttons on web pages opened with the Surfing plugin. */
+	includeWebPages: boolean;
+}
+
+// ---------------------------------------------------------------------------
+
 export interface PluginSettings {
 	features: Record<FeatureId, boolean>;
 	tabs: TabSettings;
@@ -163,6 +184,7 @@ export interface PluginSettings {
 	editMode: EditModeSettings;
 	dailyNote: DailyNoteSettings;
 	pinnedIcons: PinnedIconSettings;
+	scrollButtons: ScrollButtonSettings;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -172,6 +194,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		editMode: true,
 		dailyNote: true,
 		pinnedIcons: true,
+		scrollButtons: true,
 	},
 	tabs: {
 		openInNewTab: true,
@@ -242,10 +265,21 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		rules: [],
 		recentIcons: [],
 	},
+	scrollButtons: {
+		showTop: true,
+		showBottom: true,
+		showCursor: true,
+		iconTop: 'arrow-up',
+		iconBottom: 'arrow-down',
+		iconCursor: 'text-cursor-input',
+		showTooltips: true,
+		size: 1,
+		includeWebPages: false,
+	},
 };
 
 type Section = Exclude<keyof PluginSettings, 'features'>;
-const SECTIONS: Section[] = ['tabs', 'homeTab', 'editMode', 'dailyNote', 'pinnedIcons'];
+const SECTIONS: Section[] = ['tabs', 'homeTab', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons'];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);

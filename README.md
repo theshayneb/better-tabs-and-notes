@@ -1,6 +1,6 @@
 # Better Tabs and Notes
 
-One Obsidian plugin that replaces six:
+One Obsidian plugin that replaces seven:
 
 | Feature | Replaces |
 | --- | --- |
@@ -9,6 +9,7 @@ One Obsidian plugin that replaces six:
 | **Edit mode switch**: a header button for live preview / source / reading | [Edit mode switch](https://github.com/mara-li/obsidian-edit-shortcut) |
 | **Pinned daily note**: today's note in one pinned tab | [Pinned Daily Notes](https://github.com/docmarionum1/obsidian-pinned-daily-notes) |
 | **Pinned tab icons**: shrink pinned tabs to custom icons | [Pinned Tabs Customizer](https://github.com/diegomarzaa/obsidian-pinned-tabs-customizer) |
+| **Scroll buttons**: jump to the top, bottom or cursor of a note | [Scroll to Top](https://github.com/cloudhao1999/obsidian-scroll-to-top-plugin) |
 
 Every feature can be turned on or off on its own in the settings, and also
 turned off on just one device (handy for desktop-only features like compact
@@ -19,7 +20,7 @@ pinned tabs).
 1. Install and enable Better Tabs and Notes.
 2. In its settings, click **Import** under *Import from the original plugins*.
    It reads the originals' settings from `.obsidian/plugins/*/data.json`.
-3. Turn the six original plugins off. Running both versions of a feature at the
+3. Turn the original plugins off. Running both versions of a feature at the
    same time makes them fight over the same tabs.
 
 ## Features
@@ -118,6 +119,14 @@ pinned tabs).
 - Icons can be emoji, text or any of Obsidian's built-in icons.
 - *Set pinned tab icon* in the file menu, plus commands.
 
+### Scroll buttons
+
+- Small floating buttons in the bottom right corner of each note: scroll to
+  the top, to the bottom, and (while editing) back to the cursor.
+- Choose which buttons show, their icons, size and tooltips.
+- Commands for each, e.g. to bind to hotkeys or Commander buttons.
+- Optionally also on web pages opened with the Surfing plugin.
+
 ## Development
 
 ```
@@ -148,6 +157,7 @@ src/
     editMode/          header mode button
     dailyNote/         pinned daily note
     pinnedIcons/       compact pinned tabs, icon rules and pickers
+    scrollButtons/     scroll to top / bottom / cursor buttons
 tests/                 unit tests for the Obsidian-free logic
 ```
 

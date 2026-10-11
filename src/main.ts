@@ -9,6 +9,7 @@ import { HomeTabFeature } from './features/homeTab/homeTab';
 import { EditModeFeature } from './features/editMode/editMode';
 import { PinnedDailyNoteFeature } from './features/dailyNote/pinnedDailyNote';
 import { PinnedIconsFeature } from './features/pinnedIcons/pinnedIcons';
+import { ScrollButtonsFeature } from './features/scrollButtons/scrollButtons';
 
 const DEVICE_DISABLED_PREFIX = 'better-tabs-and-notes:disabled-on-device:';
 const DEVICE_TABS_KEY = 'better-tabs-and-notes:device-tab-settings';
@@ -28,6 +29,7 @@ export default class BetterTabsPlugin extends Plugin {
 		editMode: EditModeFeature;
 		dailyNote: PinnedDailyNoteFeature;
 		pinnedIcons: PinnedIconsFeature;
+		scrollButtons: ScrollButtonsFeature;
 	};
 
 	override async onload(): Promise<void> {
@@ -39,6 +41,7 @@ export default class BetterTabsPlugin extends Plugin {
 			editMode: new EditModeFeature(this),
 			dailyNote: new PinnedDailyNoteFeature(this),
 			pinnedIcons: new PinnedIconsFeature(this),
+			scrollButtons: new ScrollButtonsFeature(this),
 		};
 
 		// Register the settings tab first, so it's there even if a feature fails.

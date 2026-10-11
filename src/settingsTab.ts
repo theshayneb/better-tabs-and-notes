@@ -31,6 +31,10 @@ const FEATURE_INFO: Record<FeatureId, { name: string; desc: string }> = {
 		name: 'Pinned tab icons',
 		desc: 'Shrink pinned tabs to an icon, chosen per file, folder, name pattern, tag or frontmatter property.',
 	},
+	scrollButtons: {
+		name: 'Scroll buttons',
+		desc: 'Small buttons in the corner of each note to jump to the top, the bottom, or back to the cursor.',
+	},
 };
 
 const COLOR_OPTIONS: Record<ColorChoice, string> = { default: 'Theme default', accent: 'Accent color', custom: 'Custom' };
@@ -58,7 +62,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Import from the original plugins')
 			// eslint-disable-next-line obsidianmd/ui/sentence-case -- names of other plugins and apps are proper nouns
-			.setDesc('Copy settings from Home tab, Open Tab Settings, Mononote, Edit mode switch, Pinned Daily Notes and Pinned Tabs Customizer if they are still installed. Turn the originals off afterwards so they don\'t fight with this plugin.')
+			.setDesc('Copy settings from Home tab, Open Tab Settings, Mononote, Edit mode switch, Pinned Daily Notes, Pinned Tabs Customizer and Scroll to Top if they are still installed. Turn the originals off afterwards so they don\'t fight with this plugin.')
 			.addButton(btn => btn.setButtonText('Import').onClick(async () => {
 				const imported = await importLegacySettings(this.app, this.plugin.settings);
 				if (imported.length === 0) {
@@ -78,6 +82,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		this.section('editMode', el => this.renderEditMode(el));
 		this.section('dailyNote', el => this.renderDailyNote(el));
 		this.section('pinnedIcons', el => this.renderPinnedIcons(el));
+		this.section('scrollButtons', el => this.renderScrollButtons(el));
 	}
 
 	/** Heading, on/off toggles, and the feature's own settings when it's on. */
@@ -447,6 +452,32 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 	}
 
 	// -----------------------------------------------------------------------
+
+	private renderScrollButtons(el: HTMLElement): void {
+		const s = this.plugin.settings.scrollButtons;
+		const save = (redraw = false) => this.save('scrollButtons', redraw);
+		const iconSetting = (name: string, desc: string, on: boolean, setOn: (v: boolean) => void, icon: string, setIcon: (v: string) => void, fallback: string) => {
+			new Setting(el).setName(name).setDesc(desc)
+				.addText(t => t.setPlaceholder(fallback).setValue(icon).onChange(v => { setIcon(v.trim() || fallback); void save(); }))
+				.addToggle(t => t.setValue(on).onChange(v => { setOn(v); void save(); }));
+		};
+		const d = DEFAULT_SETTINGS.scrollButtons;
+		iconSetting('Scroll to top', 'Icon name, and whether to show the button.', s.showTop, v => { s.showTop = v; }, s.iconTop, v => { s.iconTop = v; }, d.iconTop);
+		iconSetting('Scroll to bottom', 'Icon name, and whether to show the button.', s.showBottom, v => { s.showBottom = v; }, s.iconBottom, v => { s.iconBottom = v; }, d.iconBottom);
+		iconSetting('Scroll to cursor', 'Only shown while editing.', s.showCursor, v => { s.showCursor = v; }, s.iconCursor, v => { s.iconCursor = v; }, d.iconCursor);
+		new Setting(el).setName('Show tooltips')
+			.addToggle(t => t.setValue(s.showTooltips).onChange(v => { s.showTooltips = v; void save(); }));
+		new Setting(el).setName('Button size')
+			.addSlider(sl => sl.setLimits(0.6, 2, 0.1).setValue(s.size).setDynamicTooltip()
+				.onChange(v => { s.size = v; void save(); }))
+			.addExtraButton(b => b.setIcon('reset').setTooltip('Reset').onClick(() => { s.size = d.size; void save(true); }));
+		if (this.app.plugins.getPlugin('surfing')) {
+			new Setting(el).setName('Also on web pages')
+				// eslint-disable-next-line obsidianmd/ui/sentence-case -- names of other plugins and apps are proper nouns
+				.setDesc('Show the top and bottom buttons on web pages opened with the Surfing plugin.')
+				.addToggle(t => t.setValue(s.includeWebPages).onChange(v => { s.includeWebPages = v; void save(); }));
+		}
+	}
 
 	private renderPinnedIcons(el: HTMLElement): void {
 		const feature = this.plugin.features.pinnedIcons;
