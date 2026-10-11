@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.12] - 2026-10-11
+
+- Fix "Fold properties in reading view" leaving the properties looking folded while Obsidian thought they were open, so the first click seemed to do nothing. It now finds the Properties heading more reliably and clicks it the way you would, and never just makes the block look folded.
+- The troubleshooting report now says what the last attempt to fold properties did.
+
 ## [0.0.11] - 2026-10-10
 
 - Edit mode switch: "Hide properties in reading view" is now "Fold properties in reading view". Instead of hiding the properties, it collapses them each time a note switches into reading view, so they're one click away. If you had the old setting on, the new one is on too.

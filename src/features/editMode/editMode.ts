@@ -58,6 +58,23 @@ function findDefaultModeButton(view: MarkdownView): HTMLElement | null {
 	return actions.find(el => !isPluginButton(el) && labels.some(label => el.getAttribute('aria-label')?.includes(label))) ?? null;
 }
 
+/** The clickable "Properties" heading of a properties block, under whichever name this Obsidian version uses. */
+function findPropertiesHeading(container: HTMLElement): HTMLElement | null {
+	return container.querySelector<HTMLElement>('.metadata-properties-heading')
+		?? container.querySelector<HTMLElement>('.collapse-indicator')?.parentElement
+		?? null;
+}
+
+function describeElement(el: Element): string {
+	return `<${el.tagName.toLowerCase()}${el.classList.length ? ` class="${Array.from(el.classList).join(' ')}"` : ''}>`;
+}
+
+/** The element and its first two levels of children, for the troubleshooting report. */
+function describeTree(el: Element, depth = 0): string {
+	const children = depth < 2 ? Array.from(el.children).slice(0, 6).map(c => describeTree(c, depth + 1)) : [];
+	return `${describeElement(el)}${children.length ? ` [${children.join(', ')}]` : ''}`;
+}
+
 export function getMode(view: MarkdownView): EditMode {
 	const state = view.getState() as { mode?: string; source?: boolean };
 	if (state.mode === 'preview') return 'preview';
@@ -82,6 +99,8 @@ export class EditModeFeature extends Feature {
 	private delayedRefresh: number | null = null;
 	/** Last mode (and file, in reading view) seen per note, to fold properties only on a switch. */
 	private lastReadingKey = new WeakMap<MarkdownView, string>();
+	/** What the last attempt to fold properties did, for the troubleshooting report. */
+	private lastCollapse = 'not tried yet';
 
 	get settings(): EditModeSettings {
 		return this.plugin.settings.editMode;
@@ -198,11 +217,22 @@ export class EditModeFeature extends Feature {
 				if (attempt + 1 < COLLAPSE_RETRY_MS.length) window.setTimeout(() => tryCollapse(attempt + 1), COLLAPSE_RETRY_MS[attempt + 1]);
 				return;
 			}
-			if (container.hasClass('is-collapsed')) return;
-			// Click Obsidian's own "Properties" heading so it folds the normal way.
-			const heading = container.querySelector<HTMLElement>('.metadata-properties-heading');
-			if (heading) heading.click();
-			else container.addClass('is-collapsed');
+			if (container.hasClass('is-collapsed')) {
+				this.lastCollapse = 'already folded';
+				return;
+			}
+			// Click Obsidian's own "Properties" heading so it folds the normal way. Never
+			// just add the collapsed class: Obsidian wouldn't know, and the next click
+			// would seem to do nothing.
+			const heading = findPropertiesHeading(container);
+			if (!heading) {
+				this.lastCollapse = `no heading found in ${describeTree(container)}`;
+				return;
+			}
+			for (const type of ['mousedown', 'mouseup', 'click']) {
+				heading.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window }));
+			}
+			this.lastCollapse = `clicked ${describeElement(heading)}, folded: ${container.hasClass('is-collapsed') ? 'yes' : 'no'}`;
 		};
 		tryCollapse(0);
 	}
@@ -362,6 +392,7 @@ export class EditModeFeature extends Feature {
 		const view = this.app.workspace.getActiveViewOfType(MarkdownView);
 		return [
 			`Edit mode switch: ${this.settings.buttonPlace}${view ? `, mode ${getMode(view)}, Obsidian's button found: ${findDefaultModeButton(view) ? 'yes' : 'no'}` : ''}`,
+			`Fold properties in reading view: ${this.settings.collapsePropertiesInReading ? 'on' : 'off'}, last attempt: ${this.lastCollapse}`,
 		];
 	}
 
