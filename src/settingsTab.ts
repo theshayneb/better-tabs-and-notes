@@ -43,6 +43,10 @@ const FEATURE_INFO: Record<FeatureId, { name: string; desc: string }> = {
 		name: 'Bulk properties',
 		desc: 'Add, change or remove properties in every note of a folder, or in the notes selected in the file explorer.',
 	},
+	tagRename: {
+		name: 'Tag renaming',
+		desc: 'Rename a tag, or merge it into another, in every note at once.',
+	},
 };
 
 const COLOR_OPTIONS: Record<ColorChoice, string> = { default: 'Theme default', accent: 'Accent color', custom: 'Custom' };
@@ -93,6 +97,10 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		this.section('scrollButtons', el => this.renderScrollButtons(el));
 		this.section('frontmatterCleaner', el => this.renderFrontmatterCleaner(el));
 		this.section('bulkProperties', el => this.renderBulkProperties(el));
+		this.section('tagRename', el => el.createDiv({
+			cls: 'setting-item-description btn-settings-note',
+			text: 'Right-click a tag in the tags view, in reading view or in the editor and choose "Rename" or "Merge into another tag", or use the commands "Rename a tag" and "Merge a tag into another". Subtags are renamed too, in note text and in the tags property.',
+		}));
 	}
 
 	/** Heading, on/off toggles, and the feature's own settings when it's on. */

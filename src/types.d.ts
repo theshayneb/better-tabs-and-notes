@@ -3,7 +3,7 @@
 // a new Obsidian version breaks something.
 
 import 'obsidian';
-import type { PaneType, TFile, WorkspaceItem, WorkspaceLeaf } from 'obsidian';
+import type { EditorPosition, PaneType, TFile, WorkspaceItem, WorkspaceLeaf } from 'obsidian';
 import type { TabSettings } from './settings';
 
 declare module 'obsidian' {
@@ -25,6 +25,11 @@ declare module 'obsidian' {
 		};
 		loadLocalStorage(key: string): unknown;
 		saveLocalStorage(key: string, value: unknown): void;
+	}
+
+	interface Editor {
+		/** The link, tag or URL at a position, if any. */
+		getClickableTokenAt?(pos: EditorPosition): { type: string; text: string } | null;
 	}
 
 	interface MetadataCache {

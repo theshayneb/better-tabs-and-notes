@@ -1,6 +1,6 @@
 # Better Tabs and Notes
 
-One Obsidian plugin that replaces nine:
+One Obsidian plugin that replaces ten:
 
 | Feature | Replaces |
 | --- | --- |
@@ -12,6 +12,7 @@ One Obsidian plugin that replaces nine:
 | **Scroll buttons**: jump to the top, bottom or cursor of a note | [Scroll to Top](https://github.com/cloudhao1999/obsidian-scroll-to-top-plugin) |
 | **Frontmatter cleaner**: delete a note's properties from a list | [Frontmatter Cleaner](https://github.com/sharfaroz7/frontmatter-cleaner) |
 | **Bulk properties**: add, change or remove properties in many notes at once | [Multi Properties](https://github.com/technohiker/obsidian-multi-properties) |
+| **Tag renaming**: rename a tag, or merge it into another, everywhere | [Tag Wrangler](https://github.com/pjeby/tag-wrangler) |
 
 Every feature can be turned on or off on its own in the settings, and also
 turned off on just one device (handy for desktop-only features like compact
@@ -156,6 +157,17 @@ pinned tabs).
   many notes have each.
 - Both ask for confirmation first.
 
+### Tag renaming
+
+- Right-click a tag in the Tags view, in reading view or in the editor and
+  choose *Rename #tag* or *Merge #tag into another tag*. Or use the commands
+  *Rename a tag* and *Merge a tag into another*.
+- Renaming also renames subtags (`#project/alpha` follows `#project`), in note
+  text and in the `tags` property. Typing the name of a tag that already
+  exists merges the two, with a warning first.
+- Merging picks the tag to merge into from a list of existing tags.
+- Both ask for confirmation first.
+
 ## Development
 
 ```
@@ -189,10 +201,11 @@ src/
     scrollButtons/     scroll to top / bottom / cursor buttons
     frontmatterCleaner/ property cleaner list and commands
     bulkProperties/    add, change or remove properties in many notes
+    tagRename/         rename and merge tags
 tests/                 unit tests for the Obsidian-free logic
 ```
 
 ## License
 
 GPL-3.0, because Edit mode switch is GPL-3.0. The other original plugins are
-MIT or 0BSD; see [NOTICE.md](NOTICE.md) for credits and their license texts.
+MIT, ISC or 0BSD; see [NOTICE.md](NOTICE.md) for credits and their license texts.

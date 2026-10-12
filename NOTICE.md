@@ -1,8 +1,8 @@
 # Third-party notices
 
-Better Tabs and Notes combines the features of nine Obsidian plugins. It is
+Better Tabs and Notes combines the features of ten Obsidian plugins. It is
 licensed under the GNU General Public License v3.0 (see `LICENSE`), because
-one of them, Edit mode switch, is GPL-3.0. The other eight are under permissive
+one of them, Edit mode switch, is GPL-3.0. The other nine are under permissive
 licenses whose notices are reproduced below as they require.
 
 | Feature here | Original plugin | Author | License |
@@ -16,6 +16,7 @@ licenses whose notices are reproduced below as they require.
 | Scroll buttons | [obsidian-scroll-to-top-plugin](https://github.com/cloudhao1999/obsidian-scroll-to-top-plugin) | cloudhao1999 | MIT |
 | Frontmatter cleaner | [frontmatter-cleaner](https://github.com/sharfaroz7/frontmatter-cleaner) | sharfaroz | MIT |
 | Bulk properties | [obsidian-multi-properties](https://github.com/technohiker/obsidian-multi-properties) | technohiker (fez-github) | MIT |
+| Tag renaming | [tag-wrangler](https://github.com/pjeby/tag-wrangler) | PJ Eby | ISC |
 
 ---
 
@@ -211,6 +212,28 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+## tag-wrangler
+
+Only renaming and merging tags were ported.
+
+ISC License
+
+Copyright 2021 PJ Eby
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 

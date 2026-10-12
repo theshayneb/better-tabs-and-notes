@@ -321,6 +321,21 @@
 	overflow-wrap: anywhere;
 }
 
+/* ===== Tag renaming ===== */
+
+.btn-tag-rename-input {
+	width: 100%;
+}
+
+.btn-tag-rename-hint {
+	min-height: 1.5em;
+	color: var(--text-muted);
+}
+
+.btn-tag-rename-hint.mod-warning {
+	color: var(--text-warning);
+}
+
 /* ===== Icon picker ===== */
 
 .btn-icon-picker .btn-icon-search {

@@ -47,7 +47,7 @@ export class FolderPickerModal extends FuzzySuggestModal<TFolder> {
 export class TagPickerModal extends FuzzySuggestModal<string> {
 	private tags: string[];
 
-	constructor(app: App, private onPick: (tag: string) => void) {
+	constructor(app: App, private onPick: (tag: string) => void, include: (tag: string) => boolean = () => true) {
 		super(app);
 		this.setPlaceholder('Search for a tag...');
 		const tags = new Set<string>();
@@ -55,7 +55,7 @@ export class TagPickerModal extends FuzzySuggestModal<string> {
 			const cache = app.metadataCache.getFileCache(file);
 			if (cache) getAllTags(cache)?.forEach(t => tags.add(t.replace(/^#/, '')));
 		}
-		this.tags = [...tags].sort();
+		this.tags = [...tags].filter(include).sort();
 	}
 
 	getItems(): string[] {

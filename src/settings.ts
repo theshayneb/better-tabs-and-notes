@@ -1,6 +1,6 @@
 // All settings live in the plugin's data.json. Each feature owns one section.
 
-export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties'] as const;
+export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'tagRename'] as const;
 export type FeatureId = typeof FEATURE_IDS[number];
 
 // ---------------------------------------------------------------------------
@@ -226,6 +226,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		scrollButtons: true,
 		frontmatterCleaner: true,
 		bulkProperties: true,
+		tagRename: true,
 	},
 	tabs: {
 		openInNewTab: true,

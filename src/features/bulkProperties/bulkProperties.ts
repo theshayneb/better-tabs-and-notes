@@ -3,6 +3,7 @@
 
 import { Modal, Notice, Setting, TFile, TFolder, type App, type TAbstractFile } from 'obsidian';
 import { Feature } from '../../feature';
+import { confirm } from '../../shared/confirm';
 import type { BulkPropertiesSettings } from '../../settings';
 import {
 	applyProperties, countProperties, parseValue, removeProperties,
@@ -142,27 +143,6 @@ export class BulkPropertiesFeature extends Feature {
 		progress.hide();
 		new Notice(`Updated ${changed} of ${notes.length} notes.${failed.length ? ` Couldn't update ${failed.length}; see the developer console.` : ''}`, 6000);
 	}
-}
-
-/** Ask before changing many notes. */
-function confirm(app: App, message: string, action: string): Promise<boolean> {
-	return new Promise(resolve => {
-		const modal = new Modal(app);
-		let done = false;
-		modal.setTitle('Are you sure?');
-		modal.contentEl.createEl('p', { text: message });
-		new Setting(modal.contentEl)
-			.addButton(b => b.setButtonText('Cancel').onClick(() => modal.close()))
-			.addButton(b => b.setButtonText(action).setWarning().onClick(() => {
-				done = true;
-				resolve(true);
-				modal.close();
-			}));
-		modal.onClose = () => {
-			if (!done) resolve(false);
-		};
-		modal.open();
-	});
 }
 
 interface Row {

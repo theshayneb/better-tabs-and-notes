@@ -13,6 +13,7 @@ const LEGACY_IDS = {
 	scrollToTop: 'obsidian-scroll-to-top-plugin',
 	frontmatterCleaner: 'frontmatter-cleaner',
 	multiProperties: 'multi-properties',
+	tagWrangler: 'tag-wrangler',
 } as const;
 
 /** Plugin id and display name of each original plugin. */
@@ -26,6 +27,8 @@ export const LEGACY_PLUGINS: [string, string][] = [
 	[LEGACY_IDS.scrollToTop, 'Scroll to Top'],
 	[LEGACY_IDS.frontmatterCleaner, 'Frontmatter Cleaner'],
 	[LEGACY_IDS.multiProperties, 'Multi Properties'],
+	// Tag Wrangler has no settings to import; listed so the settings warn while it's still on.
+	[LEGACY_IDS.tagWrangler, 'Tag Wrangler'],
 ];
 
 type Json = Record<string, unknown>;
