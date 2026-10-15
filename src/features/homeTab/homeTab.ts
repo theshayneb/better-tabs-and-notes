@@ -3,6 +3,7 @@
 
 import { Events, TFile, debounce, parseFrontMatterAliases, type Command, type EventRef, type WorkspaceLeaf } from 'obsidian';
 import { Feature } from '../../feature';
+import { closeOtherTabs } from '../../shared/closeTabs';
 import type { HomeTabSettings } from '../../settings';
 import { HOME_CODE_BLOCK, HOME_VIEW_TYPE, LEGACY_HOME_CODE_BLOCK } from './constants';
 import { EmbeddedHome, HomeView } from './homeView';
@@ -95,7 +96,10 @@ export class HomeTabFeature extends Feature {
 
 		workspace.onLayoutReady(() => {
 			this.watchBookmarks();
-			if (this.settings.openOnStart) this.openOnStart();
+			// A start page chosen for this device replaces the synced setting.
+			if (this.plugin.getDeviceStartup().page) {
+				if (this.settings.replaceNewTabs) this.replaceEmptyLeaf();
+			} else if (this.settings.openOnStart) void this.showOnStart(this.settings.closePreviousSessionTabs);
 			else if (this.settings.replaceNewTabs) this.replaceEmptyLeaf();
 		});
 	}
@@ -132,23 +136,18 @@ export class HomeTabFeature extends Feature {
 		if (leaf?.view.getViewType() === 'empty') void leaf.setViewState({ type: HOME_VIEW_TYPE });
 	}
 
-	private openOnStart(): void {
+	/** Show the home tab at startup, reusing one restored from last time. */
+	async showOnStart(closeOthers: boolean): Promise<void> {
 		const { workspace } = this.app;
 		const homes = workspace.getLeavesOfType(HOME_VIEW_TYPE);
 		if (homes.length > 0) {
-			void workspace.revealLeaf(homes[0]);
+			await workspace.revealLeaf(homes[0]);
 			homes.slice(1).forEach(l => l.detach());
 		} else {
-			void this.openHome(true);
+			await this.openHome(true);
 		}
-		if (this.settings.closePreviousSessionTabs) {
-			const toClose: WorkspaceLeaf[] = [];
-			workspace.iterateRootLeaves(leaf => {
-				// Pinned tabs (like the pinned daily note) stay.
-				if (leaf.view.getViewType() !== HOME_VIEW_TYPE && !leaf.pinned) toClose.push(leaf);
-			});
-			toClose.forEach(l => l.detach());
-		}
+		// Pinned tabs (like the pinned daily note) stay.
+		if (closeOthers) closeOtherTabs(this.app, workspace.getLeavesOfType(HOME_VIEW_TYPE)[0] ?? null);
 	}
 
 	// -----------------------------------------------------------------------

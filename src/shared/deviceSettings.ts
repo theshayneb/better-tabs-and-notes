@@ -57,3 +57,34 @@ export function shouldFocusNewTab(device: DeviceTabSettings, normalClick: boolea
 		default: return normalClick || obsidianFocusNewTab;
 	}
 }
+
+// ---------------------------------------------------------------------------
+// What opens when Obsidian starts, on this device
+
+export const START_PAGES = {
+	nothing: 'Only the tabs from last time',
+	home: 'Home tab',
+	daily: 'Today\'s daily note (pinned tab)',
+	note: 'A specific note',
+} as const;
+
+export type StartPage = keyof typeof START_PAGES;
+
+export interface DeviceStartupSettings {
+	/** Unset: follow the synced "open on start" settings of the home tab and pinned daily note. */
+	page?: StartPage;
+	/** Path of the note to open, for page "note". */
+	notePath?: string;
+	/** Close the other (unpinned) tabs after opening the start page. */
+	closeOthers?: boolean;
+}
+
+export function sanitizeDeviceStartup(raw: unknown): DeviceStartupSettings {
+	const result: DeviceStartupSettings = {};
+	if (typeof raw !== 'object' || raw === null) return result;
+	const data = raw as Record<string, unknown>;
+	if (typeof data.page === 'string' && data.page in START_PAGES) result.page = data.page as StartPage;
+	if (typeof data.notePath === 'string' && data.notePath) result.notePath = data.notePath;
+	if (data.closeOthers === true) result.closeOthers = true;
+	return result;
+}

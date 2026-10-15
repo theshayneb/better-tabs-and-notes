@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS } from '../src/settings';
-import { applyDeviceTabSettings, sanitizeDeviceTabSettings, shouldFocusNewTab } from '../src/shared/deviceSettings';
+import { applyDeviceTabSettings, sanitizeDeviceStartup, sanitizeDeviceTabSettings, shouldFocusNewTab } from '../src/shared/deviceSettings';
 
 describe('per-device tab settings', () => {
 	it('keeps only valid stored values', () => {
@@ -26,5 +26,14 @@ describe('per-device tab settings', () => {
 		expect(shouldFocusNewTab({ focusNewTabs: 'never' }, true, true)).toBe(false);
 		expect(shouldFocusNewTab({ focusNewTabs: 'normal' }, true, false)).toBe(true);
 		expect(shouldFocusNewTab({ focusNewTabs: 'normal' }, false, true)).toBe(false);
+	});
+});
+
+describe('device startup settings', () => {
+	it('keeps only valid values', () => {
+		expect(sanitizeDeviceStartup(null)).toEqual({});
+		expect(sanitizeDeviceStartup({ page: 'bogus', notePath: 3, closeOthers: 'yes' })).toEqual({});
+		expect(sanitizeDeviceStartup({ page: 'note', notePath: 'Inbox.md', closeOthers: true }))
+			.toEqual({ page: 'note', notePath: 'Inbox.md', closeOthers: true });
 	});
 });

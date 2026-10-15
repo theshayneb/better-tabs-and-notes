@@ -1,9 +1,12 @@
-import { Notice, Plugin, type Command } from 'obsidian';
+import { MarkdownView, Notice, Plugin, type Command, type WorkspaceLeaf } from 'obsidian';
 import type { Feature } from './feature';
 import { DEFAULT_SETTINGS, FEATURE_IDS, mergeSettings, type FeatureId, type PluginSettings } from './settings';
 import { BetterTabsSettingTab } from './settingsTab';
 import { copyHeaderReport, startHeaderTrace } from './shared/headerTrace';
-import { sanitizeDeviceTabSettings, type DeviceTabSettings } from './shared/deviceSettings';
+import { closeOtherTabs } from './shared/closeTabs';
+import {
+	sanitizeDeviceStartup, sanitizeDeviceTabSettings, type DeviceStartupSettings, type DeviceTabSettings,
+} from './shared/deviceSettings';
 import { TabBehaviorFeature } from './features/tabs/tabBehavior';
 import { HomeTabFeature } from './features/homeTab/homeTab';
 import { EditModeFeature } from './features/editMode/editMode';
@@ -16,6 +19,7 @@ import { TagRenameFeature } from './features/tagRename/tagRename';
 
 const DEVICE_DISABLED_PREFIX = 'better-tabs-and-notes:disabled-on-device:';
 const DEVICE_TABS_KEY = 'better-tabs-and-notes:device-tab-settings';
+const DEVICE_STARTUP_KEY = 'better-tabs-and-notes:device-startup';
 
 /** Log a failure and show it, without stopping the rest of the plugin. */
 export function reportError(what: string, error: unknown): void {
@@ -82,6 +86,7 @@ export default class BetterTabsPlugin extends Plugin {
 		}
 
 		this.syncFeatures();
+		this.app.workspace.onLayoutReady(() => void this.openDeviceStartPage());
 	}
 
 	/** data.json changed on disk, e.g. synced from another device. */
@@ -123,6 +128,67 @@ export default class BetterTabsPlugin extends Plugin {
 	setDeviceTabSettings(settings: DeviceTabSettings): void {
 		const clean = sanitizeDeviceTabSettings(settings);
 		this.app.saveLocalStorage(DEVICE_TABS_KEY, Object.keys(clean).length ? clean : null);
+	}
+
+	/** What opens at startup on this device (not synced). */
+	getDeviceStartup(): DeviceStartupSettings {
+		return sanitizeDeviceStartup(this.app.loadLocalStorage(DEVICE_STARTUP_KEY));
+	}
+
+	setDeviceStartup(settings: DeviceStartupSettings): void {
+		const clean = sanitizeDeviceStartup(settings);
+		this.app.saveLocalStorage(DEVICE_STARTUP_KEY, Object.keys(clean).length ? clean : null);
+	}
+
+	/** Open the start page chosen for this device, if any. */
+	private async openDeviceStartPage(): Promise<void> {
+		const startup = this.getDeviceStartup();
+		const { workspace } = this.app;
+		try {
+			switch (startup.page) {
+				case undefined:
+				case 'nothing':
+					return;
+				case 'home':
+					if (!this.features.homeTab.isLoaded) {
+						new Notice('The start page is set to the home tab, but the home tab feature is off.');
+						return;
+					}
+					await this.features.homeTab.showOnStart(!!startup.closeOthers);
+					return;
+				case 'daily':
+					if (!this.features.dailyNote.isLoaded) {
+						new Notice('The start page is set to the daily note, but the pinned daily note feature is off.');
+						return;
+					}
+					await this.features.dailyNote.openToday();
+					// The daily note's tab is pinned, so it stays.
+					if (startup.closeOthers) closeOtherTabs(this.app, null);
+					return;
+				case 'note': {
+					const file = startup.notePath ? this.app.vault.getFileByPath(startup.notePath) : null;
+					if (!file) {
+						new Notice(`Couldn't find the start page "${startup.notePath ?? ''}".`);
+						return;
+					}
+					let leaf: WorkspaceLeaf | null = null;
+					workspace.iterateRootLeaves(l => {
+						if (!leaf && l.view instanceof MarkdownView && l.view.file?.path === file.path) leaf = l;
+					});
+					if (!leaf) {
+						const recent = workspace.getMostRecentLeaf();
+						leaf = recent?.view.getViewType() === 'empty' ? recent : workspace.getLeaf('tab');
+						await leaf.openFile(file);
+					}
+					await workspace.revealLeaf(leaf);
+					workspace.setActiveLeaf(leaf, { focus: true });
+					if (startup.closeOthers) closeOtherTabs(this.app, leaf);
+					return;
+				}
+			}
+		} catch (e) {
+			reportError('couldn\'t open the start page', e);
+		}
 	}
 
 	setDisabledOnDevice(id: FeatureId, disabled: boolean): void {

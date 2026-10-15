@@ -18,6 +18,14 @@ Every feature can be turned on or off on its own in the settings, and also
 turned off on just one device (handy for desktop-only features like compact
 pinned tabs).
 
+## Start page per device
+
+At the top of the settings, *When Obsidian opens on this device* picks what
+opens at startup on that device only (it isn't synced): just the tabs from
+last time, the home tab, today's pinned daily note, or a specific note,
+optionally closing the other tabs. Left on *Same as other devices*, the
+synced "open on start" settings of the home tab and pinned daily note apply.
+
 ## Moving over from the original plugins
 
 1. Install and enable Better Tabs and Notes.
@@ -126,7 +134,8 @@ pinned tabs).
 
 - Small floating buttons in the bottom right corner of each note: scroll to
   the top, to the bottom, and (while editing) back to the cursor.
-- Choose which buttons show, their icons, size and tooltips.
+- Choose which buttons show, their icons, size and tooltips, and where they
+  sit: bottom right or bottom left, and how far from the edges.
 - Commands for each, e.g. to bind to hotkeys or Commander buttons.
 - Optionally also on web pages opened with the Surfing plugin.
 

@@ -100,9 +100,14 @@ export class ScrollButtonsFeature extends Feature {
 		const host = leaf.view.containerEl;
 		host.addClass(HOST_CLASS);
 		const group = host.createDiv({ cls: CONTAINER_CLASS });
-		group.setCssProps({ '--btn-scroll-size': String(this.settings.size) });
-
 		const s = this.settings;
+		group.setCssProps({
+			'--btn-scroll-size': String(s.size),
+			'--btn-scroll-bottom': `${s.offsetBottom}px`,
+			'--btn-scroll-side': `${s.offsetSide}px`,
+		});
+		group.toggleClass('is-left', s.side === 'left');
+
 		const targets: Target[] = [];
 		if (s.showCursor) targets.push('cursor');
 		if (s.showTop) targets.push('top');
@@ -112,7 +117,7 @@ export class ScrollButtonsFeature extends Feature {
 				.setIcon(this.iconFor(target))
 				.setClass('btn-scroll-button')
 				.onClick(() => void this.scroll(leaf, target));
-			if (s.showTooltips) button.setTooltip(LABELS[target], { placement: 'left' });
+			if (s.showTooltips) button.setTooltip(LABELS[target], { placement: s.side === 'left' ? 'right' : 'left' });
 			button.buttonEl.dataset.target = target;
 		}
 		return group;

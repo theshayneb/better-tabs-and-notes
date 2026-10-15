@@ -5,7 +5,7 @@ import {
 	type ColorChoice, type EditMode, type FeatureId, type FontChoice, type LogoType, type TabSettings,
 } from './settings';
 import { LEGACY_PLUGINS, importLegacySettings } from './legacyImport';
-import { FOCUS_NEW_TABS, type DeviceTabSettings } from './shared/deviceSettings';
+import { FOCUS_NEW_TABS, START_PAGES, type DeviceStartupSettings, type DeviceTabSettings } from './shared/deviceSettings';
 import { FilePickerModal, FolderPickerModal, PatternEditorModal, TagPickerModal } from './features/pinnedIcons/modals';
 import { RULE_TYPE_LABELS, findConflicts, ruleMatches } from './features/pinnedIcons/rules';
 import { renderIcon } from './features/pinnedIcons/pinnedIcons';
@@ -89,6 +89,8 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 				this.redraw();
 			}));
 
+		this.renderDeviceStartup(containerEl);
+
 		this.section('homeTab', el => this.renderHomeTab(el));
 		this.section('tabs', el => this.renderTabs(el));
 		this.section('editMode', el => this.renderEditMode(el));
@@ -101,6 +103,37 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 			cls: 'setting-item-description btn-settings-note',
 			text: 'Right-click a tag in the tags view, in reading view or in the editor and choose "Rename" or "Merge into another tag", or use the commands "Rename a tag" and "Merge a tag into another". Subtags are renamed too, in note text and in the tags property.',
 		}));
+	}
+
+	/** The start page for this device only, overriding the synced "open on start" settings. */
+	private renderDeviceStartup(el: HTMLElement): void {
+		const startup = this.plugin.getDeviceStartup();
+		const SHARED = '';
+		const set = (changes: Partial<DeviceStartupSettings>) => {
+			this.plugin.setDeviceStartup({ ...startup, ...changes });
+			this.redraw();
+		};
+
+		new Setting(el).setName('When Obsidian opens on this device').setHeading()
+			.setDesc('Not synced, so each device can start differently.');
+		new Setting(el).setName('Start page')
+			.setDesc('Leave on "same as other devices" to use the "open on start" settings of the home tab and pinned daily note below.')
+			.addDropdown(dd => dd
+				.addOptions({ [SHARED]: 'Same as other devices', ...START_PAGES })
+				.setValue(startup.page ?? SHARED)
+				.onChange(v => set({ page: (v || undefined) as DeviceStartupSettings['page'] })));
+		if (startup.page === 'note') {
+			new Setting(el).setName('Note to open')
+				.setDesc(startup.notePath ?? 'None chosen yet.')
+				.addButton(b => b.setButtonText('Choose...').onClick(() => {
+					new FilePickerModal(this.app, file => set({ notePath: file.path })).open();
+				}));
+		}
+		if (startup.page && startup.page !== 'nothing') {
+			new Setting(el).setName('Close other tabs')
+				.setDesc('Leave only the start page and pinned tabs open.')
+				.addToggle(t => t.setValue(!!startup.closeOthers).onChange(v => set({ closeOthers: v })));
+		}
 	}
 
 	/** Heading, on/off toggles, and the feature's own settings when it's on. */
@@ -158,7 +191,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		new Setting(el).setName('Replace new tabs with the home tab')
 			.addToggle(t => t.setValue(s.replaceNewTabs).onChange(v => { s.replaceNewTabs = v; void save(); }));
 		new Setting(el).setName('Open the home tab when Obsidian starts')
-			.setDesc('Focuses an existing home tab instead if there is one.')
+			.setDesc('Focuses an existing home tab instead if there is one. A start page chosen for this device at the top replaces this.')
 			.addToggle(t => t.setValue(s.openOnStart).onChange(v => { s.openOnStart = v; void save(true); }));
 		if (s.openOnStart) {
 			new Setting(el).setName('Close other tabs on start')
@@ -462,7 +495,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		new Setting(el).setName('Show ribbon button')
 			.addToggle(t => t.setValue(s.showRibbonIcon).onChange(v => { s.showRibbonIcon = v; void save(); }));
 		new Setting(el).setName('Open on start')
-			.setDesc("Show today's note in the pinned tab when Obsidian starts.")
+			.setDesc("Show today's note in the pinned tab when Obsidian starts. A start page chosen for this device at the top replaces this.")
 			.addToggle(t => t.setValue(s.openOnStart).onChange(v => { s.openOnStart = v; void save(); }));
 		new Setting(el).setName('Move to the new day at midnight')
 			.setDesc('If Obsidian is open past midnight, switch the pinned tab to the new daily note (creating it if needed).')
@@ -552,6 +585,21 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 			.addSlider(sl => sl.setLimits(0.6, 2, 0.1).setValue(s.size).setDynamicTooltip()
 				.onChange(v => { s.size = v; void save(); }))
 			.addExtraButton(b => b.setIcon('reset').setTooltip('Reset').onClick(() => { s.size = d.size; void save(true); }));
+		new Setting(el).setName('Position')
+			.setDesc('Which side of the note the buttons sit on.')
+			.addDropdown(dd => dd
+				.addOptions({ right: 'Bottom right', left: 'Bottom left' })
+				.setValue(s.side).onChange(v => { s.side = v as typeof s.side; void save(); }));
+		new Setting(el).setName('Distance from the bottom')
+			.setDesc('In pixels. Raise it if the buttons overlap the status bar.')
+			.addSlider(sl => sl.setLimits(0, 200, 2).setValue(s.offsetBottom).setDynamicTooltip()
+				.onChange(v => { s.offsetBottom = v; void save(); }))
+			.addExtraButton(b => b.setIcon('reset').setTooltip('Reset').onClick(() => { s.offsetBottom = d.offsetBottom; void save(true); }));
+		new Setting(el).setName('Distance from the side')
+			.setDesc('In pixels.')
+			.addSlider(sl => sl.setLimits(0, 200, 2).setValue(s.offsetSide).setDynamicTooltip()
+				.onChange(v => { s.offsetSide = v; void save(); }))
+			.addExtraButton(b => b.setIcon('reset').setTooltip('Reset').onClick(() => { s.offsetSide = d.offsetSide; void save(true); }));
 		if (this.app.plugins.getPlugin('surfing')) {
 			new Setting(el).setName('Also on web pages')
 				// eslint-disable-next-line obsidianmd/ui/sentence-case -- names of other plugins and apps are proper nouns

@@ -60,8 +60,8 @@
 
 .btn-scroll-buttons {
 	position: absolute;
-	right: var(--size-4-6);
-	bottom: var(--size-4-6);
+	right: var(--btn-scroll-side, var(--size-4-6));
+	bottom: var(--btn-scroll-bottom, var(--size-4-6));
 	z-index: var(--layer-status-bar);
 	display: flex;
 	flex-direction: column;
@@ -91,8 +91,13 @@
 	height: calc(var(--icon-s) * var(--btn-scroll-size, 1));
 }
 
+.btn-scroll-buttons.is-left {
+	right: auto;
+	left: var(--btn-scroll-side, var(--size-4-6));
+}
+
 .is-mobile .btn-scroll-buttons {
-	bottom: calc(var(--size-4-6) + var(--safe-area-inset-bottom, 0px));
+	bottom: calc(var(--btn-scroll-bottom, var(--size-4-6)) + var(--safe-area-inset-bottom, 0px));
 }
 
 /* ===== Frontmatter cleaner ===== */

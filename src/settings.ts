@@ -173,6 +173,12 @@ export interface ScrollButtonSettings {
 	size: number;
 	/** Also show the buttons on web pages opened with the Surfing plugin. */
 	includeWebPages: boolean;
+	/** Which side of the note the buttons sit on. */
+	side: 'right' | 'left';
+	/** Distance from the bottom of the note, in pixels. */
+	offsetBottom: number;
+	/** Distance from the side of the note, in pixels. */
+	offsetSide: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -307,6 +313,9 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		showTooltips: true,
 		size: 1,
 		includeWebPages: false,
+		side: 'right',
+		offsetBottom: 24,
+		offsetSide: 24,
 	},
 	frontmatterCleaner: {
 		showRibbonIcon: true,

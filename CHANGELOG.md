@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.19] - 2026-10-15
+
+- Scroll buttons: choose which side of the note they sit on (bottom right or bottom left) and how far they are from the bottom and the side, e.g. to lift them clear of the status bar.
+- New setting at the top of the settings, "When Obsidian opens on this device": choose a start page for this device only (not synced): just the tabs from last time, the home tab, today's pinned daily note, or a specific note, and optionally close the other tabs. "Same as other devices" keeps using the synced "open on start" settings of the home tab and pinned daily note.
+
 ## [0.0.18] - 2026-10-12
 
 - New feature, from the Tag Wrangler plugin: tag renaming. Right-click a tag in the Tags view, in reading view or in the editor to rename it, or to merge it into another tag, in every note at once. Subtags follow along, and tags are changed both in note text and in the tags property. Renaming to a tag that already exists warns that the two will be merged. Also available as the commands "Rename a tag" and "Merge a tag into another". Both ask for confirmation first.

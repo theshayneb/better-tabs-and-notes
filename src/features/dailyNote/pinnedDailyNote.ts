@@ -32,7 +32,8 @@ export class PinnedDailyNoteFeature extends Feature {
 		this.lastDate = moment().format('YYYY-MM-DD');
 		this.registerInterval(window.setInterval(() => void this.checkRollOver(), 60_000));
 		this.app.workspace.onLayoutReady(() => {
-			if (this.settings.openOnStart) void this.openToday();
+			// A start page chosen for this device replaces the synced setting.
+			if (this.settings.openOnStart && !this.plugin.getDeviceStartup().page) void this.openToday();
 		});
 	}
 
