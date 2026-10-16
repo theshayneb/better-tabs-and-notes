@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.20] - 2026-10-16
+
+- Home tab: the bookmarks and recent files lists can now be shown in columns (two by default, or one or three; setting "Columns" under Lists). The list still reads top to bottom, down the first column and then the next. Narrow screens like phones keep one column.
+
 ## [0.0.19] - 2026-10-15
 
 - Scroll buttons: choose which side of the note they sit on (bottom right or bottom left) and how far they are from the bottom and the side, e.g. to lift them clear of the status bar.

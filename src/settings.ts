@@ -70,6 +70,8 @@ export interface HomeTabSettings {
 	showBookmarks: boolean;
 	showRecentFiles: boolean;
 	maxRecentFiles: number;
+	/** Columns for the bookmark and recent file lists (one on narrow screens). */
+	listColumns: number;
 	storeRecentFiles: boolean;
 	recentFiles: string[];
 
@@ -260,6 +262,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		showBookmarks: true,
 		showRecentFiles: false,
 		maxRecentFiles: 5,
+		listColumns: 2,
 		storeRecentFiles: true,
 		recentFiles: [],
 		logoType: 'obsidian',

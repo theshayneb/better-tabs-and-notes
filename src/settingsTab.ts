@@ -239,6 +239,11 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 			.addToggle(t => t.setValue(s.showBookmarks).onChange(v => { s.showBookmarks = v; void save(); }));
 		new Setting(el).setName('Show recent files')
 			.addToggle(t => t.setValue(s.showRecentFiles).onChange(v => { s.showRecentFiles = v; void save(true); }));
+		new Setting(el).setName('Columns')
+			.setDesc('For the bookmarks and recent files. Narrow screens, like phones, always use one.')
+			.addDropdown(dd => dd
+				.addOptions({ 1: 'One', 2: 'Two', 3: 'Three' })
+				.setValue(String(s.listColumns)).onChange(v => { s.listColumns = Number(v); void save(); }));
 		if (s.showRecentFiles) {
 			new Setting(el).setName('Remember recent files between sessions')
 				.addToggle(t => t.setValue(s.storeRecentFiles).onChange(v => {

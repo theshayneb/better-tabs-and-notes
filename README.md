@@ -40,6 +40,7 @@ synced "open on start" settings of the home tab and pinned daily note apply.
 
 - Replaces empty new tabs with a start page (can also open on startup and
   close the previous session's tabs, keeping pinned tabs).
+- Bookmarks and recent files can be shown in one, two or three columns.
 - Search box that fuzzy-matches file names and aliases, highlights the match,
   and offers to create the note if it doesn't exist. Files with the same name
   are listed together: notes first, then bases, then other file types.

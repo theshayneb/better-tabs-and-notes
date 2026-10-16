@@ -101,6 +101,14 @@ export class HomePage extends Component {
 		const section = this.listsEl.createDiv({ cls: 'btn-home-list' });
 		section.createDiv({ cls: 'btn-home-list-heading', text: heading });
 		const list = section.createDiv({ cls: 'btn-home-list-items' });
+		// Fill the columns top to bottom, so the list still reads in order down the first column.
+		const columns = Math.max(1, Math.min(3, Math.round(this.feature.settings.listColumns)));
+		list.toggleClass('is-multi-column', columns > 1);
+		this.listsEl.toggleClass('is-wide', columns > 1);
+		list.setCssProps({
+			'--btn-home-columns': String(columns),
+			'--btn-home-rows': String(Math.ceil(files.length / columns)),
+		});
 		for (const { file, title } of files) {
 			const item = list.createDiv({ cls: 'btn-home-list-item', attr: { 'aria-label': file.path } });
 			setIcon(item.createSpan({ cls: 'btn-home-list-icon' }), iconFor(file));
