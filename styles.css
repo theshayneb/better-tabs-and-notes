@@ -613,10 +613,6 @@
 	margin-top: var(--size-4-8);
 }
 
-.btn-home-lists.is-wide {
-	width: min(100%, 860px);
-}
-
 .btn-home-list-items.is-multi-column {
 	display: grid;
 	grid-template-rows: repeat(var(--btn-home-rows), auto);

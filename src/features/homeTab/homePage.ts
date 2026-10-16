@@ -104,7 +104,6 @@ export class HomePage extends Component {
 		// Fill the columns top to bottom, so the list still reads in order down the first column.
 		const columns = Math.max(1, Math.min(3, Math.round(this.feature.settings.listColumns)));
 		list.toggleClass('is-multi-column', columns > 1);
-		this.listsEl.toggleClass('is-wide', columns > 1);
 		list.setCssProps({
 			'--btn-home-columns': String(columns),
 			'--btn-home-rows': String(Math.ceil(files.length / columns)),

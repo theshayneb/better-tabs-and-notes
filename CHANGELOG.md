@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.21] - 2026-10-16
+
+- Home tab: the bookmarks and recent files lists are the same width as the search bar again, so they line up underneath it instead of spilling past its left edge.
+
 ## [0.0.20] - 2026-10-16
 
 - Home tab: the bookmarks and recent files lists can now be shown in columns (two by default, or one or three; setting "Columns" under Lists). The list still reads top to bottom, down the first column and then the next. Narrow screens like phones keep one column.
