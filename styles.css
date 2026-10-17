@@ -623,6 +623,8 @@
 
 .btn-home-list-heading {
 	margin-bottom: var(--size-4-2);
+	/* Line up with the item icons below. */
+	padding: 0 var(--size-4-2);
 	color: var(--text-muted);
 	font-size: var(--font-ui-small);
 	font-weight: var(--font-semibold);
@@ -660,12 +662,13 @@
 	white-space: nowrap;
 }
 
+/* Hidden buttons take no space, so titles use the full width of the column. */
 .btn-home-list-remove {
-	visibility: hidden;
+	display: none;
 }
 
 .btn-home-list-item:hover .btn-home-list-remove {
-	visibility: visible;
+	display: flex;
 }
 
 @media (width <= 600px) {
