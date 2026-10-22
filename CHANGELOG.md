@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.23] - 2026-10-22
+
+- Pinned daily note: moving to the new day after midnight now works on mobile. Phones freeze or close Obsidian in the background, so the once-a-minute check slept through midnight, and after a restart the pinned tab kept yesterday's note. Now the pinned tab also moves to today when Obsidian comes back on screen, and a few seconds after Obsidian starts (giving Sync time to bring in today's note if another device already made it).
+
 ## [0.0.22] - 2026-10-17
 
 - Home tab lists: the hidden remove button no longer takes up space at the end of every row, so names use the full width of their column and both columns end evenly under the search bar. The button still appears when you hover a row. The list heading now lines up with the icons below it.

@@ -22,6 +22,8 @@ export class PinnedDailyNoteFeature extends Feature {
 
 	private ribbonEl: HTMLElement | null = null;
 	private lastDate = '';
+	/** The openToday call in progress, so overlapping calls don't create the note twice. */
+	private opening: Promise<void> | null = null;
 
 	get settings(): DailyNoteSettings {
 		return this.plugin.settings.dailyNote;
@@ -31,9 +33,20 @@ export class PinnedDailyNoteFeature extends Feature {
 		this.updateRibbon();
 		this.lastDate = moment().format('YYYY-MM-DD');
 		this.registerInterval(window.setInterval(() => void this.checkRollOver(), 60_000));
+		// Phones freeze Obsidian in the background, so the timer can sleep through
+		// midnight. Check again as soon as Obsidian is back on screen.
+		this.registerDomEvent(document, 'visibilitychange', () => {
+			if (document.visibilityState === 'visible') void this.checkRollOver();
+		});
+		this.registerDomEvent(window, 'focus', () => void this.checkRollOver());
 		this.app.workspace.onLayoutReady(() => {
 			// A start page chosen for this device replaces the synced setting.
 			if (this.settings.openOnStart && !this.plugin.getDeviceStartup().page) void this.openToday();
+			// Obsidian may have been closed overnight and restored yesterday's note.
+			// Wait a little first, so Sync can bring in today's note if another device made it.
+			else if (this.settings.rollOver) {
+				this.registerInterval(window.setTimeout(() => void this.rollOverIfStale(), 8_000));
+			}
 		});
 	}
 
@@ -96,6 +109,16 @@ export class PinnedDailyNoteFeature extends Feature {
 	}
 
 	async openToday(focus = true): Promise<void> {
+		if (!this.opening) {
+			this.opening = this.doOpenToday(focus).finally(() => { this.opening = null; });
+			return this.opening;
+		}
+		await this.opening;
+		// The call in progress may not have focused the tab.
+		if (focus) await this.doOpenToday(true);
+	}
+
+	private async doOpenToday(focus: boolean): Promise<void> {
 		const config = this.getConfig();
 		if (!config) {
 			const source = this.settings.source === 'periodic-notes' ? 'Periodic Notes plugin (daily notes)' : 'Daily notes core plugin';
@@ -151,8 +174,16 @@ export class PinnedDailyNoteFeature extends Feature {
 		const date = moment().format('YYYY-MM-DD');
 		if (date === this.lastDate) return;
 		this.lastDate = date;
-		if (!this.settings.rollOver) return;
+		if (this.settings.rollOver) await this.rollOverIfStale();
+	}
+
+	/** Move the pinned daily note tab to today if it shows an earlier day. */
+	private async rollOverIfStale(): Promise<void> {
 		const config = this.getConfig();
-		if (config && this.findPinnedDailyLeaf(config)) await this.openToday(false);
+		if (!config) return;
+		const leaf = this.findPinnedDailyLeaf(config);
+		if (!leaf) return;
+		const today = normalizePath(dailyNotePath(config, moment()));
+		if (leaf.getViewState().state?.file !== today) await this.openToday(false);
 	}
 }
