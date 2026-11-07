@@ -341,6 +341,143 @@
 	color: var(--text-warning);
 }
 
+/* ===== Links in properties ===== */
+
+.btn-fml-has-links:not(.is-editing) > :not(.btn-fml-display),
+.btn-fml-has-links.is-editing > .btn-fml-display,
+.metadata-property-value:not(.btn-fml-has-links) > .btn-fml-display {
+	display: none;
+}
+
+.btn-fml-display {
+	flex: 1;
+	min-width: 0;
+	padding: var(--input-padding);
+	font-size: var(--metadata-input-font-size, var(--font-small));
+	overflow-wrap: anywhere;
+	cursor: text;
+}
+
+/* ===== Nested properties ===== */
+
+/* An open nested property drops below its name and uses the full width. */
+/* Obsidian may reuse a property's row when its type changes, so match on the content, not a class. */
+/* stylelint-disable selector-disallowed-list */
+.metadata-property:has(> .metadata-property-value > .btn-np-node:not(.is-collapsed)) {
+	flex-wrap: wrap;
+}
+
+.metadata-property:has(> .metadata-property-value > .btn-np-node:not(.is-collapsed)) > .metadata-property-value {
+	width: 100%;
+	padding-left: 20px;
+}
+
+.metadata-property:has(> .metadata-property-value > .btn-np-node) > .metadata-property-warning-icon {
+	display: none;
+}
+/* stylelint-enable selector-disallowed-list */
+
+.btn-np-node {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	width: 100%;
+}
+
+.btn-np-head {
+	display: flex;
+	align-items: center;
+	min-width: 0;
+}
+
+/* While open, the triangle sits on the property's own line, next to its name. */
+.btn-np-node:not(.is-collapsed) > .btn-np-head {
+	position: absolute;
+	top: var(--metadata-property-padding, 0);
+	left: var(--metadata-label-width, 9em);
+	height: var(--input-height);
+}
+
+.btn-np-container {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+.btn-np-container .metadata-property {
+	width: 100%;
+	border-bottom: none;
+}
+
+.btn-np-node.is-collapsed > .btn-np-container {
+	display: none;
+}
+
+.btn-np-collapse {
+	flex-shrink: 0;
+	width: 20px;
+	height: 20px;
+	padding: 0;
+	color: var(--text-muted);
+	transition: transform 100ms ease-in-out;
+}
+
+.btn-np-collapse svg {
+	width: 10px;
+	height: 10px;
+}
+
+.btn-np-node.is-collapsed > .btn-np-head > .btn-np-collapse {
+	transform: rotate(-90deg);
+}
+
+.btn-np-summary {
+	display: none;
+	overflow: hidden;
+	padding: var(--input-padding);
+	color: var(--text-muted);
+	font-size: var(--metadata-input-font-size, var(--font-small));
+	font-style: italic;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	cursor: var(--cursor);
+}
+
+.btn-np-node.is-collapsed > .btn-np-head > .btn-np-summary {
+	display: inline;
+}
+
+.btn-np-add {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--size-4-1);
+	width: fit-content;
+	padding: 2px var(--size-4-1);
+	border-radius: var(--radius-s);
+	color: var(--text-muted);
+	font-size: var(--metadata-label-font-size, var(--font-small));
+	cursor: var(--cursor);
+}
+
+.btn-np-add:hover {
+	background-color: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.btn-np-add-icon {
+	display: flex;
+}
+
+.btn-np-add-icon svg {
+	width: 14px;
+	height: 14px;
+}
+
+.btn-np-add-input {
+	width: min(100%, 240px);
+	font-size: var(--metadata-label-font-size, var(--font-small));
+}
+
 /* ===== Icon picker ===== */
 
 .btn-icon-picker .btn-icon-search {

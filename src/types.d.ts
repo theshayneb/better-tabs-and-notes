@@ -32,7 +32,53 @@ declare module 'obsidian' {
 		getClickableTokenAt?(pos: EditorPosition): { type: string; text: string } | null;
 	}
 
+	interface App {
+		/** The Properties panel's property types and their widgets. */
+		metadataTypeManager?: MetadataTypeManager;
+	}
+
+	/** Draws one property value in the Properties panel. */
+	interface PropertyWidget {
+		type: string;
+		icon: string;
+		/** A function in recent Obsidian versions, a string in some older ones. */
+		name: string | (() => string);
+		render(el: HTMLElement, value: unknown, context: PropertyRenderContext): unknown;
+		validate(value: unknown): boolean;
+	}
+
+	interface PropertyRenderContext {
+		app: App;
+		key: string;
+		sourcePath: string;
+		onChange(value: unknown): void;
+		blur(): void;
+	}
+
+	interface MenuItem {
+		setSubmenu?(): Menu;
+	}
+
+	interface MetadataTypeManager {
+		registeredTypeWidgets: Record<string, PropertyWidget | undefined>;
+		getWidget(type: string): PropertyWidget;
+		getTypeInfo(key: string, value: unknown): { inferred: PropertyWidget; expected: PropertyWidget };
+		getAssignedWidget(key: string): string | null;
+		setType(key: string, type: string): unknown;
+		unsetType(key: string): unknown;
+	}
+
+	interface MarkdownView {
+		/** The Properties panel of the note. */
+		metadataEditor?: {
+			serialize(): Record<string, unknown>;
+			synchronize(data: Record<string, unknown>): void;
+		};
+	}
+
 	interface MetadataCache {
+		/** Recount a note's links into resolvedLinks/unresolvedLinks from its cache. */
+		resolveLinks?(path: string): void;
 		/** Every property name in the vault with its registered type, keyed by lower-case name. */
 		getAllPropertyInfos?(): Record<string, { name: string; widget?: string; type?: string; occurrences?: number }>;
 	}

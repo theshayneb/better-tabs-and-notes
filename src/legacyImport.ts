@@ -14,6 +14,8 @@ const LEGACY_IDS = {
 	frontmatterCleaner: 'frontmatter-cleaner',
 	multiProperties: 'multi-properties',
 	tagWrangler: 'tag-wrangler',
+	frontmatterMarkdownLinks: 'frontmatter-markdown-links',
+	nestedProperties: 'nested-properties',
 } as const;
 
 /** Plugin id and display name of each original plugin. */
@@ -29,6 +31,8 @@ export const LEGACY_PLUGINS: [string, string][] = [
 	[LEGACY_IDS.multiProperties, 'Multi Properties'],
 	// Tag Wrangler has no settings to import; listed so the settings warn while it's still on.
 	[LEGACY_IDS.tagWrangler, 'Tag Wrangler'],
+	[LEGACY_IDS.frontmatterMarkdownLinks, 'Frontmatter Markdown Links'],
+	[LEGACY_IDS.nestedProperties, 'Nested Properties'],
 ];
 
 type Json = Record<string, unknown>;
@@ -215,6 +219,13 @@ export async function importLegacySettings(app: App, settings: PluginSettings): 
 		const delimiter = str(multi.delimiter);
 		if (delimiter) m.delimiter = delimiter;
 		imported.push('Multi Properties');
+	}
+
+	const nested = await readData(app, LEGACY_IDS.nestedProperties);
+	if (nested) {
+		const level = num(nested.initialExpandLevel);
+		if (level !== undefined && level >= 0) settings.nestedProperties.expandLevel = Math.min(5, Math.round(level));
+		imported.push('Nested Properties');
 	}
 
 	return imported;

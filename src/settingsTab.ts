@@ -47,6 +47,14 @@ const FEATURE_INFO: Record<FeatureId, { name: string; desc: string }> = {
 		name: 'Tag renaming',
 		desc: 'Rename a tag, or merge it into another, in every note at once.',
 	},
+	frontmatterLinks: {
+		name: 'Links in properties',
+		desc: 'When a property holds several links, or a link with other text, show each link separately and make it work, and count it as a backlink.',
+	},
+	nestedProperties: {
+		name: 'Nested properties',
+		desc: 'Show properties that contain other properties or lists as a collapsible tree in the properties panel, and edit them there.',
+	},
 };
 
 const COLOR_OPTIONS: Record<ColorChoice, string> = { default: 'Theme default', accent: 'Accent color', custom: 'Custom' };
@@ -74,7 +82,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Import from the original plugins')
 			// eslint-disable-next-line obsidianmd/ui/sentence-case -- names of other plugins and apps are proper nouns
-			.setDesc('Copy settings from Home tab, Open Tab Settings, Mononote, Edit mode switch, Pinned Daily Notes, Pinned Tabs Customizer, Scroll to Top, Frontmatter Cleaner and Multi Properties if they are still installed. Turn the originals off afterwards so they don\'t fight with this plugin.')
+			.setDesc('Copy settings from Home tab, Open Tab Settings, Mononote, Edit mode switch, Pinned Daily Notes, Pinned Tabs Customizer, Scroll to Top, Frontmatter Cleaner, Multi Properties and Nested Properties if they are still installed. Turn the originals off afterwards so they don\'t fight with this plugin.')
 			.addButton(btn => btn.setButtonText('Import').onClick(async () => {
 				const imported = await importLegacySettings(this.app, this.plugin.settings);
 				if (imported.length === 0) {
@@ -103,6 +111,11 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 			cls: 'setting-item-description btn-settings-note',
 			text: 'Right-click a tag in the tags view, in reading view or in the editor and choose "Rename" or "Merge into another tag", or use the commands "Rename a tag" and "Merge a tag into another". Subtags are renamed too, in note text and in the tags property.',
 		}));
+		this.section('frontmatterLinks', el => el.createDiv({
+			cls: 'setting-item-description btn-settings-note',
+			text: 'Click a link to open it (ctrl/cmd-click or middle-click for a new tab), hover it to preview, and click the text around the links to edit the value.',
+		}));
+		this.section('nestedProperties', el => this.renderNestedProperties(el));
 	}
 
 	/** The start page for this device only, overriding the synced "open on start" settings. */
@@ -508,6 +521,21 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 	}
 
 	// -----------------------------------------------------------------------
+
+	private renderNestedProperties(el: HTMLElement): void {
+		const s = this.plugin.settings.nestedProperties;
+		el.createDiv({
+			cls: 'setting-item-description btn-settings-note',
+			text: 'Click the triangle or the grey summary to open a nested property. Right-click an entry, or click its icon, to change its type, cut, copy, paste or remove it.',
+		});
+		new Setting(el).setName('Levels shown open')
+			.setDesc('How many levels of a nested property are open when a note is shown.')
+			.addDropdown(dd => {
+				dd.addOption('0', 'None (all collapsed)');
+				for (let level = 1; level <= 5; level++) dd.addOption(String(level), String(level));
+				dd.setValue(String(s.expandLevel)).onChange(v => { s.expandLevel = Number(v); void this.save('nestedProperties'); });
+			});
+	}
 
 	private renderBulkProperties(el: HTMLElement): void {
 		const s = this.plugin.settings.bulkProperties;

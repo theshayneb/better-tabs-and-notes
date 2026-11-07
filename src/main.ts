@@ -16,6 +16,8 @@ import { ScrollButtonsFeature } from './features/scrollButtons/scrollButtons';
 import { FrontmatterCleanerFeature } from './features/frontmatterCleaner/frontmatterCleaner';
 import { BulkPropertiesFeature } from './features/bulkProperties/bulkProperties';
 import { TagRenameFeature } from './features/tagRename/tagRename';
+import { FrontmatterLinksFeature } from './features/frontmatterLinks/frontmatterLinks';
+import { NestedPropertiesFeature } from './features/nestedProperties/nestedProperties';
 
 const DEVICE_DISABLED_PREFIX = 'better-tabs-and-notes:disabled-on-device:';
 const DEVICE_TABS_KEY = 'better-tabs-and-notes:device-tab-settings';
@@ -40,6 +42,8 @@ export default class BetterTabsPlugin extends Plugin {
 		frontmatterCleaner: FrontmatterCleanerFeature;
 		bulkProperties: BulkPropertiesFeature;
 		tagRename: TagRenameFeature;
+		frontmatterLinks: FrontmatterLinksFeature;
+		nestedProperties: NestedPropertiesFeature;
 	};
 
 	override async onload(): Promise<void> {
@@ -55,6 +59,8 @@ export default class BetterTabsPlugin extends Plugin {
 			frontmatterCleaner: new FrontmatterCleanerFeature(this),
 			bulkProperties: new BulkPropertiesFeature(this),
 			tagRename: new TagRenameFeature(this),
+			frontmatterLinks: new FrontmatterLinksFeature(this),
+			nestedProperties: new NestedPropertiesFeature(this),
 		};
 
 		// Register the settings tab first, so it's there even if a feature fails.

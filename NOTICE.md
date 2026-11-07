@@ -1,8 +1,8 @@
 # Third-party notices
 
-Better Tabs and Notes combines the features of ten Obsidian plugins. It is
+Better Tabs and Notes combines the features of twelve Obsidian plugins. It is
 licensed under the GNU General Public License v3.0 (see `LICENSE`), because
-one of them, Edit mode switch, is GPL-3.0. The other nine are under permissive
+one of them, Edit mode switch, is GPL-3.0. The other eleven are under permissive
 licenses whose notices are reproduced below as they require.
 
 | Feature here | Original plugin | Author | License |
@@ -17,6 +17,8 @@ licenses whose notices are reproduced below as they require.
 | Frontmatter cleaner | [frontmatter-cleaner](https://github.com/sharfaroz7/frontmatter-cleaner) | sharfaroz | MIT |
 | Bulk properties | [obsidian-multi-properties](https://github.com/technohiker/obsidian-multi-properties) | technohiker (fez-github) | MIT |
 | Tag renaming | [tag-wrangler](https://github.com/pjeby/tag-wrangler) | PJ Eby | ISC |
+| Links in properties | [obsidian-frontmatter-markdown-links](https://github.com/mnaoumov/obsidian-frontmatter-markdown-links) | Michael Naumov | MIT |
+| Nested properties | [obsidian-nested-properties](https://github.com/mnaoumov/obsidian-nested-properties) | Michael Naumov | MIT |
 
 ---
 
@@ -234,6 +236,64 @@ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+---
+
+## obsidian-frontmatter-markdown-links
+
+Only showing several links in one property as separate links and counting them
+as backlinks were ported, rewritten without the original's helper libraries.
+
+MIT License
+
+Copyright (C) 2024-2026 by Michael Naumov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## obsidian-nested-properties
+
+Only the collapsible tree of nested properties and editing it (types and the
+right-click menu) were ported, rewritten without the original's helper libraries.
+
+MIT License
+
+Copyright (C) 2026 by Michael Naumov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 ---
 

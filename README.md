@@ -1,6 +1,6 @@
 # Better Tabs and Notes
 
-One Obsidian plugin that replaces ten:
+One Obsidian plugin that replaces twelve:
 
 | Feature | Replaces |
 | --- | --- |
@@ -13,6 +13,8 @@ One Obsidian plugin that replaces ten:
 | **Frontmatter cleaner**: delete a note's properties from a list | [Frontmatter Cleaner](https://github.com/sharfaroz7/frontmatter-cleaner) |
 | **Bulk properties**: add, change or remove properties in many notes at once | [Multi Properties](https://github.com/technohiker/obsidian-multi-properties) |
 | **Tag renaming**: rename a tag, or merge it into another, everywhere | [Tag Wrangler](https://github.com/pjeby/tag-wrangler) |
+| **Links in properties**: several links in one property, each a real link and a backlink | [Frontmatter Markdown Links](https://github.com/mnaoumov/obsidian-frontmatter-markdown-links) |
+| **Nested properties**: nested properties as a collapsible, editable tree | [Nested Properties](https://github.com/mnaoumov/obsidian-nested-properties) |
 
 Every feature can be turned on or off on its own in the settings, and also
 turned off on just one device (handy for desktop-only features like compact
@@ -178,6 +180,31 @@ synced "open on start" settings of the home tab and pinned daily note apply.
 - Merging picks the tag to merge into from a list of existing tags.
 - Both ask for confirmation first.
 
+### Links in properties
+
+- A property value that holds several links, or a link with other text
+  (`[[Chapter one]] and [Chapter two](<Chapter two.md>)`), shows each link
+  separately in the Properties panel. Click one to open it (ctrl/cmd-click or
+  middle-click for a new tab), hover to preview it, and click the text around
+  the links to edit the value.
+- Those links resolve and count as backlinks on the notes they point to,
+  including links inside nested properties.
+- Wikilinks and markdown links both work; paths with spaces can be in angle
+  brackets or percent-encoded. A value that is exactly one link is left to
+  Obsidian, which already handles it.
+
+### Nested properties
+
+- Properties that contain other properties or lists of objects show as a
+  collapsible tree. A collapsed one shows a one-line summary; choose how many
+  levels start open in the settings.
+- Each value in the tree is edited with Obsidian's own controls (text, number,
+  checkbox, date, list...). Add properties and list items with the buttons at
+  the bottom of each level.
+- Right-click an entry (or click its icon) to change its type, or to cut, copy,
+  paste or remove it. In a list of objects, a field's type can be set for every
+  item at once or for one item only.
+
 ## Development
 
 ```
@@ -212,6 +239,8 @@ src/
     frontmatterCleaner/ property cleaner list and commands
     bulkProperties/    add, change or remove properties in many notes
     tagRename/         rename and merge tags
+    frontmatterLinks/  links inside property values
+    nestedProperties/  nested properties tree
 tests/                 unit tests for the Obsidian-free logic
 ```
 

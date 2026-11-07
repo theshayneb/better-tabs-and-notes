@@ -1,6 +1,6 @@
 // All settings live in the plugin's data.json. Each feature owns one section.
 
-export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'tagRename'] as const;
+export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'tagRename', 'frontmatterLinks', 'nestedProperties'] as const;
 export type FeatureId = typeof FEATURE_IDS[number];
 
 // ---------------------------------------------------------------------------
@@ -211,6 +211,14 @@ export interface BulkPropertiesSettings {
 }
 
 // ---------------------------------------------------------------------------
+// Nested properties
+
+export interface NestedPropertySettings {
+	/** How many levels of a nested property start expanded: 0 shows everything collapsed. */
+	expandLevel: number;
+}
+
+// ---------------------------------------------------------------------------
 
 export interface PluginSettings {
 	features: Record<FeatureId, boolean>;
@@ -222,6 +230,7 @@ export interface PluginSettings {
 	scrollButtons: ScrollButtonSettings;
 	frontmatterCleaner: FrontmatterCleanerSettings;
 	bulkProperties: BulkPropertiesSettings;
+	nestedProperties: NestedPropertySettings;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -235,6 +244,8 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		frontmatterCleaner: true,
 		bulkProperties: true,
 		tagRename: true,
+		frontmatterLinks: true,
+		nestedProperties: true,
 	},
 	tabs: {
 		openInNewTab: true,
@@ -333,10 +344,13 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		includeSubfolders: true,
 		delimiter: ',',
 	},
+	nestedProperties: {
+		expandLevel: 0,
+	},
 };
 
 type Section = Exclude<keyof PluginSettings, 'features'>;
-const SECTIONS: Section[] = ['tabs', 'homeTab', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties'];
+const SECTIONS: Section[] = ['tabs', 'homeTab', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'nestedProperties'];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);

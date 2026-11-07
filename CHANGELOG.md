@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.24] - 2026-11-07
+
+- New feature, from the Frontmatter Markdown Links plugin: links in properties. A property value holding several links, or a link with other text, now shows each link separately in the Properties panel. Click to open (ctrl/cmd-click or middle-click for a new tab), hover to preview, and click the text around the links to edit. The links also resolve and count as backlinks on the notes they point to.
+- New feature, from the Nested Properties plugin: nested properties. Properties that contain other properties or lists of objects show as a collapsible tree with a one-line summary when collapsed. Edit values with Obsidian's own controls, add properties and list items, and right-click an entry to change its type or to cut, copy, paste or remove it. Choose how many levels start open in the settings. "Import" in the settings reads Nested Properties' starting level.
+
 ## [0.0.23] - 2026-10-22
 
 - Pinned daily note: moving to the new day after midnight now works on mobile. Phones freeze or close Obsidian in the background, so the once-a-minute check slept through midnight, and after a restart the pinned tab kept yesterday's note. Now the pinned tab also moves to today when Obsidian comes back on screen, and a few seconds after Obsidian starts (giving Sync time to bring in today's note if another device already made it).
