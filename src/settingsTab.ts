@@ -9,6 +9,10 @@ import { FOCUS_NEW_TABS, START_PAGES, type DeviceStartupSettings, type DeviceTab
 import { FilePickerModal, FolderPickerModal, PatternEditorModal, TagPickerModal } from './features/pinnedIcons/modals';
 import { RULE_TYPE_LABELS, findConflicts, ruleMatches } from './features/pinnedIcons/rules';
 import { renderIcon } from './features/pinnedIcons/pinnedIcons';
+import { cleanIds, describeHidden, matchNames, searchCommands, type CommandFilter } from './features/hideCommands/hideLogic';
+
+/** How many commands the "All commands" list shows at once. */
+const MAX_COMMANDS_SHOWN = 50;
 
 const FEATURE_INFO: Record<FeatureId, { name: string; desc: string }> = {
 	homeTab: {
@@ -55,11 +59,21 @@ const FEATURE_INFO: Record<FeatureId, { name: string; desc: string }> = {
 		name: 'Nested properties',
 		desc: 'Show properties that contain other properties or lists as a collapsible tree in the properties panel, and edit them there.',
 	},
+	hideCommands: {
+		name: 'Hide commands',
+		desc: 'Hide commands from the command palette. Hidden commands still run from hotkeys, buttons, macros and other plugins.',
+	},
 };
 
 const COLOR_OPTIONS: Record<ColorChoice, string> = { default: 'Theme default', accent: 'Accent color', custom: 'Custom' };
 
 export class BetterTabsSettingTab extends PluginSettingTab {
+	// Hide commands: kept across redraws.
+	private commandQuery = '';
+	private commandFilter: CommandFilter = 'all';
+	private bulkText = '';
+	private bulkReport = '';
+
 	constructor(app: App, private plugin: BetterTabsPlugin) {
 		super(app, plugin);
 	}
@@ -116,6 +130,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 			text: 'Click a link to open it (ctrl/cmd-click or middle-click for a new tab), hover it to preview, and click the text around the links to edit the value.',
 		}));
 		this.section('nestedProperties', el => this.renderNestedProperties(el));
+		this.section('hideCommands', el => this.renderHideCommands(el));
 	}
 
 	/** The start page for this device only, overriding the synced "open on start" settings. */
@@ -521,6 +536,89 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 	}
 
 	// -----------------------------------------------------------------------
+
+	private renderHideCommands(el: HTMLElement): void {
+		const feature = this.plugin.features.hideCommands;
+		const s = this.plugin.settings.hideCommands;
+		const commands = feature.allCommands();
+
+		if (feature.problem) el.createDiv({ cls: 'btn-settings-warning', text: feature.problem });
+
+		new Setting(el).setName('Where to hide them')
+			.setDesc('Choosing everywhere also hides them from the hotkeys page and other plugins\' command pickers. Use it only if hiding from the command palette alone doesn\'t work.')
+			.addDropdown(dd => dd
+				.addOptions({ palette: 'Command palette only (recommended)', everywhere: 'Everywhere' })
+				.setValue(feature.scope)
+				.onChange(v => { s.scope = v as typeof s.scope; void this.save('hideCommands', true); }));
+
+		// Hidden commands
+		const hidden = describeHidden(cleanIds(s.hiddenIds), commands);
+		new Setting(el).setName(`Hidden commands (${hidden.length})`).setHeading();
+		const hiddenEl = el.createDiv({ cls: 'btn-hc-list' });
+		if (hidden.length === 0) hiddenEl.createDiv({ cls: 'btn-hc-empty', text: 'No commands are hidden yet.' });
+		for (const entry of hidden) {
+			this.renderCommandRow(hiddenEl, entry.name ?? entry.id, entry.id, entry.name === null, true);
+		}
+
+		// Hide several at once
+		new Setting(el).setName('Hide several at once').setHeading()
+			// eslint-disable-next-line obsidianmd/ui/sentence-case -- the example is a command name as the palette shows it
+			.setDesc('Paste one command per line, as the command palette shows it, e.g. "RSS Reader: Refresh feeds". Command IDs work too.');
+		const textarea = el.createEl('textarea', { cls: 'btn-hc-bulk', attr: { rows: '6', spellcheck: 'false' } });
+		textarea.value = this.bulkText;
+		textarea.addEventListener('input', () => { this.bulkText = textarea.value; });
+		new Setting(el)
+			.setDesc(this.bulkReport)
+			.addButton(b => b.setButtonText('Hide these').setCta().onClick(async () => {
+				const { ids, notFound } = matchNames(textarea.value, commands);
+				const already = ids.filter(id => feature.isHidden(id)).length;
+				if (ids.length) await feature.hide(ids);
+				const parts = [`Hid ${ids.length - already} command${ids.length - already === 1 ? '' : 's'}${already ? ` (${already} already hidden)` : ''}.`];
+				if (notFound.length) parts.push(`Not found, so left in the box above to check the spelling: ${notFound.length}.`);
+				this.bulkReport = parts.join(' ');
+				this.bulkText = notFound.join('\n');
+				this.redraw();
+			}));
+
+		// All commands
+		new Setting(el).setName(`All commands (${commands.length})`).setHeading();
+		const listEl = createDiv({ cls: 'btn-hc-list' });
+		const renderList = () => {
+			listEl.empty();
+			const matches = searchCommands(commands, this.commandQuery, new Set(cleanIds(s.hiddenIds)), this.commandFilter);
+			if (matches.length === 0) listEl.createDiv({ cls: 'btn-hc-empty', text: 'No matching commands.' });
+			for (const command of matches.slice(0, MAX_COMMANDS_SHOWN)) {
+				this.renderCommandRow(listEl, command.name, command.id, false, feature.isHidden(command.id));
+			}
+			if (matches.length > MAX_COMMANDS_SHOWN) {
+				listEl.createDiv({ cls: 'btn-hc-empty', text: `Showing ${MAX_COMMANDS_SHOWN} of ${matches.length}. Type to narrow it down.` });
+			}
+		};
+		new Setting(el)
+			.addSearch(search => search.setPlaceholder('Search commands or plugins...').setValue(this.commandQuery)
+				.onChange(v => { this.commandQuery = v; renderList(); }))
+			.addDropdown(dd => dd
+				.addOptions({ all: 'All', visible: 'Shown', hidden: 'Hidden' })
+				.setValue(this.commandFilter)
+				.onChange(v => { this.commandFilter = v as CommandFilter; renderList(); }));
+		el.appendChild(listEl);
+		renderList();
+	}
+
+	/** One command with its ID and a hide/unhide (or remove) button. */
+	private renderCommandRow(parent: HTMLElement, name: string, id: string, notLoaded: boolean, isHidden: boolean): void {
+		const feature = this.plugin.features.hideCommands;
+		const row = parent.createDiv({ cls: 'btn-hc-row' });
+		row.toggleClass('is-hidden-command', isHidden);
+		const text = row.createDiv({ cls: 'btn-hc-text' });
+		const nameEl = text.createDiv({ cls: 'btn-hc-name', text: name });
+		if (notLoaded) nameEl.createSpan({ cls: 'btn-hc-badge', text: 'Not loaded' });
+		if (!notLoaded) text.createDiv({ cls: 'btn-hc-id', text: id });
+		const label = notLoaded ? 'Remove' : isHidden ? 'Unhide' : 'Hide';
+		row.createEl('button', { text: label }).addEventListener('click', () => {
+			void (isHidden ? feature.unhide(id) : feature.hide([id])).then(() => this.redraw());
+		});
+	}
 
 	private renderNestedProperties(el: HTMLElement): void {
 		const s = this.plugin.settings.nestedProperties;

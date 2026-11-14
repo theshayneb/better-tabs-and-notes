@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.25] - 2026-11-14
+
+- New feature: hide commands from the command palette. Hidden commands keep working from hotkeys, buttons, macros and other plugins; nothing is unregistered. In the settings, search every command and hide or unhide it, see what's hidden (commands of plugins that aren't loaded are marked "Not loaded"), or paste a list of commands to hide them all at once. Only the command palette is filtered by default, so the Hotkeys page and other plugins' command pickers still list everything; "Where to hide them: Everywhere" is there in case that doesn't work. Changes apply the next time the palette opens, and the list syncs between devices.
+
 ## [0.0.24] - 2026-11-07
 
 - New feature, from the Frontmatter Markdown Links plugin: links in properties. A property value holding several links, or a link with other text, now shows each link separately in the Properties panel. Click to open (ctrl/cmd-click or middle-click for a new tab), hover to preview, and click the text around the links to edit. The links also resolve and count as backlinks on the notes they point to.

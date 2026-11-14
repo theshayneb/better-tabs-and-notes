@@ -19,6 +19,8 @@ declare module 'obsidian' {
 		commands: {
 			executeCommandById(id: string): boolean;
 			commands: Record<string, Command | undefined>;
+			/** Every command; also feeds the Hotkeys page and other plugins' command pickers. */
+			listCommands?(): Command[];
 		};
 		viewRegistry: {
 			getTypeByExtension(extension: string): string | undefined;

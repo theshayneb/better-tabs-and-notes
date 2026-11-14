@@ -18,6 +18,7 @@ licenses whose notices are reproduced below as they require.
 | Bulk properties | [obsidian-multi-properties](https://github.com/technohiker/obsidian-multi-properties) | technohiker (fez-github) | MIT |
 | Tag renaming | [tag-wrangler](https://github.com/pjeby/tag-wrangler) | PJ Eby | ISC |
 | Links in properties | [obsidian-frontmatter-markdown-links](https://github.com/mnaoumov/obsidian-frontmatter-markdown-links) | Michael Naumov | MIT |
+| Hide commands (the approach) | [obsidian-command-block-list](https://github.com/RyotaUshio/obsidian-command-block-list) | Ryota Ushio | MIT |
 | Nested properties | [obsidian-nested-properties](https://github.com/mnaoumov/obsidian-nested-properties) | Michael Naumov | MIT |
 
 ---
@@ -276,6 +277,35 @@ right-click menu) were ported, rewritten without the original's helper libraries
 MIT License
 
 Copyright (C) 2026 by Michael Naumov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## obsidian-command-block-list
+
+Hide commands follows its approach of filtering lists of commands with
+monkey-around, without unregistering anything. The code was written anew.
+
+MIT License
+
+Copyright (c) 2024 Ryota Ushio
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

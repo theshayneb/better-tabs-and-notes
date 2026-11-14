@@ -478,6 +478,71 @@
 	font-size: var(--metadata-label-font-size, var(--font-small));
 }
 
+/* ===== Hide commands ===== */
+
+.btn-hc-list {
+	display: flex;
+	flex-direction: column;
+	max-height: 40vh;
+	margin-bottom: var(--size-4-3);
+	overflow-y: auto;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+}
+
+.btn-hc-row {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-2);
+	padding: var(--size-4-1) var(--size-4-3);
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.btn-hc-row:last-child {
+	border-bottom: none;
+}
+
+.btn-hc-text {
+	flex: 1;
+	min-width: 0;
+}
+
+.btn-hc-name {
+	overflow-wrap: anywhere;
+}
+
+.btn-hc-row.is-hidden-command .btn-hc-name {
+	color: var(--text-muted);
+}
+
+.btn-hc-id {
+	color: var(--text-faint);
+	font-family: var(--font-monospace);
+	font-size: var(--font-smallest);
+	overflow-wrap: anywhere;
+}
+
+.btn-hc-badge {
+	margin-left: var(--size-4-2);
+	padding: 0 var(--size-4-1);
+	border-radius: var(--radius-s);
+	background-color: var(--background-modifier-error);
+	color: var(--text-on-accent);
+	font-size: var(--font-smallest);
+}
+
+.btn-hc-empty {
+	padding: var(--size-4-2) var(--size-4-3);
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+.btn-hc-bulk {
+	width: 100%;
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-small);
+}
+
 /* ===== Icon picker ===== */
 
 .btn-icon-picker .btn-icon-search {

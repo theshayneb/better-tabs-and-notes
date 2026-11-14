@@ -15,6 +15,7 @@ One Obsidian plugin that replaces twelve:
 | **Tag renaming**: rename a tag, or merge it into another, everywhere | [Tag Wrangler](https://github.com/pjeby/tag-wrangler) |
 | **Links in properties**: several links in one property, each a real link and a backlink | [Frontmatter Markdown Links](https://github.com/mnaoumov/obsidian-frontmatter-markdown-links) |
 | **Nested properties**: nested properties as a collapsible, editable tree | [Nested Properties](https://github.com/mnaoumov/obsidian-nested-properties) |
+| **Hide commands**: hide commands from the command palette, keeping them working | [Command Block List](https://github.com/RyotaUshio/obsidian-command-block-list) |
 
 Every feature can be turned on or off on its own in the settings, and also
 turned off on just one device (handy for desktop-only features like compact
@@ -205,6 +206,21 @@ synced "open on start" settings of the home tab and pinned daily note apply.
   paste or remove it. In a list of objects, a field's type can be set for every
   item at once or for one item only.
 
+### Hide commands
+
+- Hide commands from the command palette by ID. Hidden commands keep working:
+  nothing is unregistered or disabled, so hotkeys, buttons (e.g. Meta Bind),
+  Commander macros and `executeCommandById` still run them.
+- In the settings: search every command (core and all plugins) and hide or
+  unhide it; see the hidden list, where commands of plugins that aren't loaded
+  are marked *Not loaded* so they can be removed; or paste a list of commands
+  ("Plugin: Command", one per line) to hide them all at once.
+- By default only the command palette is filtered, so the Hotkeys page and other
+  plugins' command pickers still list everything. If that doesn't work in your
+  Obsidian version, *Where to hide them: Everywhere* filters every list of
+  commands instead (including the Hotkeys page).
+- Changes apply the next time the palette opens; the list syncs between devices.
+
 ## Development
 
 ```
@@ -241,6 +257,7 @@ src/
     tagRename/         rename and merge tags
     frontmatterLinks/  links inside property values
     nestedProperties/  nested properties tree
+    hideCommands/      hide commands from the command palette
 tests/                 unit tests for the Obsidian-free logic
 ```
 
