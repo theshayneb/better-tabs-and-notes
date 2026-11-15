@@ -1,6 +1,8 @@
 // All settings live in the plugin's data.json. Each feature owns one section.
 
-export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'tagRename', 'frontmatterLinks', 'nestedProperties', 'hideCommands'] as const;
+import { DEFAULT_LINK_ICON_RULES, type LinkIconRule } from './features/linkIcons/linkIconRules';
+
+export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'tagRename', 'frontmatterLinks', 'nestedProperties', 'hideCommands', 'linkIcons'] as const;
 export type FeatureId = typeof FEATURE_IDS[number];
 
 // ---------------------------------------------------------------------------
@@ -229,6 +231,14 @@ export interface HideCommandsSettings {
 }
 
 // ---------------------------------------------------------------------------
+// Link icons
+
+export interface LinkIconSettings {
+	/** Which icon goes before links to which file types; the first matching rule wins. */
+	rules: LinkIconRule[];
+}
+
+// ---------------------------------------------------------------------------
 
 export interface PluginSettings {
 	features: Record<FeatureId, boolean>;
@@ -242,6 +252,7 @@ export interface PluginSettings {
 	bulkProperties: BulkPropertiesSettings;
 	nestedProperties: NestedPropertySettings;
 	hideCommands: HideCommandsSettings;
+	linkIcons: LinkIconSettings;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -258,6 +269,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		frontmatterLinks: true,
 		nestedProperties: true,
 		hideCommands: true,
+		linkIcons: true,
 	},
 	tabs: {
 		openInNewTab: true,
@@ -363,10 +375,13 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		hiddenIds: [],
 		scope: 'palette',
 	},
+	linkIcons: {
+		rules: structuredClone(DEFAULT_LINK_ICON_RULES),
+	},
 };
 
 type Section = Exclude<keyof PluginSettings, 'features'>;
-const SECTIONS: Section[] = ['tabs', 'homeTab', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'nestedProperties', 'hideCommands'];
+const SECTIONS: Section[] = ['tabs', 'homeTab', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'nestedProperties', 'hideCommands', 'linkIcons'];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);

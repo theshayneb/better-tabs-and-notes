@@ -19,6 +19,7 @@ import { TagRenameFeature } from './features/tagRename/tagRename';
 import { FrontmatterLinksFeature } from './features/frontmatterLinks/frontmatterLinks';
 import { NestedPropertiesFeature } from './features/nestedProperties/nestedProperties';
 import { HideCommandsFeature } from './features/hideCommands/hideCommands';
+import { LinkIconsFeature } from './features/linkIcons/linkIcons';
 
 const DEVICE_DISABLED_PREFIX = 'better-tabs-and-notes:disabled-on-device:';
 const DEVICE_TABS_KEY = 'better-tabs-and-notes:device-tab-settings';
@@ -46,6 +47,7 @@ export default class BetterTabsPlugin extends Plugin {
 		frontmatterLinks: FrontmatterLinksFeature;
 		nestedProperties: NestedPropertiesFeature;
 		hideCommands: HideCommandsFeature;
+		linkIcons: LinkIconsFeature;
 	};
 
 	override async onload(): Promise<void> {
@@ -64,6 +66,7 @@ export default class BetterTabsPlugin extends Plugin {
 			frontmatterLinks: new FrontmatterLinksFeature(this),
 			nestedProperties: new NestedPropertiesFeature(this),
 			hideCommands: new HideCommandsFeature(this),
+			linkIcons: new LinkIconsFeature(this),
 		};
 
 		// Register the settings tab first, so it's there even if a feature fails.
@@ -85,6 +88,7 @@ export default class BetterTabsPlugin extends Plugin {
 		// Views and code block processors can only be registered by the plugin
 		// itself, and must exist before the workspace restores saved tabs.
 		this.features.homeTab.registerPluginParts();
+		this.features.linkIcons.registerPluginParts();
 
 		for (const feature of Object.values(this.features) as Feature[]) {
 			try {

@@ -6,7 +6,8 @@ import {
 } from './settings';
 import { LEGACY_PLUGINS, importLegacySettings } from './legacyImport';
 import { FOCUS_NEW_TABS, START_PAGES, type DeviceStartupSettings, type DeviceTabSettings } from './shared/deviceSettings';
-import { FilePickerModal, FolderPickerModal, PatternEditorModal, TagPickerModal } from './features/pinnedIcons/modals';
+import { FilePickerModal, FolderPickerModal, IconPickerModal, PatternEditorModal, TagPickerModal } from './features/pinnedIcons/modals';
+import { DEFAULT_LINK_ICON_RULES, cleanRules } from './features/linkIcons/linkIconRules';
 import { RULE_TYPE_LABELS, findConflicts, ruleMatches } from './features/pinnedIcons/rules';
 import { renderIcon } from './features/pinnedIcons/pinnedIcons';
 import { cleanIds, describeHidden, matchNames, searchCommands, type CommandFilter } from './features/hideCommands/hideLogic';
@@ -62,6 +63,10 @@ const FEATURE_INFO: Record<FeatureId, { name: string; desc: string }> = {
 	hideCommands: {
 		name: 'Hide commands',
 		desc: 'Hide commands from the command palette. Hidden commands still run from hotkeys, buttons, macros and other plugins.',
+	},
+	linkIcons: {
+		name: 'Link icons',
+		desc: 'Show an icon before links to files that aren\'t notes, like PDFs, images or audio, chosen by the file type.',
 	},
 };
 
@@ -131,6 +136,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		}));
 		this.section('nestedProperties', el => this.renderNestedProperties(el));
 		this.section('hideCommands', el => this.renderHideCommands(el));
+		this.section('linkIcons', el => this.renderLinkIcons(el));
 	}
 
 	/** The start page for this device only, overriding the synced "open on start" settings. */
@@ -536,6 +542,44 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 	}
 
 	// -----------------------------------------------------------------------
+
+	private renderLinkIcons(el: HTMLElement): void {
+		const s = this.plugin.settings.linkIcons;
+		s.rules = cleanRules(s.rules);
+		const save = (redraw = false) => this.save('linkIcons', redraw);
+
+		el.createDiv({
+			cls: 'setting-item-description btn-settings-note',
+			text: 'Shown in reading view and live preview, before links like [[Paper.pdf]] (not embeds, which show the file itself). List file extensions separated by commas; the first rule listing a type wins.',
+		});
+		s.rules.forEach((rule, i) => {
+			const setting = new Setting(el).setClass('btn-link-icon-rule');
+			const iconButton = setting.controlEl.createEl('button', { cls: 'btn-link-icon-choose', attr: { 'aria-label': 'Choose icon' } });
+			renderIcon(iconButton, rule.icon || 'lucide:circle-help');
+			iconButton.addEventListener('click', () => {
+				const recent = this.plugin.settings.pinnedIcons.recentIcons;
+				new IconPickerModal(this.app, recent, icon => {
+					this.plugin.settings.pinnedIcons.recentIcons = [icon, ...recent.filter(r => r !== icon)].slice(0, 24);
+					rule.icon = icon;
+					void save(true);
+				}).open();
+			});
+			// eslint-disable-next-line obsidianmd/ui/sentence-case -- file extensions are typed in lower case
+			setting.addText(t => t.setPlaceholder('pdf, epub').setValue(rule.extensions)
+				.onChange(v => { rule.extensions = v; void save(); }));
+			setting.addExtraButton(b => b.setIcon('trash').setTooltip('Remove')
+				.onClick(() => { s.rules.splice(i, 1); void save(true); }));
+		});
+		new Setting(el)
+			.addButton(b => b.setButtonText('Add a file type').onClick(() => {
+				s.rules.push({ extensions: '', icon: 'lucide:file' });
+				void save(true);
+			}))
+			.addButton(b => b.setButtonText('Reset to defaults').onClick(() => {
+				s.rules = structuredClone(DEFAULT_LINK_ICON_RULES);
+				void save(true);
+			}));
+	}
 
 	private renderHideCommands(el: HTMLElement): void {
 		const feature = this.plugin.features.hideCommands;

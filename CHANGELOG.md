@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.26] - 2026-11-15
+
+- New feature: link icons. Links to files that aren't notes get an icon before their name, chosen by the file type, so `[[ThingIWantToRead.pdf]]` shows a document icon. Works in reading view and Live Preview; embeds are left alone. Comes with icons for PDFs, images, audio, video, EPUBs, canvases, bases, documents, spreadsheets and archives, and you can change them or add your own file types in the settings (Obsidian icons or emoji).
+
 ## [0.0.25] - 2026-11-14
 
 - New feature: hide commands from the command palette. Hidden commands keep working from hotkeys, buttons, macros and other plugins; nothing is unregistered. In the settings, search every command and hide or unhide it, see what's hidden (commands of plugins that aren't loaded are marked "Not loaded"), or paste a list of commands to hide them all at once. Only the command palette is filtered by default, so the Hotkeys page and other plugins' command pickers still list everything; "Where to hide them: Everywhere" is there in case that doesn't work. Changes apply the next time the palette opens, and the list syncs between devices.

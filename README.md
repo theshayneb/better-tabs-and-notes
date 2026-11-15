@@ -16,6 +16,7 @@ One Obsidian plugin that replaces twelve:
 | **Links in properties**: several links in one property, each a real link and a backlink | [Frontmatter Markdown Links](https://github.com/mnaoumov/obsidian-frontmatter-markdown-links) |
 | **Nested properties**: nested properties as a collapsible, editable tree | [Nested Properties](https://github.com/mnaoumov/obsidian-nested-properties) |
 | **Hide commands**: hide commands from the command palette, keeping them working | [Command Block List](https://github.com/RyotaUshio/obsidian-command-block-list) |
+| **Link icons**: an icon before links to PDFs, images and other files, by file type | (new) |
 
 Every feature can be turned on or off on its own in the settings, and also
 turned off on just one device (handy for desktop-only features like compact
@@ -221,6 +222,16 @@ synced "open on start" settings of the home tab and pinned daily note apply.
   commands instead (including the Hotkeys page).
 - Changes apply the next time the palette opens; the list syncs between devices.
 
+### Link icons
+
+- Links to files that aren't notes get an icon before their name, chosen by
+  the file type: `[[ThingIWantToRead.pdf]]` shows a document icon. Shown in
+  reading view and Live Preview (not in source mode, and not for embeds, which
+  show the file itself).
+- Comes with icons for PDFs, images, audio, video, EPUBs, canvases, bases,
+  documents, spreadsheets and archives. Change them in the settings: each rule
+  is a list of extensions and an icon (an Obsidian icon or an emoji).
+
 ## Development
 
 ```
@@ -258,6 +269,7 @@ src/
     frontmatterLinks/  links inside property values
     nestedProperties/  nested properties tree
     hideCommands/      hide commands from the command palette
+    linkIcons/         icons before links to non-note files
 tests/                 unit tests for the Obsidian-free logic
 ```
 
