@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.29] - 2026-11-15
+
+- Fix property templates adding another set of "Insert missing properties" buttons every time a note's properties refreshed. The buttons sit next to "Add property", deeper in the properties panel than where the check for existing buttons looked. Now there's always one set, and extra sets left by 0.0.27 and 0.0.28 are removed.
+
 ## [0.0.28] - 2026-11-15
 
 - Fix typing in the settings of property templates, link icons and nested properties: every keystroke redrew the open notes, which took the cursor out of the field. Those redraws now wait until you close the settings (or switch to another settings tab). Settings are still saved as you type.

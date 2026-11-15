@@ -145,7 +145,11 @@ export class PropertyTemplatesFeature extends Feature {
 	}
 
 	private renderButtons(container: HTMLElement, file: TFile | null): void {
-		let actions = container.querySelector<HTMLElement>(`:scope > .${ACTIONS_CLASS}`);
+		// The buttons sit next to "Add property", deeper inside the container: look anywhere in it,
+		// and keep only one set (earlier versions could add several).
+		const existing = Array.from(container.querySelectorAll<HTMLElement>(`.${ACTIONS_CLASS}`));
+		for (const extra of existing.slice(1)) extra.remove();
+		let actions: HTMLElement | null = existing[0] ?? null;
 		const template = file && this.settings.showButtons ? this.templateOf(file) : [];
 		const fm = file ? this.app.metadataCache.getFileCache(file)?.frontmatter : undefined;
 		const missing = template.length ? missingProperties(fm, template).length : 0;
