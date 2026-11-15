@@ -603,7 +603,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 			if (rule.properties.length) {
 				card.createDiv({
 					cls: 'setting-item-description btn-pt-columns',
-					text: 'For each property: its name, the value a note gets when it\'s inserted (optional), and the values to pick from in the dropdown (optional, the same in every note).',
+					text: 'For each property: its name, the value a note gets when it\'s inserted (optional), the values to pick from in the dropdown (optional, the same in every note), and whether to hide it in these notes (a button under the properties shows it again).',
 				});
 			}
 			rule.properties.forEach((property, j) => {
@@ -620,6 +620,13 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 							.onChange(v => { s.choices = setChoices(s.choices, property.name, v); void save(); });
 						t.inputEl.addClass('btn-pt-choices-input');
 					})
+					.addToggle(t => t.setTooltip('Hide this property in notes this rule matches')
+						.setValue(property.hidden === true)
+						.onChange(v => {
+							if (v) property.hidden = true;
+							else delete property.hidden;
+							void save();
+						}))
 					.addExtraButton(b => b.setIcon('arrow-up').setTooltip('Move up').onClick(() => move(rule.properties, j, -1)))
 					.addExtraButton(b => b.setIcon('arrow-down').setTooltip('Move down').onClick(() => move(rule.properties, j, 1)))
 					.addExtraButton(b => b.setIcon('x').setTooltip('Remove').onClick(() => { rule.properties.splice(j, 1); void save(true); }));

@@ -8,18 +8,21 @@ import { Feature } from '../../feature';
 import type { PropertyTemplateSettings } from '../../settings';
 import { confirm } from '../../shared/confirm';
 import {
-	choicesFor, insertMissing, isSorted, missingProperties, sortProperties, templateFor, templateValue,
+	choicesFor, hiddenNames, insertMissing, isSorted, missingProperties, sortProperties, templateFor, templateValue,
 	type TemplateProperty,
 } from './templateLogic';
 
 const ACTIONS_CLASS = 'btn-pt-actions';
 const CHOICES_CLASS = 'btn-pt-choices';
+const HIDDEN_CLASS = 'btn-pt-hidden';
 
 export class PropertyTemplatesFeature extends Feature {
 	readonly id = 'propertyTemplates';
 	readonly name = 'Property templates';
 
 	private refreshTimer: number | null = null;
+	/** Notes (by path) whose hidden properties are shown for now. */
+	private revealed = new Set<string>();
 
 	get settings(): PropertyTemplateSettings {
 		return this.plugin.settings.propertyTemplates;
@@ -44,6 +47,7 @@ export class PropertyTemplatesFeature extends Feature {
 		this.observer?.disconnect();
 		this.observer = null;
 		for (const el of activeDocument.querySelectorAll(`.${ACTIONS_CLASS}, .${CHOICES_CLASS}`)) el.remove();
+		for (const el of activeDocument.querySelectorAll(`.${HIDDEN_CLASS}`)) el.removeClass(HIDDEN_CLASS);
 	}
 
 	override onSettingsChange(): void {
@@ -160,11 +164,13 @@ export class PropertyTemplatesFeature extends Feature {
 		const existing = Array.from(container.querySelectorAll<HTMLElement>(`.${ACTIONS_CLASS}`));
 		for (const extra of existing.slice(1)) extra.remove();
 		let actions: HTMLElement | null = existing[0] ?? null;
-		const template = file && this.settings.showButtons ? this.templateOf(file) : [];
+		const fullTemplate = file ? this.templateOf(file) : [];
+		const template = this.settings.showButtons ? fullTemplate : [];
 		const fm = file ? this.app.metadataCache.getFileCache(file)?.frontmatter : undefined;
 		const missing = template.length ? missingProperties(fm, template).length : 0;
 		const unsorted = template.length > 0 && !isSorted(fm, template);
-		if (!file || (!missing && !unsorted)) {
+		const hiddenCount = this.applyHidden(container, file, fullTemplate);
+		if (!file || (!missing && !unsorted && !hiddenCount)) {
 			actions?.remove();
 			return;
 		}
@@ -179,6 +185,33 @@ export class PropertyTemplatesFeature extends Feature {
 			this.renderButton(actions, 'list-plus', `Insert ${missing} missing propert${missing === 1 ? 'y' : 'ies'}`, () => this.insert(file, true));
 		}
 		if (unsorted) this.renderButton(actions, 'arrow-up-down', 'Reorder properties', () => this.sort(file));
+		if (hiddenCount) {
+			const shown = this.revealed.has(file.path);
+			const plural = hiddenCount === 1 ? 'y' : 'ies';
+			this.renderButton(actions, shown ? 'eye-off' : 'eye',
+				shown ? `Hide ${hiddenCount} propert${plural} again` : `Show ${hiddenCount} hidden propert${plural}`,
+				() => {
+					if (shown) this.revealed.delete(file.path);
+					else this.revealed.add(file.path);
+					return Promise.resolve();
+				});
+		}
+	}
+
+	/**
+	 * Hide the rows of properties the note's rules hide (unless they're shown
+	 * for now). Returns how many of the note's properties are hidden ones.
+	 */
+	private applyHidden(container: HTMLElement, file: TFile | null, template: TemplateProperty[]): number {
+		const hidden = hiddenNames(template);
+		const reveal = file !== null && this.revealed.has(file.path);
+		let count = 0;
+		for (const row of container.querySelectorAll<HTMLElement>('.metadata-property[data-property-key]')) {
+			const isHidden = hidden.has((row.dataset.propertyKey ?? '').toLowerCase());
+			if (isHidden) count++;
+			row.toggleClass(HIDDEN_CLASS, isHidden && !reveal);
+		}
+		return count;
 	}
 
 	private renderButton(parent: HTMLElement, icon: string, text: string, run: () => Promise<unknown>): void {

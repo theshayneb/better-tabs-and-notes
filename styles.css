@@ -625,6 +625,10 @@
 	padding-top: var(--size-4-2);
 }
 
+.metadata-property.btn-pt-hidden {
+	display: none;
+}
+
 /* ===== Icon picker ===== */
 
 .btn-icon-picker .btn-icon-search {

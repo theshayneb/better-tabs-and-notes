@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-	choicesFor, insertMissing, setChoices, isSorted, missingProperties, sortProperties, templateFor, templateValue,
+	choicesFor, hiddenNames, insertMissing, setChoices, isSorted, missingProperties, sortProperties, templateFor, templateValue,
 	type TemplateRule,
 } from '../src/features/propertyTemplates/templateLogic';
 
@@ -18,6 +18,20 @@ describe('property templates: rules', () => {
 			{ name: 'author', value: '' }, { name: 'status', value: 'to read' }, { name: 'rating', value: '' }, { name: 'subgenre', value: 'space' },
 		]);
 		expect(templateFor(rules, { basename: 'x', path: 'Other/x.md', tags: [] })).toEqual([]);
+	});
+
+	it('hides a property when any matching rule hides it', () => {
+		const hiding: TemplateRule[] = [
+			{ type: 'folder', match: 'Books', properties: [{ name: 'status', value: '' }, { name: 'cover', value: '', hidden: true }] },
+			{ type: 'tag', match: 'scifi', properties: [{ name: 'Status', value: '', hidden: true }] },
+			{ type: 'tag', match: 'other', properties: [{ name: 'author', value: '', hidden: true }] },
+		];
+		expect(templateFor(hiding, book)).toEqual([
+			{ name: 'status', value: '', hidden: true }, { name: 'cover', value: '', hidden: true },
+		]);
+		expect([...hiddenNames(templateFor(hiding, book))]).toEqual(['status', 'cover']);
+		// The rule objects themselves are left alone.
+		expect(hiding[0].properties[0].hidden).toBeUndefined();
 	});
 });
 

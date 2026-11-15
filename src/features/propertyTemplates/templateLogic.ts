@@ -9,6 +9,8 @@ export interface TemplateProperty {
 	name: string;
 	/** Value for a newly inserted property; empty leaves it empty. */
 	value: string;
+	/** Hide the property in the Properties panel of notes the rule matches. */
+	hidden?: boolean;
 }
 
 export interface TemplateRule {
@@ -36,12 +38,22 @@ export function templateFor(rules: TemplateRule[], file: FileInfo): TemplateProp
 		if (!ruleMatches({ type: rule.type, match: rule.match, icon: '' }, file)) continue;
 		for (const property of rule.properties) {
 			const name = property.name.trim();
-			if (!name || seen.has(key(name))) continue;
+			if (!name) continue;
+			if (seen.has(key(name))) {
+				// Any matching rule that hides a property hides it.
+				if (property.hidden) result.find(p => key(p.name) === key(name))!.hidden = true;
+				continue;
+			}
 			seen.add(key(name));
-			result.push({ name, value: property.value });
+			result.push(property.hidden ? { name, value: property.value, hidden: true } : { name, value: property.value });
 		}
 	}
 	return result;
+}
+
+/** The (lowercase) names of the template's hidden properties. */
+export function hiddenNames(template: TemplateProperty[]): Set<string> {
+	return new Set(template.filter(p => p.hidden).map(p => key(p.name)));
 }
 
 /** The note's actual key for a property name (properties match regardless of case), or undefined. */

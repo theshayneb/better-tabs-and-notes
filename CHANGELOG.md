@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.33] - 2026-11-15
+
+### Added
+- Property templates: a switch on each property in a rule hides that property in the Properties panel of the notes the rule matches. The property stays in the note; "Show N hidden properties" under the panel shows them again.
+
 ## [0.0.32] - 2026-11-15
 
 ### Changed

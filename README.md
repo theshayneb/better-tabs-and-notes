@@ -249,6 +249,9 @@ synced "open on start" settings of the home tab and pinned daily note apply.
 - **Values to pick from**: give a property (vault-wide) a list of values, and a
   dropdown button next to it offers them. You can still type anything else; for
   list properties a value is added or removed.
+- **Hide** (the switch on each property in a rule): the property is hidden in
+  the Properties panel of notes that rule matches, but stays in the note.
+  **Show N hidden properties** under the panel shows them again for that note.
 
 ## Development
 
