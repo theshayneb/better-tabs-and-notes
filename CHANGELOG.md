@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.32] - 2026-11-15
+
+### Changed
+- Property templates: the dropdown arrow for values to pick from now sits at the start of the value, next to the property name, instead of at the far right.
+
 ## [0.0.31] - 2026-11-15
 
 ### Fixed

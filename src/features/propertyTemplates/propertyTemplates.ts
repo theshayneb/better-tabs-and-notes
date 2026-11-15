@@ -260,6 +260,8 @@ export class PropertyTemplatesFeature extends Feature {
 			}
 			if (button) continue;
 			button = valueEl.createDiv({ cls: `${CHOICES_CLASS} clickable-icon`, attr: { 'aria-label': 'Choose a value' } });
+			// At the start of the value, right next to the property name, rather than far off on the right.
+			valueEl.prepend(button);
 			setIcon(button, 'chevron-down');
 			button.addEventListener('mousedown', evt => evt.preventDefault());
 			button.addEventListener('click', evt => {
