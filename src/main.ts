@@ -20,6 +20,7 @@ import { FrontmatterLinksFeature } from './features/frontmatterLinks/frontmatter
 import { NestedPropertiesFeature } from './features/nestedProperties/nestedProperties';
 import { HideCommandsFeature } from './features/hideCommands/hideCommands';
 import { LinkIconsFeature } from './features/linkIcons/linkIcons';
+import { PropertyTemplatesFeature } from './features/propertyTemplates/propertyTemplates';
 
 const DEVICE_DISABLED_PREFIX = 'better-tabs-and-notes:disabled-on-device:';
 const DEVICE_TABS_KEY = 'better-tabs-and-notes:device-tab-settings';
@@ -48,6 +49,7 @@ export default class BetterTabsPlugin extends Plugin {
 		nestedProperties: NestedPropertiesFeature;
 		hideCommands: HideCommandsFeature;
 		linkIcons: LinkIconsFeature;
+		propertyTemplates: PropertyTemplatesFeature;
 	};
 
 	override async onload(): Promise<void> {
@@ -67,6 +69,7 @@ export default class BetterTabsPlugin extends Plugin {
 			nestedProperties: new NestedPropertiesFeature(this),
 			hideCommands: new HideCommandsFeature(this),
 			linkIcons: new LinkIconsFeature(this),
+			propertyTemplates: new PropertyTemplatesFeature(this),
 		};
 
 		// Register the settings tab first, so it's there even if a feature fails.

@@ -1,8 +1,9 @@
 // All settings live in the plugin's data.json. Each feature owns one section.
 
 import { DEFAULT_LINK_ICON_RULES, type LinkIconRule } from './features/linkIcons/linkIconRules';
+import type { PropertyChoices, TemplateRule } from './features/propertyTemplates/templateLogic';
 
-export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'tagRename', 'frontmatterLinks', 'nestedProperties', 'hideCommands', 'linkIcons'] as const;
+export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'tagRename', 'frontmatterLinks', 'nestedProperties', 'hideCommands', 'linkIcons', 'propertyTemplates'] as const;
 export type FeatureId = typeof FEATURE_IDS[number];
 
 // ---------------------------------------------------------------------------
@@ -239,6 +240,18 @@ export interface LinkIconSettings {
 }
 
 // ---------------------------------------------------------------------------
+// Property templates
+
+export interface PropertyTemplateSettings {
+	/** Properties for notes matching each rule, in order; all matching rules combine. */
+	rules: TemplateRule[];
+	/** Values offered for a property, vault-wide. */
+	choices: PropertyChoices[];
+	/** Show "Insert missing properties" and "Reorder properties" under a note's properties. */
+	showButtons: boolean;
+}
+
+// ---------------------------------------------------------------------------
 
 export interface PluginSettings {
 	features: Record<FeatureId, boolean>;
@@ -253,6 +266,7 @@ export interface PluginSettings {
 	nestedProperties: NestedPropertySettings;
 	hideCommands: HideCommandsSettings;
 	linkIcons: LinkIconSettings;
+	propertyTemplates: PropertyTemplateSettings;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -270,6 +284,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		nestedProperties: true,
 		hideCommands: true,
 		linkIcons: true,
+		propertyTemplates: true,
 	},
 	tabs: {
 		openInNewTab: true,
@@ -378,10 +393,15 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	linkIcons: {
 		rules: structuredClone(DEFAULT_LINK_ICON_RULES),
 	},
+	propertyTemplates: {
+		rules: [],
+		choices: [],
+		showButtons: true,
+	},
 };
 
 type Section = Exclude<keyof PluginSettings, 'features'>;
-const SECTIONS: Section[] = ['tabs', 'homeTab', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'nestedProperties', 'hideCommands', 'linkIcons'];
+const SECTIONS: Section[] = ['tabs', 'homeTab', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'nestedProperties', 'hideCommands', 'linkIcons', 'propertyTemplates'];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);

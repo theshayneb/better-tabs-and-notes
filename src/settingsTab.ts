@@ -68,6 +68,10 @@ const FEATURE_INFO: Record<FeatureId, { name: string; desc: string }> = {
 		name: 'Link icons',
 		desc: 'Show an icon before links to files that aren\'t notes, like PDFs, images or audio, chosen by the file type.',
 	},
+	propertyTemplates: {
+		name: 'Property templates',
+		desc: 'Give notes in a folder, with a tag or with a matching name a set of properties in a set order, and give properties a list of values to pick from.',
+	},
 };
 
 const COLOR_OPTIONS: Record<ColorChoice, string> = { default: 'Theme default', accent: 'Accent color', custom: 'Custom' };
@@ -137,6 +141,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		this.section('nestedProperties', el => this.renderNestedProperties(el));
 		this.section('hideCommands', el => this.renderHideCommands(el));
 		this.section('linkIcons', el => this.renderLinkIcons(el));
+		this.section('propertyTemplates', el => this.renderPropertyTemplates(el));
 	}
 
 	/** The start page for this device only, overriding the synced "open on start" settings. */
@@ -542,6 +547,91 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 	}
 
 	// -----------------------------------------------------------------------
+
+	private renderPropertyTemplates(el: HTMLElement): void {
+		const s = this.plugin.settings.propertyTemplates;
+		if (!Array.isArray(s.rules)) s.rules = [];
+		if (!Array.isArray(s.choices)) s.choices = [];
+		const save = (redraw = false) => this.save('propertyTemplates', redraw);
+		const move = <T>(list: T[], i: number, by: number) => {
+			const j = i + by;
+			if (j < 0 || j >= list.length) return;
+			[list[i], list[j]] = [list[j], list[i]];
+			void save(true);
+		};
+
+		// Property names Obsidian knows, offered while typing.
+		const datalistId = 'btn-pt-property-names';
+		const datalist = el.createEl('datalist', { attr: { id: datalistId } });
+		for (const info of Object.values(this.app.metadataCache.getAllPropertyInfos?.() ?? {})) {
+			datalist.createEl('option', { attr: { value: info.name } });
+		}
+		const nameInput = (input: HTMLInputElement) => input.setAttr('list', datalistId);
+
+		el.createDiv({
+			cls: 'setting-item-description btn-settings-note',
+			text: 'Under a note\'s properties, "Insert missing properties" adds the ones its rules list that it doesn\'t have yet (existing ones are never changed) and "Reorder properties" puts them in the rules\' order, leaving any others after them. Every rule that matches a note counts, the first rule first. Right-click a folder to do either for all its notes.',
+		});
+		new Setting(el).setName('Show the buttons under properties')
+			.addToggle(t => t.setValue(s.showButtons).onChange(v => { s.showButtons = v; void save(); }));
+
+		new Setting(el).setName('Rules').setHeading();
+		if (s.rules.length === 0) el.createDiv({ cls: 'btn-hc-empty', text: 'No rules yet.' });
+		s.rules.forEach((rule, i) => {
+			if (!Array.isArray(rule.properties)) rule.properties = [];
+			const card = el.createDiv({ cls: 'btn-pt-rule' });
+			new Setting(card).setName(`Rule ${i + 1}`)
+				.addDropdown(dd => dd.addOptions(RULE_TYPE_LABELS).setValue(rule.type)
+					.onChange(v => { rule.type = v as typeof rule.type; void save(); }))
+				.addText(t => t.setPlaceholder(rule.type === 'folder' ? 'Folder/path' : rule.type === 'tag' ? 'Tag' : 'Name or pattern')
+					.setValue(rule.match).onChange(v => { rule.match = v.trim(); void save(); }))
+				.addExtraButton(b => b.setIcon('folder').setTooltip('Choose a folder or tag').onClick(() => {
+					const done = (match: string) => { rule.match = match; void save(true); };
+					if (rule.type === 'tag') new TagPickerModal(this.app, done).open();
+					else new FolderPickerModal(this.app, f => { rule.type = 'folder'; done(f.path); }).open();
+				}))
+				.addExtraButton(b => b.setIcon('arrow-up').setTooltip('Move up').onClick(() => move(s.rules, i, -1)))
+				.addExtraButton(b => b.setIcon('arrow-down').setTooltip('Move down').onClick(() => move(s.rules, i, 1)))
+				.addExtraButton(b => b.setIcon('trash').setTooltip('Remove rule').onClick(() => { s.rules.splice(i, 1); void save(true); }));
+			rule.properties.forEach((property, j) => {
+				new Setting(card).setClass('btn-pt-property')
+					.addText(t => {
+						t.setPlaceholder('Property').setValue(property.name).onChange(v => { property.name = v; void save(); });
+						nameInput(t.inputEl);
+					})
+					.addText(t => t.setPlaceholder('Value when added (optional)').setValue(property.value)
+						.onChange(v => { property.value = v; void save(); }))
+					.addExtraButton(b => b.setIcon('arrow-up').setTooltip('Move up').onClick(() => move(rule.properties, j, -1)))
+					.addExtraButton(b => b.setIcon('arrow-down').setTooltip('Move down').onClick(() => move(rule.properties, j, 1)))
+					.addExtraButton(b => b.setIcon('x').setTooltip('Remove').onClick(() => { rule.properties.splice(j, 1); void save(true); }));
+			});
+			new Setting(card).addButton(b => b.setButtonText('Add property').onClick(() => {
+				rule.properties.push({ name: '', value: '' });
+				void save(true);
+			}));
+		});
+		new Setting(el).addButton(b => b.setButtonText('Add rule').setCta().onClick(() => {
+			s.rules.push({ type: 'folder', match: '', properties: [] });
+			void save(true);
+		}));
+
+		new Setting(el).setName('Values to pick from').setHeading()
+			.setDesc('A dropdown button next to these properties offers the values, separated by commas. You can still type anything else. For list properties, picking a value adds or removes it.');
+		s.choices.forEach((choice, i) => {
+			new Setting(el).setClass('btn-pt-property')
+				.addText(t => {
+					t.setPlaceholder('Property').setValue(choice.property).onChange(v => { choice.property = v; void save(); });
+					nameInput(t.inputEl);
+				})
+				.addText(t => t.setPlaceholder('To read, reading, done').setValue(choice.options)
+					.onChange(v => { choice.options = v; void save(); }))
+				.addExtraButton(b => b.setIcon('x').setTooltip('Remove').onClick(() => { s.choices.splice(i, 1); void save(true); }));
+		});
+		new Setting(el).addButton(b => b.setButtonText('Add a property with values').onClick(() => {
+			s.choices.push({ property: '', options: '' });
+			void save(true);
+		}));
+	}
 
 	private renderLinkIcons(el: HTMLElement): void {
 		const s = this.plugin.settings.linkIcons;

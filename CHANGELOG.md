@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.27] - 2026-11-15
+
+- New feature: property templates. Rules by folder, tag or name list the properties a note should have, in order, with optional starting values; every matching rule counts, the first first. Next to "Add property", "Insert N missing properties" adds the missing ones in the right places without changing existing ones, and "Reorder properties" puts properties in the rules' order, leaving others after them. Also as commands for the current note and from a folder's right-click menu.
+- Property templates can also give a property a list of values: a dropdown button next to it offers them, and you can still type anything else.
+
 ## [0.0.26] - 2026-11-15
 
 - New feature: link icons. Links to files that aren't notes get an icon before their name, chosen by the file type, so `[[ThingIWantToRead.pdf]]` shows a document icon. Works in reading view and Live Preview; embeds are left alone. Comes with icons for PDFs, images, audio, video, EPUBs, canvases, bases, documents, spreadsheets and archives, and you can change them or add your own file types in the settings (Obsidian icons or emoji).

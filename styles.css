@@ -572,6 +572,43 @@
 	height: var(--icon-s);
 }
 
+/* ===== Property templates ===== */
+
+/* Sits on the same line as Obsidian's "Add property" button, styled like it. */
+.btn-pt-actions {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: var(--size-4-1);
+	vertical-align: bottom;
+}
+
+.btn-pt-choices {
+	flex-shrink: 0;
+	align-self: center;
+	padding: var(--size-2-1);
+	color: var(--text-faint);
+}
+
+.btn-pt-choices svg {
+	width: var(--icon-xs);
+	height: var(--icon-xs);
+}
+
+.btn-pt-rule {
+	margin-bottom: var(--size-4-3);
+	padding: 0 var(--size-4-3);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+}
+
+.btn-pt-property .setting-item-info {
+	display: none;
+}
+
+.btn-pt-property .setting-item-control {
+	justify-content: flex-start;
+}
+
 /* ===== Icon picker ===== */
 
 .btn-icon-picker .btn-icon-search {

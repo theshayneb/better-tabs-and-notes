@@ -19,6 +19,7 @@ licenses whose notices are reproduced below as they require.
 | Tag renaming | [tag-wrangler](https://github.com/pjeby/tag-wrangler) | PJ Eby | ISC |
 | Links in properties | [obsidian-frontmatter-markdown-links](https://github.com/mnaoumov/obsidian-frontmatter-markdown-links) | Michael Naumov | MIT |
 | Hide commands (the approach) | [obsidian-command-block-list](https://github.com/RyotaUshio/obsidian-command-block-list) | Ryota Ushio | MIT |
+| Property templates (the idea only; no code was copied) | [fileclass](https://github.com/mdelobelle/fileclass) | mdelobelle | MIT |
 | Nested properties | [obsidian-nested-properties](https://github.com/mnaoumov/obsidian-nested-properties) | Michael Naumov | MIT |
 
 ---

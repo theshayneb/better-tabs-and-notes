@@ -17,6 +17,7 @@ One Obsidian plugin that replaces twelve:
 | **Nested properties**: nested properties as a collapsible, editable tree | [Nested Properties](https://github.com/mnaoumov/obsidian-nested-properties) |
 | **Hide commands**: hide commands from the command palette, keeping them working | [Command Block List](https://github.com/RyotaUshio/obsidian-command-block-list) |
 | **Link icons**: an icon before links to PDFs, images and other files, by file type | (new) |
+| **Property templates**: properties by folder or tag, inserted and ordered with a click, and values to pick from | Part of [Fileclass](https://github.com/mdelobelle/fileclass) (new code) |
 
 Every feature can be turned on or off on its own in the settings, and also
 turned off on just one device (handy for desktop-only features like compact
@@ -232,6 +233,22 @@ synced "open on start" settings of the home tab and pinned daily note apply.
   documents, spreadsheets and archives. Change them in the settings: each rule
   is a list of extensions and an icon (an Obsidian icon or an emoji).
 
+### Property templates
+
+- Rules by folder, tag or name (the same kinds as pinned tab icons) list the
+  properties a note should have, in order, each with an optional starting value.
+  Every rule that matches a note counts, the first rule first.
+- Under a note's properties, next to *Add property*, **Insert N missing
+  properties** adds the ones it doesn't have yet in the right places (existing
+  properties are never changed, even empty ones), and **Reorder properties**
+  puts them in the rules' order, leaving any others after them. Each button only
+  shows when there's something to do.
+- The same from the command palette for the current note, or for every note in
+  a folder from its right-click menu.
+- **Values to pick from**: give a property (vault-wide) a list of values, and a
+  dropdown button next to it offers them. You can still type anything else; for
+  list properties a value is added or removed.
+
 ## Development
 
 ```
@@ -270,6 +287,7 @@ src/
     nestedProperties/  nested properties tree
     hideCommands/      hide commands from the command palette
     linkIcons/         icons before links to non-note files
+    propertyTemplates/ property templates and value choices
 tests/                 unit tests for the Obsidian-free logic
 ```
 
