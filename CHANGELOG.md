@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.31] - 2026-11-15
+
+### Fixed
+- Property templates: the dropdown arrow for values to pick from didn't show. It is now added to the property rows directly (not through Obsidian's property drawing), so it shows for text and list properties alike, and is easier to see.
+
 ## [0.0.30] - 2026-11-15
 
 - Property templates: each property in a rule now has three fields, labelled: its name, the starting value a note gets when it's inserted, and the values to pick from in the dropdown. Before, only the starting value sat next to the name, so a list of choices typed there was inserted into every note in full; the values to pick from were in a separate section further down, which still exists for properties no rule lists.

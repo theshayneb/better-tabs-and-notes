@@ -586,7 +586,7 @@
 	flex-shrink: 0;
 	align-self: center;
 	padding: var(--size-2-1);
-	color: var(--text-faint);
+	color: var(--text-muted);
 }
 
 .btn-pt-choices svg {

@@ -3,26 +3,23 @@
 // them in order; properties can offer a list of values to pick from.
 // Inspired by Fileclass by mdelobelle (MIT); see NOTICE.md.
 
-import { MarkdownView, Menu, Notice, TFile, TFolder, setIcon, type Command, type PropertyRenderContext, type PropertyWidget, type TAbstractFile } from 'obsidian';
-import { around } from 'monkey-around';
+import { MarkdownView, Menu, Notice, TFile, TFolder, setIcon, type Command, type TAbstractFile } from 'obsidian';
 import { Feature } from '../../feature';
 import type { PropertyTemplateSettings } from '../../settings';
 import { confirm } from '../../shared/confirm';
-import { redrawProperties } from '../../shared/properties';
 import {
 	choicesFor, insertMissing, isSorted, missingProperties, sortProperties, templateFor, templateValue,
 	type TemplateProperty,
 } from './templateLogic';
 
 const ACTIONS_CLASS = 'btn-pt-actions';
+const CHOICES_CLASS = 'btn-pt-choices';
 
 export class PropertyTemplatesFeature extends Feature {
 	readonly id = 'propertyTemplates';
 	readonly name = 'Property templates';
 
 	private refreshTimer: number | null = null;
-	/** A redraw of the properties panels held back while the settings are open. */
-	private redrawPending = false;
 
 	get settings(): PropertyTemplateSettings {
 		return this.plugin.settings.propertyTemplates;
@@ -37,26 +34,21 @@ export class PropertyTemplatesFeature extends Feature {
 		this.registerEvent(this.app.workspace.on('file-menu', (menu, file) => {
 			if (file instanceof TFolder) this.addFolderItems(menu, file);
 		}));
-		this.patchWidgets();
+		// Obsidian redraws property values without telling anyone: re-add the dropdown buttons then.
+		this.observePanels();
 		this.app.workspace.onLayoutReady(later);
 	}
 
 	override onunload(): void {
 		if (this.refreshTimer !== null) window.clearTimeout(this.refreshTimer);
-		for (const el of activeDocument.querySelectorAll(`.${ACTIONS_CLASS}`)) el.remove();
+		this.observer?.disconnect();
+		this.observer = null;
+		for (const el of activeDocument.querySelectorAll(`.${ACTIONS_CLASS}, .${CHOICES_CLASS}`)) el.remove();
 	}
 
 	override onSettingsChange(): void {
+		// Only touches the buttons in the notes, so it's safe while typing in the settings.
 		this.scheduleRefresh();
-		// Redrawing the properties panels while typing in the settings would take the cursor away.
-		if (this.plugin.settingsOpen) this.redrawPending = true;
-		else redrawProperties(this.app);
-	}
-
-	override onSettingsClosed(): void {
-		if (!this.redrawPending) return;
-		this.redrawPending = false;
-		redrawProperties(this.app);
 	}
 
 	override commands(): Command[] {
@@ -125,6 +117,23 @@ export class PropertyTemplatesFeature extends Feature {
 	// Buttons under the properties
 	// -----------------------------------------------------------------------
 
+	private observer: MutationObserver | null = null;
+
+	private observePanels(): void {
+		const ours = (node: Node) => node instanceof HTMLElement && (node.hasClass(ACTIONS_CLASS) || node.hasClass(CHOICES_CLASS) || node.closest(`.${ACTIONS_CLASS}`) !== null);
+		this.observer = new MutationObserver(mutations => {
+			for (const m of mutations) {
+				const target = m.target instanceof HTMLElement ? m.target : m.target.parentElement;
+				if (!target?.closest('.metadata-container') || ours(m.target)) continue;
+				const changed = [...Array.from(m.addedNodes), ...Array.from(m.removedNodes)];
+				if (changed.length && changed.every(ours)) continue;
+				this.scheduleRefresh();
+				return;
+			}
+		});
+		this.observer.observe(this.app.workspace.containerEl, { childList: true, subtree: true });
+	}
+
 	private scheduleRefresh(): void {
 		if (this.refreshTimer !== null) window.clearTimeout(this.refreshTimer);
 		// After Obsidian has redrawn the properties.
@@ -140,6 +149,7 @@ export class PropertyTemplatesFeature extends Feature {
 			if (!(view instanceof MarkdownView)) continue;
 			for (const container of view.containerEl.querySelectorAll<HTMLElement>('.metadata-container')) {
 				this.renderButtons(container, view.file);
+				if (view.file) this.renderChoiceButtons(container, view.file);
 			}
 		}
 	}
@@ -232,66 +242,52 @@ export class PropertyTemplatesFeature extends Feature {
 	// Choices
 	// -----------------------------------------------------------------------
 
-	/** Add a dropdown button to text and list properties that have choices. Typing still works as usual. */
-	private patchWidgets(): void {
-		const widgets = this.app.metadataTypeManager?.registeredTypeWidgets;
-		if (!widgets) return;
-		const decorate = (el: HTMLElement, value: unknown, context: PropertyRenderContext, list: boolean) => {
-			try {
-				this.addChoiceButton(el, value, context, list);
-			} catch (e) {
-				console.error('Better Tabs and Notes: couldn\'t add property choices', e);
+	/**
+	 * Add a dropdown button to each property in the panel that has values to
+	 * pick from. Works on the panel's rows rather than Obsidian's property
+	 * widgets, so it keeps working whatever draws the values. Typing still works.
+	 */
+	private renderChoiceButtons(container: HTMLElement, file: TFile): void {
+		for (const row of container.querySelectorAll<HTMLElement>('.metadata-property[data-property-key]')) {
+			const valueEl = row.querySelector<HTMLElement>(':scope > .metadata-property-value');
+			if (!valueEl) continue;
+			const name = row.querySelector<HTMLInputElement>('.metadata-property-key-input')?.value || row.dataset.propertyKey || '';
+			const options = name ? choicesFor(this.settings.choices, name) : [];
+			let button = valueEl.querySelector<HTMLElement>(`:scope > .${CHOICES_CLASS}`);
+			if (options.length === 0) {
+				button?.remove();
+				continue;
 			}
-		};
-		for (const [type, list] of [['text', false], ['multitext', true]] as const) {
-			const widget = widgets[type];
-			if (!widget) continue;
-			this.register(around(widget, {
-				render(original) {
-					return function (this: PropertyWidget, el: HTMLElement, value: unknown, context: PropertyRenderContext) {
-						const result = original.call(this, el, value, context);
-						decorate(el, value, context, list);
-						return result;
-					};
-				},
-			}));
+			if (button) continue;
+			button = valueEl.createDiv({ cls: `${CHOICES_CLASS} clickable-icon`, attr: { 'aria-label': 'Choose a value' } });
+			setIcon(button, 'chevron-down');
+			button.addEventListener('mousedown', evt => evt.preventDefault());
+			button.addEventListener('click', evt => {
+				evt.preventDefault();
+				evt.stopPropagation();
+				this.showChoices(evt, file, name);
+			});
 		}
-		redrawProperties(this.app);
-		// Registered after the patches, so it runs once they're removed.
-		this.register(() => redrawProperties(this.app));
 	}
 
-	private addChoiceButton(el: HTMLElement, value: unknown, context: PropertyRenderContext, list: boolean): void {
-		const options = choicesFor(this.settings.choices, context.key);
-		if (options.length === 0) return;
-		let current = value;
-		const button = el.createDiv({ cls: 'btn-pt-choices clickable-icon', attr: { 'aria-label': 'Choose a value' } });
-		setIcon(button, 'chevron-down');
-		button.addEventListener('click', evt => {
-			evt.preventDefault();
-			evt.stopPropagation();
-			const menu = new Menu();
-			const chosen = list
-				? new Set((Array.isArray(current) ? current : []).map(String))
-				: new Set([typeof current === 'string' ? current : '']);
-			for (const option of options) {
-				menu.addItem(item => item.setTitle(option).setChecked(chosen.has(option)).onClick(() => {
-					if (list) {
-						const items = (Array.isArray(current) ? current : []).map(String);
-						current = chosen.has(option) ? items.filter(i => i !== option) : [...items, option];
-					} else {
-						current = option;
-						// Show it straight away; Obsidian saves it through onChange.
-						const input = el.querySelector<HTMLElement>('[contenteditable], input');
-						if (input instanceof HTMLInputElement) input.value = option;
-						else if (input) input.textContent = option;
-					}
-					context.onChange(current);
-					// Obsidian doesn't redraw list pills changed from outside its own input.
-					if (list) window.setTimeout(() => redrawProperties(this.app), 50);
-				}));
-			}
-			menu.showAtMouseEvent(evt);
-		});
+	private showChoices(evt: MouseEvent, file: TFile, name: string): void {
+		const options = choicesFor(this.settings.choices, name);
+		const fm = this.app.metadataCache.getFileCache(file)?.frontmatter ?? {};
+		const key = Object.keys(fm).find(k => k.toLowerCase() === name.toLowerCase()) ?? name;
+		const current: unknown = fm[key];
+		const list = Array.isArray(current) || this.propertyType(key) === 'multitext';
+		const items = (Array.isArray(current) ? current : current == null || current === '' ? [] : [current]).map(String);
+		const chosen = new Set(list ? items : [typeof current === 'string' ? current : '']);
+		const menu = new Menu();
+		for (const option of options) {
+			menu.addItem(item => item.setTitle(option).setChecked(chosen.has(option)).onClick(() => {
+				const next = list ? (chosen.has(option) ? items.filter(i => i !== option) : [...items, option]) : option;
+				void this.app.fileManager.processFrontMatter(file, (data: Record<string, unknown>) => {
+					const actual = Object.keys(data).find(k => k.toLowerCase() === name.toLowerCase()) ?? key;
+					data[actual] = next;
+				}).then(() => this.scheduleRefresh());
+			}));
+		}
+		menu.showAtMouseEvent(evt);
 	}
 }
