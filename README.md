@@ -246,9 +246,12 @@ synced "open on start" settings of the home tab and pinned daily note apply.
   shows when there's something to do.
 - The same from the command palette for the current note, or for every note in
   a folder from its right-click menu.
-- **Values to pick from**: give a property (vault-wide) a list of values, and a
-  dropdown button next to it offers them. You can still type anything else; for
-  list properties a value is added or removed.
+- **Values to pick from**: give a property in a rule a list of values, and a
+  dropdown button next to it offers them in the notes that rule matches, so
+  *Genre* can offer different values for books and films. If several matching
+  rules give values, the first one's are used. Values in "Values to pick from in
+  every note" apply to any note no matching rule gives values for. You can still
+  type anything else; for list properties a value is added or removed.
 - **Hide** (the switch on each property in a rule): the property is hidden in
   the Properties panel of notes that rule matches, but stays in the note.
   **Show N hidden properties** under the panel shows them again for that note.

@@ -8,7 +8,6 @@ import { LEGACY_PLUGINS, importLegacySettings } from './legacyImport';
 import { FOCUS_NEW_TABS, START_PAGES, type DeviceStartupSettings, type DeviceTabSettings } from './shared/deviceSettings';
 import { FilePickerModal, FolderPickerModal, IconPickerModal, PatternEditorModal, TagPickerModal } from './features/pinnedIcons/modals';
 import { DEFAULT_LINK_ICON_RULES, cleanRules } from './features/linkIcons/linkIconRules';
-import { choicesFor, setChoices } from './features/propertyTemplates/templateLogic';
 import { RULE_TYPE_LABELS, findConflicts, ruleMatches } from './features/pinnedIcons/rules';
 import { renderIcon } from './features/pinnedIcons/pinnedIcons';
 import { cleanIds, describeHidden, matchNames, searchCommands, type CommandFilter } from './features/hideCommands/hideLogic';
@@ -603,7 +602,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 			if (rule.properties.length) {
 				card.createDiv({
 					cls: 'setting-item-description btn-pt-columns',
-					text: 'For each property: its name, the value a note gets when it\'s inserted (optional), the values to pick from in the dropdown (optional, the same in every note), and whether to hide it in these notes (a button under the properties shows it again).',
+					text: 'For each property: its name, the value a note gets when it\'s inserted (optional), the values to pick from in the dropdown in these notes (optional), and whether to hide it in these notes (a button under the properties shows it again).',
 				});
 			}
 			rule.properties.forEach((property, j) => {
@@ -616,8 +615,12 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 						.onChange(v => { property.value = v; void save(); }))
 					.addText(t => {
 						t.setPlaceholder('Values to pick from: a, b, c')
-							.setValue(choicesFor(s.choices, property.name).join(', '))
-							.onChange(v => { s.choices = setChoices(s.choices, property.name, v); void save(); });
+							.setValue(property.options ?? '')
+							.onChange(v => {
+								if (v.trim()) property.options = v;
+								else delete property.options;
+								void save();
+							});
 						t.inputEl.addClass('btn-pt-choices-input');
 					})
 					.addToggle(t => t.setTooltip('Hide this property in notes this rule matches')
@@ -641,8 +644,8 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 			void save(true);
 		}));
 
-		new Setting(el).setName('Values to pick from').setHeading()
-			.setDesc('A dropdown button next to these properties offers the values, separated by commas. You can still type anything else. For list properties, picking a value adds or removes it. Values set in a rule above show here too; add properties here that no rule lists.');
+		new Setting(el).setName('Values to pick from in every note').setHeading()
+			.setDesc('A dropdown button next to these properties offers the values, separated by commas, in any note. You can still type anything else. For list properties, picking a value adds or removes it. Values given in a matching rule above take their place.');
 		s.choices.forEach((choice, i) => {
 			new Setting(el).setClass('btn-pt-property')
 				.addText(t => {

@@ -1,7 +1,7 @@
 // All settings live in the plugin's data.json. Each feature owns one section.
 
 import { DEFAULT_LINK_ICON_RULES, type LinkIconRule } from './features/linkIcons/linkIconRules';
-import type { PropertyChoices, TemplateRule } from './features/propertyTemplates/templateLogic';
+import { moveChoicesIntoRules, type PropertyChoices, type TemplateRule } from './features/propertyTemplates/templateLogic';
 
 export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'tagRename', 'frontmatterLinks', 'nestedProperties', 'hideCommands', 'linkIcons', 'propertyTemplates'] as const;
 export type FeatureId = typeof FEATURE_IDS[number];
@@ -245,8 +245,10 @@ export interface LinkIconSettings {
 export interface PropertyTemplateSettings {
 	/** Properties for notes matching each rule, in order; all matching rules combine. */
 	rules: TemplateRule[];
-	/** Values offered for a property, vault-wide. */
+	/** Values offered for a property in every note, unless a matching rule gives its own. */
 	choices: PropertyChoices[];
+	/** Values to pick from live in the rules (0.0.34+); older settings are moved there once. */
+	optionsInRules: boolean;
 	/** Show "Insert missing properties" and "Reorder properties" under a note's properties. */
 	showButtons: boolean;
 }
@@ -396,6 +398,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	propertyTemplates: {
 		rules: [],
 		choices: [],
+		optionsInRules: true,
 		showButtons: true,
 	},
 };
@@ -434,6 +437,12 @@ export function mergeSettings(stored: unknown): PluginSettings {
 	// 0.0.4-0.0.6 had an on/off header button instead of buttonPlace.
 	if (isRecord(storedEdit) && !('buttonPlace' in storedEdit) && storedEdit.showHeaderButton === false) {
 		result.editMode.buttonPlace = 'none';
+	}
+	// Up to 0.0.33 values to pick from were vault-wide; now each rule has its own.
+	const storedTemplates = data.propertyTemplates;
+	if (isRecord(storedTemplates) && !('optionsInRules' in storedTemplates)) {
+		const t = result.propertyTemplates;
+		if (Array.isArray(t.rules) && Array.isArray(t.choices)) t.choices = moveChoicesIntoRules(t.rules, t.choices);
 	}
 	return result;
 }

@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
-	choicesFor, hiddenNames, insertMissing, setChoices, isSorted, missingProperties, sortProperties, templateFor, templateValue,
+	choicesFor, hiddenNames, insertMissing, moveChoicesIntoRules, optionsFor, isSorted, missingProperties, sortProperties, templateFor, templateValue,
 	type TemplateRule,
 } from '../src/features/propertyTemplates/templateLogic';
+import { mergeSettings } from '../src/settings';
 
 const book = { basename: 'Dune', path: 'Books/Dune.md', tags: ['scifi'] };
 const rules: TemplateRule[] = [
@@ -94,16 +95,47 @@ describe('property templates: values', () => {
 	});
 });
 
-describe('property templates: editing choices', () => {
-	it('adds, updates and removes a property\'s values', () => {
-		let choices = setChoices([], 'Rating', '⭐, ⭐⭐');
-		expect(choices).toEqual([{ property: 'Rating', options: '⭐, ⭐⭐' }]);
-		const entry = choices[0];
-		choices = setChoices([{ property: 'status', options: 'a' }, ...choices], 'rating', '⭐');
-		expect(choices).toEqual([{ property: 'status', options: 'a' }, { property: 'Rating', options: '⭐' }]);
-		// The same entry object is updated, so other settings rows holding it stay in step.
-		expect(choices[1]).toBe(entry);
-		expect(setChoices(choices, 'RATING', '  ')).toEqual([{ property: 'status', options: 'a' }]);
-		expect(setChoices(choices, '', 'x')).toBe(choices);
+describe('property templates: values per rule', () => {
+	const perRule: TemplateRule[] = [
+		{ type: 'folder', match: 'Books', properties: [{ name: 'genre', value: '', options: 'scifi, fantasy' }, { name: 'status', value: '' }] },
+		{ type: 'folder', match: 'Films', properties: [{ name: 'Genre', value: '', options: 'drama, comedy' }] },
+		{ type: 'tag', match: 'scifi', properties: [{ name: 'genre', value: '', options: 'space opera' }, { name: 'status', value: '', options: 'to read, done' }] },
+	];
+	const everyNote = [{ property: 'genre', options: 'other' }, { property: 'mood', options: 'happy, sad' }];
+	const film = { basename: 'Heat', path: 'Films/Heat.md', tags: [] };
+
+	it('offers the values of the note\'s first matching rule that has some', () => {
+		const t = templateFor(perRule, book);
+		expect(optionsFor(t, everyNote, 'Genre')).toEqual(['scifi', 'fantasy']);
+		expect(optionsFor(t, everyNote, 'status')).toEqual(['to read', 'done']);
+		expect(optionsFor(templateFor(perRule, film), everyNote, 'genre')).toEqual(['drama', 'comedy']);
+	});
+
+	it('falls back to the values for every note', () => {
+		expect(optionsFor(templateFor(perRule, book), everyNote, 'mood')).toEqual(['happy', 'sad']);
+		expect(optionsFor([], everyNote, 'genre')).toEqual(['other']);
+		expect(optionsFor([], everyNote, 'nothing')).toEqual([]);
+	});
+
+	it('moves older vault-wide values into the rules that list the property', () => {
+		const rules: TemplateRule[] = [
+			{ type: 'folder', match: 'Books', properties: [{ name: 'Rating', value: '' }, { name: 'genre', value: '', options: 'own' }] },
+			{ type: 'tag', match: 'x', properties: [{ name: 'rating', value: '' }] },
+		];
+		const left = moveChoicesIntoRules(rules, [{ property: 'rating', options: '⭐, ⭐⭐' }, { property: 'genre', options: 'a' }, { property: 'mood', options: 'ok' }]);
+		expect(rules[0].properties.map(p => p.options)).toEqual(['⭐, ⭐⭐', 'own']);
+		expect(rules[1].properties[0].options).toBe('⭐, ⭐⭐');
+		expect(left).toEqual([{ property: 'mood', options: 'ok' }]);
+	});
+
+	it('moves them once, when loading older settings', () => {
+		const old = { propertyTemplates: { rules: [{ type: 'folder', match: 'B', properties: [{ name: 'status', value: '' }] }], choices: [{ property: 'status', options: 'a, b' }], showButtons: true } };
+		const s = mergeSettings(old);
+		expect(s.propertyTemplates.rules[0].properties[0].options).toBe('a, b');
+		expect(s.propertyTemplates.choices).toEqual([]);
+		expect(s.propertyTemplates.optionsInRules).toBe(true);
+		// Newer settings are left as they are.
+		const kept = mergeSettings({ propertyTemplates: { ...old.propertyTemplates, optionsInRules: true } });
+		expect(kept.propertyTemplates.choices).toEqual([{ property: 'status', options: 'a, b' }]);
 	});
 });

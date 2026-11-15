@@ -9,6 +9,8 @@ export interface TemplateProperty {
 	name: string;
 	/** Value for a newly inserted property; empty leaves it empty. */
 	value: string;
+	/** Values to pick from in notes the rule matches, separated by commas. */
+	options?: string;
 	/** Hide the property in the Properties panel of notes the rule matches. */
 	hidden?: boolean;
 }
@@ -39,13 +41,19 @@ export function templateFor(rules: TemplateRule[], file: FileInfo): TemplateProp
 		for (const property of rule.properties) {
 			const name = property.name.trim();
 			if (!name) continue;
+			const options = property.options?.trim() ? property.options : undefined;
 			if (seen.has(key(name))) {
-				// Any matching rule that hides a property hides it.
-				if (property.hidden) result.find(p => key(p.name) === key(name))!.hidden = true;
+				const earlier = result.find(p => key(p.name) === key(name))!;
+				// Any matching rule that hides a property hides it; the first rule with values gives them.
+				if (property.hidden) earlier.hidden = true;
+				if (options && !earlier.options) earlier.options = options;
 				continue;
 			}
 			seen.add(key(name));
-			result.push(property.hidden ? { name, value: property.value, hidden: true } : { name, value: property.value });
+			const entry: TemplateProperty = { name, value: property.value };
+			if (options) entry.options = options;
+			if (property.hidden) entry.hidden = true;
+			result.push(entry);
 		}
 	}
 	return result;
@@ -136,11 +144,39 @@ export function sortProperties(frontmatter: Record<string, unknown>, template: T
 	return true;
 }
 
-/** The values offered for a property, if any. */
+const splitOptions = (options: string) => [...new Set(options.split(',').map(o => o.trim()).filter(Boolean))];
+
+/** The values offered for a property in every note, if any. */
 export function choicesFor(choices: PropertyChoices[], property: string): string[] {
 	const entry = choices.find(c => key(c.property) === key(property));
-	if (!entry) return [];
-	return [...new Set(entry.options.split(',').map(o => o.trim()).filter(Boolean))];
+	return entry ? splitOptions(entry.options) : [];
+}
+
+/**
+ * The values offered for a property in a note: from the note's template (its
+ * matching rules), or else the ones for every note.
+ */
+export function optionsFor(template: TemplateProperty[], choices: PropertyChoices[], property: string): string[] {
+	const own = template.find(p => key(p.name) === key(property))?.options;
+	return own ? splitOptions(own) : choicesFor(choices, property);
+}
+
+/**
+ * Move vault-wide values into the rules that list the property (each rule gets
+ * a copy, unless it has its own already). Returns the vault-wide values left:
+ * those for properties no rule lists.
+ */
+export function moveChoicesIntoRules(rules: TemplateRule[], choices: PropertyChoices[]): PropertyChoices[] {
+	const listed = new Set<string>();
+	for (const rule of rules) {
+		for (const property of Array.isArray(rule.properties) ? rule.properties : []) {
+			if (!property.name?.trim()) continue;
+			listed.add(key(property.name));
+			const options = choicesFor(choices, property.name).join(', ');
+			if (options && !property.options?.trim()) property.options = options;
+		}
+	}
+	return choices.filter(c => !listed.has(key(c.property)));
 }
 
 /**
@@ -167,21 +203,4 @@ export function templateValue(raw: string, type: string | undefined): unknown {
 		default:
 			return text === '' ? null : text;
 	}
-}
-
-/**
- * Set the values offered for a property: updates its entry in place (matched
- * regardless of case, so other code holding it sees the change), adds one, or
- * removes it when the options are empty. Returns the new list.
- */
-export function setChoices(choices: PropertyChoices[], property: string, options: string): PropertyChoices[] {
-	const name = property.trim();
-	if (!name) return choices;
-	const others = (c: PropertyChoices) => key(c.property) !== key(name);
-	if (!options.trim()) return choices.filter(others);
-	const index = choices.findIndex(c => !others(c));
-	if (index === -1) return [...choices, { property: name, options }];
-	// Keep the first entry for the property (and its spelling), drop any repeats.
-	choices[index].options = options;
-	return choices.filter((c, i) => i === index || others(c));
 }

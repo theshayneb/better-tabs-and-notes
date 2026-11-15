@@ -8,7 +8,7 @@ import { Feature } from '../../feature';
 import type { PropertyTemplateSettings } from '../../settings';
 import { confirm } from '../../shared/confirm';
 import {
-	choicesFor, hiddenNames, insertMissing, isSorted, missingProperties, sortProperties, templateFor, templateValue,
+	hiddenNames, optionsFor, insertMissing, isSorted, missingProperties, sortProperties, templateFor, templateValue,
 	type TemplateProperty,
 } from './templateLogic';
 
@@ -281,11 +281,12 @@ export class PropertyTemplatesFeature extends Feature {
 	 * widgets, so it keeps working whatever draws the values. Typing still works.
 	 */
 	private renderChoiceButtons(container: HTMLElement, file: TFile): void {
+		const template = this.templateOf(file);
 		for (const row of container.querySelectorAll<HTMLElement>('.metadata-property[data-property-key]')) {
 			const valueEl = row.querySelector<HTMLElement>(':scope > .metadata-property-value');
 			if (!valueEl) continue;
 			const name = row.querySelector<HTMLInputElement>('.metadata-property-key-input')?.value || row.dataset.propertyKey || '';
-			const options = name ? choicesFor(this.settings.choices, name) : [];
+			const options = name ? optionsFor(template, this.settings.choices, name) : [];
 			let button = valueEl.querySelector<HTMLElement>(`:scope > .${CHOICES_CLASS}`);
 			if (options.length === 0) {
 				button?.remove();
@@ -306,7 +307,7 @@ export class PropertyTemplatesFeature extends Feature {
 	}
 
 	private showChoices(evt: MouseEvent, file: TFile, name: string): void {
-		const options = choicesFor(this.settings.choices, name);
+		const options = optionsFor(this.templateOf(file), this.settings.choices, name);
 		const fm = this.app.metadataCache.getFileCache(file)?.frontmatter ?? {};
 		const key = Object.keys(fm).find(k => k.toLowerCase() === name.toLowerCase()) ?? name;
 		const current: unknown = fm[key];

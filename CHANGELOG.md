@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.34] - 2026-11-15
+
+### Changed
+- Property templates: values to pick from now belong to each rule, so a property such as Genre can offer different values in different kinds of notes. If several matching rules give values, the first one's are used. Values you had set are copied into every rule that lists the property. The section below the rules is now "Values to pick from in every note", for properties no matching rule gives values for.
+
 ## [0.0.33] - 2026-11-15
 
 ### Added
