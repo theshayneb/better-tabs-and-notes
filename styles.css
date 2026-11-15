@@ -606,7 +606,23 @@
 }
 
 .btn-pt-property .setting-item-control {
+	flex: 1 1 auto;
 	justify-content: flex-start;
+	min-width: 0;
+}
+
+.btn-pt-property .setting-item-control input[type="text"] {
+	flex: 1 1 0;
+	width: 0;
+	min-width: 0;
+}
+
+.btn-pt-property .setting-item-control input.btn-pt-choices-input {
+	flex-grow: 2;
+}
+
+.btn-pt-columns {
+	padding-top: var(--size-4-2);
 }
 
 /* ===== Icon picker ===== */

@@ -8,6 +8,7 @@ import { LEGACY_PLUGINS, importLegacySettings } from './legacyImport';
 import { FOCUS_NEW_TABS, START_PAGES, type DeviceStartupSettings, type DeviceTabSettings } from './shared/deviceSettings';
 import { FilePickerModal, FolderPickerModal, IconPickerModal, PatternEditorModal, TagPickerModal } from './features/pinnedIcons/modals';
 import { DEFAULT_LINK_ICON_RULES, cleanRules } from './features/linkIcons/linkIconRules';
+import { choicesFor, setChoices } from './features/propertyTemplates/templateLogic';
 import { RULE_TYPE_LABELS, findConflicts, ruleMatches } from './features/pinnedIcons/rules';
 import { renderIcon } from './features/pinnedIcons/pinnedIcons';
 import { cleanIds, describeHidden, matchNames, searchCommands, type CommandFilter } from './features/hideCommands/hideLogic';
@@ -599,14 +600,26 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 				.addExtraButton(b => b.setIcon('arrow-up').setTooltip('Move up').onClick(() => move(s.rules, i, -1)))
 				.addExtraButton(b => b.setIcon('arrow-down').setTooltip('Move down').onClick(() => move(s.rules, i, 1)))
 				.addExtraButton(b => b.setIcon('trash').setTooltip('Remove rule').onClick(() => { s.rules.splice(i, 1); void save(true); }));
+			if (rule.properties.length) {
+				card.createDiv({
+					cls: 'setting-item-description btn-pt-columns',
+					text: 'For each property: its name, the value a note gets when it\'s inserted (optional), and the values to pick from in the dropdown (optional, the same in every note).',
+				});
+			}
 			rule.properties.forEach((property, j) => {
 				new Setting(card).setClass('btn-pt-property')
 					.addText(t => {
 						t.setPlaceholder('Property').setValue(property.name).onChange(v => { property.name = v; void save(); });
 						nameInput(t.inputEl);
 					})
-					.addText(t => t.setPlaceholder('Value when added (optional)').setValue(property.value)
+					.addText(t => t.setPlaceholder('Starting value').setValue(property.value)
 						.onChange(v => { property.value = v; void save(); }))
+					.addText(t => {
+						t.setPlaceholder('Values to pick from: a, b, c')
+							.setValue(choicesFor(s.choices, property.name).join(', '))
+							.onChange(v => { s.choices = setChoices(s.choices, property.name, v); void save(); });
+						t.inputEl.addClass('btn-pt-choices-input');
+					})
 					.addExtraButton(b => b.setIcon('arrow-up').setTooltip('Move up').onClick(() => move(rule.properties, j, -1)))
 					.addExtraButton(b => b.setIcon('arrow-down').setTooltip('Move down').onClick(() => move(rule.properties, j, 1)))
 					.addExtraButton(b => b.setIcon('x').setTooltip('Remove').onClick(() => { rule.properties.splice(j, 1); void save(true); }));
@@ -622,7 +635,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		}));
 
 		new Setting(el).setName('Values to pick from').setHeading()
-			.setDesc('A dropdown button next to these properties offers the values, separated by commas. You can still type anything else. For list properties, picking a value adds or removes it.');
+			.setDesc('A dropdown button next to these properties offers the values, separated by commas. You can still type anything else. For list properties, picking a value adds or removes it. Values set in a rule above show here too; add properties here that no rule lists.');
 		s.choices.forEach((choice, i) => {
 			new Setting(el).setClass('btn-pt-property')
 				.addText(t => {

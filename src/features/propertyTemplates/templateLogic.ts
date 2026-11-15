@@ -156,3 +156,20 @@ export function templateValue(raw: string, type: string | undefined): unknown {
 			return text === '' ? null : text;
 	}
 }
+
+/**
+ * Set the values offered for a property: updates its entry in place (matched
+ * regardless of case, so other code holding it sees the change), adds one, or
+ * removes it when the options are empty. Returns the new list.
+ */
+export function setChoices(choices: PropertyChoices[], property: string, options: string): PropertyChoices[] {
+	const name = property.trim();
+	if (!name) return choices;
+	const others = (c: PropertyChoices) => key(c.property) !== key(name);
+	if (!options.trim()) return choices.filter(others);
+	const index = choices.findIndex(c => !others(c));
+	if (index === -1) return [...choices, { property: name, options }];
+	// Keep the first entry for the property (and its spelling), drop any repeats.
+	choices[index].options = options;
+	return choices.filter((c, i) => i === index || others(c));
+}

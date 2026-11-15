@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.30] - 2026-11-15
+
+- Property templates: each property in a rule now has three fields, labelled: its name, the starting value a note gets when it's inserted, and the values to pick from in the dropdown. Before, only the starting value sat next to the name, so a list of choices typed there was inserted into every note in full; the values to pick from were in a separate section further down, which still exists for properties no rule lists.
+
 ## [0.0.29] - 2026-11-15
 
 - Fix property templates adding another set of "Insert missing properties" buttons every time a note's properties refreshed. The buttons sit next to "Add property", deeper in the properties panel than where the check for existing buttons looked. Now there's always one set, and extra sets left by 0.0.27 and 0.0.28 are removed.

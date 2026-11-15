@@ -236,7 +236,8 @@ synced "open on start" settings of the home tab and pinned daily note apply.
 ### Property templates
 
 - Rules by folder, tag or name (the same kinds as pinned tab icons) list the
-  properties a note should have, in order, each with an optional starting value.
+  properties a note should have, in order, each with an optional starting value
+  and optional values to pick from.
   Every rule that matches a note counts, the first rule first.
 - Under a note's properties, next to *Add property*, **Insert N missing
   properties** adds the ones it doesn't have yet in the right places (existing

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-	choicesFor, insertMissing, isSorted, missingProperties, sortProperties, templateFor, templateValue,
+	choicesFor, insertMissing, setChoices, isSorted, missingProperties, sortProperties, templateFor, templateValue,
 	type TemplateRule,
 } from '../src/features/propertyTemplates/templateLogic';
 
@@ -77,5 +77,19 @@ describe('property templates: values', () => {
 		expect(templateValue('4', 'number')).toBe(4);
 		expect(templateValue('yes', 'checkbox')).toBe(true);
 		expect(templateValue('', 'checkbox')).toBe(false);
+	});
+});
+
+describe('property templates: editing choices', () => {
+	it('adds, updates and removes a property\'s values', () => {
+		let choices = setChoices([], 'Rating', '⭐, ⭐⭐');
+		expect(choices).toEqual([{ property: 'Rating', options: '⭐, ⭐⭐' }]);
+		const entry = choices[0];
+		choices = setChoices([{ property: 'status', options: 'a' }, ...choices], 'rating', '⭐');
+		expect(choices).toEqual([{ property: 'status', options: 'a' }, { property: 'Rating', options: '⭐' }]);
+		// The same entry object is updated, so other settings rows holding it stay in step.
+		expect(choices[1]).toBe(entry);
+		expect(setChoices(choices, 'RATING', '  ')).toEqual([{ property: 'status', options: 'a' }]);
+		expect(setChoices(choices, '', 'x')).toBe(choices);
 	});
 });
