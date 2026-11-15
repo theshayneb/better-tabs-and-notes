@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.28] - 2026-11-15
+
+- Fix typing in the settings of property templates, link icons and nested properties: every keystroke redrew the open notes, which took the cursor out of the field. Those redraws now wait until you close the settings (or switch to another settings tab). Settings are still saved as you type.
+
 ## [0.0.27] - 2026-11-15
 
 - New feature: property templates. Rules by folder, tag or name list the properties a note should have, in order, with optional starting values; every matching rule counts, the first first. Next to "Add property", "Insert N missing properties" adds the missing ones in the right places without changing existing ones, and "Reorder properties" puts properties in the rules' order, leaving others after them. Also as commands for the current note and from a folder's right-click menu.

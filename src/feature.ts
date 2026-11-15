@@ -45,4 +45,11 @@ export abstract class Feature extends Component {
 
 	/** Called after this feature's settings changed while it's loaded. */
 	onSettingsChange(): void {}
+
+	/**
+	 * Called when the settings window closes (or shows another tab). Redraws of
+	 * open notes belong here rather than in onSettingsChange: redrawing them on
+	 * every keystroke takes the cursor out of the settings field being typed in.
+	 */
+	onSettingsClosed(): void {}
 }

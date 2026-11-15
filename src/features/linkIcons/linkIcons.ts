@@ -59,7 +59,18 @@ export class LinkIconsFeature extends Feature {
 		for (const el of activeDocument.querySelectorAll(`.${ICON_CLASS}`)) el.remove();
 	}
 
+	/** A redraw of open notes held back while the settings are open. */
+	private redrawPending = false;
+
 	override onSettingsChange(): void {
+		// Redrawing the notes while typing in the settings would take the cursor away.
+		if (this.plugin.settingsOpen) this.redrawPending = true;
+		else this.redraw();
+	}
+
+	override onSettingsClosed(): void {
+		if (!this.redrawPending) return;
+		this.redrawPending = false;
 		this.redraw();
 	}
 

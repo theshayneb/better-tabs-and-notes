@@ -21,6 +21,8 @@ export class PropertyTemplatesFeature extends Feature {
 	readonly name = 'Property templates';
 
 	private refreshTimer: number | null = null;
+	/** A redraw of the properties panels held back while the settings are open. */
+	private redrawPending = false;
 
 	get settings(): PropertyTemplateSettings {
 		return this.plugin.settings.propertyTemplates;
@@ -46,6 +48,14 @@ export class PropertyTemplatesFeature extends Feature {
 
 	override onSettingsChange(): void {
 		this.scheduleRefresh();
+		// Redrawing the properties panels while typing in the settings would take the cursor away.
+		if (this.plugin.settingsOpen) this.redrawPending = true;
+		else redrawProperties(this.app);
+	}
+
+	override onSettingsClosed(): void {
+		if (!this.redrawPending) return;
+		this.redrawPending = false;
 		redrawProperties(this.app);
 	}
 

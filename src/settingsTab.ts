@@ -87,7 +87,13 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		super(app, plugin);
 	}
 
+	override hide(): void {
+		super.hide();
+		this.plugin.onSettingsClosed();
+	}
+
 	override display(): void {
+		this.plugin.settingsOpen = true;
 		const { containerEl } = this;
 		containerEl.empty();
 		containerEl.addClass('btn-settings');

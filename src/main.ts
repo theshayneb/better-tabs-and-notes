@@ -212,6 +212,22 @@ export default class BetterTabsPlugin extends Plugin {
 		this.syncFeatures();
 	}
 
+	/** Whether this plugin's settings tab is showing, so features can hold back redraws of open notes. */
+	settingsOpen = false;
+
+	/** The settings tab was closed: let features catch up on redraws they held back. */
+	onSettingsClosed(): void {
+		this.settingsOpen = false;
+		for (const feature of Object.values(this.features) as Feature[]) {
+			if (!feature.isLoaded) continue;
+			try {
+				feature.onSettingsClosed();
+			} catch (e) {
+				reportError(`${feature.name} couldn't apply its settings`, e);
+			}
+		}
+	}
+
 	async saveSettings(changed?: FeatureId): Promise<void> {
 		await this.saveData(this.settings);
 		if (changed) {

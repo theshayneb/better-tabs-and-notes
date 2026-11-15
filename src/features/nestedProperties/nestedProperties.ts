@@ -123,8 +123,18 @@ export class NestedPropertiesFeature extends Feature {
 		this.register(() => redrawProperties(this.app));
 	}
 
+	/** A redraw of the properties panels held back while the settings are open. */
+	private redrawPending = false;
+
 	override onSettingsChange(): void {
 		this.expanded.clear();
+		if (this.plugin.settingsOpen) this.redrawPending = true;
+		else redrawProperties(this.app);
+	}
+
+	override onSettingsClosed(): void {
+		if (!this.redrawPending) return;
+		this.redrawPending = false;
 		redrawProperties(this.app);
 	}
 
