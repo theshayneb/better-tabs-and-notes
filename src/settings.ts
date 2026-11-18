@@ -76,7 +76,6 @@ export interface HomeTabSettings {
 	/** Columns for the bookmark and recent file lists (one on narrow screens). */
 	listColumns: number;
 	storeRecentFiles: boolean;
-	recentFiles: string[];
 
 	logoType: LogoType;
 	logoIcon: string;
@@ -142,6 +141,8 @@ export interface DailyNoteSettings {
 export type RuleType = 'exact' | 'folder' | 'starts-with' | 'ends-with' | 'contains' | 'regex' | 'tag';
 
 export interface IconRule {
+	/** Stable id, so edits on different devices merge per rule (see shared/editLog.ts). */
+	id?: string;
 	type: RuleType;
 	match: string;
 	icon: string;
@@ -156,7 +157,6 @@ export interface PinnedIconSettings {
 	readFrontmatter: boolean;
 	frontmatterProperty: string;
 	rules: IconRule[];
-	recentIcons: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -316,7 +316,6 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		maxRecentFiles: 5,
 		listColumns: 2,
 		storeRecentFiles: true,
-		recentFiles: [],
 		logoType: 'obsidian',
 		logoIcon: 'home',
 		logoImagePath: '',
@@ -356,7 +355,6 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		readFrontmatter: false,
 		frontmatterProperty: 'pinned-icon',
 		rules: [],
-		recentIcons: [],
 	},
 	scrollButtons: {
 		showTop: true,

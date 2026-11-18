@@ -3,6 +3,7 @@
 
 import { Modal, Notice, TFile, type App, type Command } from 'obsidian';
 import { Feature } from '../../feature';
+import { CLEANER_RECORD_KEY, loadRecord } from '../../shared/deviceMemory';
 import type { FrontmatterCleanerSettings } from '../../settings';
 import {
 	buildRecordBlock, formatValue, insertRecord, isEmptyValue,
@@ -106,10 +107,9 @@ export class FrontmatterCleanerFeature extends Feature {
 			const block = buildRecordBlock(removed, record.format);
 			const heading = { text: this.settings.headingText, level: this.settings.headingLevel };
 			await this.app.vault.process(file, content => insertRecord(content, block, record.location, heading));
-			// Remember the last choices as the new defaults.
-			this.settings.recordFormat = record.format;
-			this.settings.recordLocation = record.location;
-			await this.plugin.saveSettings();
+			// Remember the last choices, on this device only.
+			const same = record.format === this.settings.recordFormat && record.location === this.settings.recordLocation;
+			this.app.saveLocalStorage(CLEANER_RECORD_KEY, same ? null : record);
 		}
 
 		new Notice(`Deleted ${keys.length} propert${keys.length === 1 ? 'y' : 'ies'}${record ? ' (record kept).' : '.'}`);
@@ -129,8 +129,9 @@ class PropertyCleanerModal extends Modal {
 		super(app);
 		const s = feature.settings;
 		this.keepRecord = s.keepRecordByDefault;
-		this.format = s.recordFormat;
-		this.location = s.recordLocation;
+		const last = loadRecord(app, CLEANER_RECORD_KEY);
+		this.format = (['table', 'colon', 'dataview'] as const).find(f => f === last.format) ?? s.recordFormat;
+		this.location = (['top', 'bottom', 'heading'] as const).find(l => l === last.location) ?? s.recordLocation;
 	}
 
 	override onOpen(): void {

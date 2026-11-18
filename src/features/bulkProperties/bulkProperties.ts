@@ -3,6 +3,7 @@
 
 import { Modal, Notice, Setting, TFile, TFolder, type App, type TAbstractFile } from 'obsidian';
 import { Feature } from '../../feature';
+import { BULK_MODE_KEY, loadChoice } from '../../shared/deviceMemory';
 import { confirm } from '../../shared/confirm';
 import type { BulkPropertiesSettings } from '../../settings';
 import {
@@ -151,13 +152,18 @@ interface Row {
 	value: HTMLInputElement;
 }
 
+const EXISTING_MODES = ['ignore', 'overwrite', 'append'] as const;
+
 class AddPropertiesModal extends Modal {
 	private rows: Row[] = [];
+	/** Last used on this device, else the setting. */
+	private mode: ExistingMode;
 	private rowsEl!: HTMLElement;
 	private datalistId = `btn-bulk-props-${Math.random().toString(36).slice(2)}`;
 
 	constructor(app: App, private feature: BulkPropertiesFeature, private notes: TFile[], private where: string) {
 		super(app);
+		this.mode = loadChoice(app, BULK_MODE_KEY, EXISTING_MODES) ?? feature.settings.existingMode;
 	}
 
 	override onOpen(): void {
@@ -177,8 +183,8 @@ class AddPropertiesModal extends Modal {
 			.setName('If a note already has the property')
 			.addDropdown(dd => dd
 				.addOptions({ ignore: 'Leave it as it is', overwrite: 'Replace its value', append: 'Add to its list of values' })
-				.setValue(this.feature.settings.existingMode)
-				.onChange(v => { this.feature.settings.existingMode = v as ExistingMode; }));
+				.setValue(this.mode)
+				.onChange(v => { this.mode = v as ExistingMode; }));
 
 		this.rowsEl = contentEl.createDiv({ cls: 'btn-bulk-rows' });
 		this.addRow();
@@ -238,13 +244,13 @@ class AddPropertiesModal extends Modal {
 			return;
 		}
 
-		const mode = this.feature.settings.existingMode;
+		const mode = this.mode;
 		const list = props.map(p => p.name).join(', ');
 		const ok = await confirm(this.app,
 			`Set ${list} in ${this.notes.length} note${this.notes.length === 1 ? '' : 's'} in ${this.where}?`, 'Apply');
 		if (!ok) return;
-		// Remember the choice for next time.
-		await this.feature.saveSettings();
+		// Remember the choice for next time, on this device only.
+		this.app.saveLocalStorage(BULK_MODE_KEY, mode === this.feature.settings.existingMode ? null : mode);
 		this.close();
 		await this.feature.editAll(this.notes, 'Updating', fm => {
 			const before = JSON.stringify(fm);

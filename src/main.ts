@@ -4,6 +4,9 @@ import { DEFAULT_SETTINGS, FEATURE_IDS, mergeSettings, type FeatureId, type Plug
 import { BetterTabsSettingTab } from './settingsTab';
 import { copyHeaderReport, startHeaderTrace } from './shared/headerTrace';
 import { closeOtherTabs } from './shared/closeTabs';
+import { EDIT_LOG_STORE_KEY, RECENT_FILES_KEY, RECENT_ICONS_KEY, loadStrings, runsBackgroundTasks, saveStrings } from './shared/deviceMemory';
+import { EDIT_LOG_KEY, applyLog, cleanLog, diffSettings, ensureIds, hasAllEdits, mergeLogs, type EditLog } from './shared/editLog';
+import { SyncWatcher } from './shared/syncSettle';
 import {
 	sanitizeDeviceStartup, sanitizeDeviceTabSettings, type DeviceStartupSettings, type DeviceTabSettings,
 } from './shared/deviceSettings';
@@ -53,7 +56,10 @@ export default class BetterTabsPlugin extends Plugin {
 	};
 
 	override async onload(): Promise<void> {
-		this.settings = mergeSettings(await this.loadData());
+		this.syncWatcher = this.addChild(new SyncWatcher(this.app));
+		const stored: unknown = await this.loadData();
+		this.moveDeviceListsOut(stored);
+		this.useStored(stored);
 
 		this.features = {
 			tabs: new TabBehaviorFeature(this),
@@ -73,7 +79,8 @@ export default class BetterTabsPlugin extends Plugin {
 		};
 
 		// Register the settings tab first, so it's there even if a feature fails.
-		this.addSettingTab(new BetterTabsSettingTab(this.app, this));
+		this.settingTab = new BetterTabsSettingTab(this.app, this);
+		this.addSettingTab(this.settingTab);
 
 		this.register(startHeaderTrace());
 		this.addCommand({
@@ -102,15 +109,118 @@ export default class BetterTabsPlugin extends Plugin {
 		}
 
 		this.syncFeatures();
-		this.app.workspace.onLayoutReady(() => void this.openDeviceStartPage());
+		this.app.workspace.onLayoutReady(() => {
+			void this.openDeviceStartPage();
+			void this.repairSyncedSettings();
+		});
 	}
 
-	/** data.json changed on disk, e.g. synced from another device. */
+	// -----------------------------------------------------------------------
+	// Settings and Sync
+	// -----------------------------------------------------------------------
+
+	/** Watches Obsidian Sync, so automatic work can wait for it to settle. */
+	syncWatcher!: SyncWatcher;
+	private settingTab!: BetterTabsSettingTab;
+	/** Every settings edit seen on any device (also kept in this device's storage). */
+	private editLog: EditLog = {};
+	/** The settings as last loaded or saved, to tell what an edit changed. */
+	private snapshot: PluginSettings | null = null;
+	/** data.json as last read or written, so unchanged settings aren't written again. */
+	private lastWritten = '';
+	/** data.json is missing edits this device knows about (Sync brought back an older copy). */
+	private needsRepair = false;
+	private repairing = false;
+	private lastEditTime = 0;
+
+	/** Up to 0.0.34 recent notes and icons were in data.json; keep them on this device instead. */
+	private moveDeviceListsOut(stored: unknown): void {
+		const section = (key: string): Record<string, unknown> => {
+			const value = stored && typeof stored === 'object' ? (stored as Record<string, unknown>)[key] : undefined;
+			return value && typeof value === 'object' ? value as Record<string, unknown> : {};
+		};
+		for (const [list, key] of [[section('homeTab').recentFiles, RECENT_FILES_KEY], [section('pinnedIcons').recentIcons, RECENT_ICONS_KEY]] as const) {
+			if (Array.isArray(list) && loadStrings(this.app, key) === null) {
+				saveStrings(this.app, key, list.filter((s): s is string => typeof s === 'string'));
+			}
+		}
+	}
+
+	/** Take the settings from data.json, with the newest edits from every device laid over them. */
+	private useStored(stored: unknown): void {
+		this.lastWritten = JSON.stringify(stored ?? null);
+		const fileLog = cleanLog(stored && typeof stored === 'object' ? (stored as Record<string, unknown>)[EDIT_LOG_KEY] : undefined);
+		const known = cleanLog(this.app.loadLocalStorage(EDIT_LOG_STORE_KEY));
+		this.editLog = mergeLogs(known, fileLog);
+		if (!hasAllEdits(known, this.editLog)) this.app.saveLocalStorage(EDIT_LOG_STORE_KEY, this.editLog);
+		this.needsRepair = !hasAllEdits(fileLog, this.editLog);
+		const settings = mergeSettings(stored);
+		ensureIds(settings as unknown as Record<string, unknown>);
+		applyLog(settings as unknown as Record<string, unknown>, this.editLog);
+		this.settings = settings;
+		this.snapshot = structuredClone(settings);
+	}
+
+	/** Log what changed since the last load or save, as edits made now on this device. Returns whether anything did. */
+	private captureEdits(): boolean {
+		ensureIds(this.settings as unknown as Record<string, unknown>);
+		if (!this.snapshot) return false;
+		this.lastEditTime = Math.max(Date.now(), this.lastEditTime + 1);
+		const edits = diffSettings(this.snapshot as unknown as Record<string, unknown>, this.settings as unknown as Record<string, unknown>, this.lastEditTime);
+		this.snapshot = structuredClone(this.settings);
+		if (Object.keys(edits).length === 0) return false;
+		this.editLog = mergeLogs(this.editLog, edits);
+		this.app.saveLocalStorage(EDIT_LOG_STORE_KEY, this.editLog);
+		return true;
+	}
+
+	/** Write data.json, unless it would be the same as what's there. */
+	private async writeSettings(): Promise<void> {
+		const data = { ...this.settings, [EDIT_LOG_KEY]: this.editLog };
+		const text = JSON.stringify(data);
+		if (text === this.lastWritten) return;
+		this.lastWritten = text;
+		this.needsRepair = false;
+		await this.saveData(data);
+	}
+
+	/** data.json changed on disk, e.g. synced from another device: merge it with what this device knows. */
 	override async onExternalSettingsChange(): Promise<void> {
-		this.settings = mergeSettings(await this.loadData());
-		this.syncFeatures();
-		for (const feature of Object.values(this.features) as Feature[]) {
-			if (feature.isLoaded) feature.onSettingsChange();
+		const stored: unknown = await this.loadData();
+		if (JSON.stringify(stored ?? null) === this.lastWritten) return;
+		// Edits made here but not saved yet are kept.
+		this.captureEdits();
+		const before = JSON.stringify(this.settings);
+		this.useStored(stored);
+		if (JSON.stringify(this.settings) !== before) {
+			this.syncFeatures();
+			for (const feature of Object.values(this.features) as Feature[]) {
+				if (feature.isLoaded) feature.onSettingsChange();
+			}
+			// The settings page would otherwise keep editing the old copy.
+			if (this.settingsOpen) this.settingTab.display();
+		}
+		void this.repairSyncedSettings();
+	}
+
+	/**
+	 * If Sync brought back an older data.json that lacks edits this device knows,
+	 * write them back. Only on the device that runs background tasks, after Sync
+	 * has settled.
+	 */
+	private async repairSyncedSettings(): Promise<void> {
+		if (!this.needsRepair || this.repairing || !runsBackgroundTasks(this.app)) return;
+		this.repairing = true;
+		try {
+			await this.syncWatcher.waitUntilSettled();
+			// Take in anything that arrived while waiting, then write only if still needed.
+			const stored: unknown = await this.loadData();
+			if (JSON.stringify(stored ?? null) !== this.lastWritten) await this.onExternalSettingsChange();
+			if (this.needsRepair) await this.writeSettings();
+		} catch (e) {
+			console.error('Better Tabs and Notes: couldn\'t repair the synced settings', e);
+		} finally {
+			this.repairing = false;
 		}
 	}
 
@@ -229,7 +339,8 @@ export default class BetterTabsPlugin extends Plugin {
 	}
 
 	async saveSettings(changed?: FeatureId): Promise<void> {
-		await this.saveData(this.settings);
+		// Nothing changed: don't touch data.json (and so don't give Sync anything to carry).
+		if (this.captureEdits()) await this.writeSettings();
 		if (changed) {
 			const feature = this.features[changed] as Feature;
 			if (feature.isLoaded) feature.onSettingsChange();

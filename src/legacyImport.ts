@@ -1,6 +1,7 @@
 // One-off import of settings from the original plugins' data.json files.
 
 import { normalizePath, type App } from 'obsidian';
+import { RECENT_FILES_KEY, RECENT_ICONS_KEY, saveStrings } from './shared/deviceMemory';
 import type { EditMode, IconRule, PluginSettings, RuleType } from './settings';
 
 const LEGACY_IDS = {
@@ -89,9 +90,9 @@ export async function importLegacySettings(app: App, settings: PluginSettings): 
 		assign(h, 'fontWeight', num(home.fontWeight));
 		assign(h, 'logoScale', num(home.logoScale));
 		if (Array.isArray(home.recentFilesStore)) {
-			h.recentFiles = home.recentFilesStore
+			saveStrings(app, RECENT_FILES_KEY, home.recentFilesStore
 				.map(r => isRecord(r) ? str(r.filepath) ?? str(r.path) : undefined)
-				.filter((p): p is string => !!p);
+				.filter((p): p is string => !!p));
 		}
 		const logo = isRecord(home.logo) ? home.logo : {};
 		const logoType = str(home.logoType);
@@ -177,7 +178,7 @@ export async function importLegacySettings(app: App, settings: PluginSettings): 
 				.map(m => ({ type: str(m.type) as RuleType, match: str(m.match) ?? '', icon: str(m.icon) ?? '' }))
 				.filter((r): r is IconRule => types.includes(r.type) && !!r.match && !!r.icon);
 		}
-		if (Array.isArray(pinned.recentIcons)) p.recentIcons = pinned.recentIcons.filter((i): i is string => typeof i === 'string');
+		if (Array.isArray(pinned.recentIcons)) saveStrings(app, RECENT_ICONS_KEY, pinned.recentIcons.filter((i): i is string => typeof i === 'string'));
 		imported.push('Pinned Tabs Customizer');
 	}
 

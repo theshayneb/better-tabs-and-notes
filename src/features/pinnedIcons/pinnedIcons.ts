@@ -4,6 +4,7 @@
 import { TFile, WorkspaceLeaf, debounce, getAllTags, setIcon, type Command } from 'obsidian';
 import { around } from 'monkey-around';
 import { Feature } from '../../feature';
+import { recentIcons, rememberIcon } from '../../shared/deviceMemory';
 import type { IconRule, PinnedIconSettings, RuleType } from '../../settings';
 import { FilePickerModal, FolderPickerModal, IconPickerModal, PatternEditorModal, TagPickerModal } from './modals';
 import { NATIVE_PIN_ICON, isLucideIcon, lucideName, normalizeTag, resolveIcon, type FileInfo } from './rules';
@@ -104,8 +105,8 @@ export class PinnedIconsFeature extends Feature {
 	}
 
 	openIconPicker(onSelect: (icon: string) => void): void {
-		new IconPickerModal(this.app, this.settings.recentIcons, icon => {
-			this.settings.recentIcons = [icon, ...this.settings.recentIcons.filter(i => i !== icon)].slice(0, MAX_RECENT_ICONS);
+		new IconPickerModal(this.app, recentIcons(this.app), icon => {
+			rememberIcon(this.app, icon, MAX_RECENT_ICONS);
 			onSelect(icon);
 		}).open();
 	}

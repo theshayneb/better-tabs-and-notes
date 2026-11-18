@@ -1,6 +1,7 @@
 // Which icon goes before a link to a file of a given type; no Obsidian imports so it can be unit-tested.
 
 export interface LinkIconRule {
+	id?: string;
 	/** File extensions, comma- or space-separated, without dots: "png, jpg". */
 	extensions: string;
 	/** An emoji/text, or "lucide:name" for an Obsidian icon. */
@@ -62,7 +63,11 @@ export function cleanRules(raw: unknown): LinkIconRule[] {
 	if (!Array.isArray(raw)) return structuredClone(DEFAULT_LINK_ICON_RULES);
 	return raw
 		.filter((r): r is Record<string, unknown> => !!r && typeof r === 'object')
-		.map(r => ({ extensions: typeof r.extensions === 'string' ? r.extensions : '', icon: typeof r.icon === 'string' ? r.icon : '' }));
+		.map(r => ({
+			...(typeof r.id === 'string' ? { id: r.id } : {}),
+			extensions: typeof r.extensions === 'string' ? r.extensions : '',
+			icon: typeof r.icon === 'string' ? r.icon : '',
+		}));
 }
 
 export interface FoundLink {

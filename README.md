@@ -31,6 +31,26 @@ last time, the home tab, today's pinned daily note, or a specific note,
 optionally closing the other tabs. Left on *Same as other devices*, the
 synced "open on start" settings of the home tab and pinned daily note apply.
 
+## Several devices and Obsidian Sync
+
+The plugin is built for one always-on desktop plus phones and tablets that sync
+now and then:
+
+- **Run background tasks on this device** (top of the settings, not synced; on
+  for desktop, off for phones and tablets by default). Only that device creates
+  today's daily note on its own and repairs synced settings.
+- Automatic work waits for Sync to settle first: a quiet minute with no vault
+  changes and Sync not busy (at most 10 minutes; longer while Sync reports it's
+  syncing).
+- Using the plugin never writes its settings: recent notes, recent icons and
+  remembered choices are kept on each device. Settings are written only when
+  you change one, and not at all when nothing changed.
+- Settings changed on different devices are merged by when each change was
+  made, not by which device saved last. Lists (hidden commands, pinned tab
+  icon rules, link icon rules, property templates) merge item by item. If Sync
+  brings back an older copy from a device that was offline, the background
+  device puts the newer changes back once Sync has settled.
+
 ## Moving over from the original plugins
 
 1. Install and enable Better Tabs and Notes.
@@ -124,6 +144,11 @@ synced "open on start" settings of the home tab and pinned daily note apply.
 - Creates today's note if needed, using the folder, date format and template
   from the Daily notes core plugin or the Periodic Notes plugin.
 - Optional: open on startup, and switch to the new day's note at midnight.
+- If today's note isn't there yet, it first waits for Sync to settle (another
+  device may have made it), showing *Waiting for sync…* with a *Create now*
+  button. Then the background device creates it; a phone or tablet shows
+  *Create today's note* instead, and opens the note by itself if it arrives.
+  Opening it by hand creates it once Sync has settled.
 
 ### Pinned tab icons
 
@@ -295,6 +320,9 @@ src/
     hideCommands/      hide commands from the command palette
     linkIcons/         icons before links to non-note files
     propertyTemplates/ property templates and value choices
+  shared/editLog.ts    merging settings edits from several devices by edit time
+  shared/syncSettle.ts waiting for Obsidian Sync to settle
+  shared/deviceMemory.ts things kept on this device only (local storage)
 tests/                 unit tests for the Obsidian-free logic
 ```
 

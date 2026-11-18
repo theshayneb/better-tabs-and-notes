@@ -5,6 +5,7 @@ import {
 	type ColorChoice, type EditMode, type FeatureId, type FontChoice, type LogoType, type TabSettings,
 } from './settings';
 import { LEGACY_PLUGINS, importLegacySettings } from './legacyImport';
+import { BULK_MODE_KEY, CLEANER_RECORD_KEY, recentIcons, rememberIcon, runsBackgroundTasks, setRunsBackgroundTasks } from './shared/deviceMemory';
 import { FOCUS_NEW_TABS, START_PAGES, type DeviceStartupSettings, type DeviceTabSettings } from './shared/deviceSettings';
 import { FilePickerModal, FolderPickerModal, IconPickerModal, PatternEditorModal, TagPickerModal } from './features/pinnedIcons/modals';
 import { DEFAULT_LINK_ICON_RULES, cleanRules } from './features/linkIcons/linkIconRules';
@@ -159,6 +160,12 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 			this.redraw();
 		};
 
+		new Setting(el).setName('This device').setHeading()
+			.setDesc('Not synced, so each device can be set differently.');
+		new Setting(el).setName('Run background tasks on this device')
+			.setDesc('Creates today\'s daily note on its own (at midnight and at startup) and repairs synced settings that another device rolled back, after Obsidian Sync has settled. Leave it on for the one device that is always on and syncing. Elsewhere today\'s note is only created when you ask for it. Default: on for desktop, off for phones and tablets.')
+			.addToggle(t => t.setValue(runsBackgroundTasks(this.app)).onChange(v => setRunsBackgroundTasks(this.app, v)));
+
 		new Setting(el).setName('When Obsidian opens on this device').setHeading()
 			.setDesc('Not synced, so each device can start differently.');
 		new Setting(el).setName('Start page')
@@ -291,9 +298,9 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 				.setValue(String(s.listColumns)).onChange(v => { s.listColumns = Number(v); void save(); }));
 		if (s.showRecentFiles) {
 			new Setting(el).setName('Remember recent files between sessions')
+				.setDesc('Each device keeps its own list.')
 				.addToggle(t => t.setValue(s.storeRecentFiles).onChange(v => {
 					s.storeRecentFiles = v;
-					if (!v) s.recentFiles = [];
 					void save();
 				}));
 			new Setting(el).setName('Number of recent files')
@@ -676,9 +683,8 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 			const iconButton = setting.controlEl.createEl('button', { cls: 'btn-link-icon-choose', attr: { 'aria-label': 'Choose icon' } });
 			renderIcon(iconButton, rule.icon || 'lucide:circle-help');
 			iconButton.addEventListener('click', () => {
-				const recent = this.plugin.settings.pinnedIcons.recentIcons;
-				new IconPickerModal(this.app, recent, icon => {
-					this.plugin.settings.pinnedIcons.recentIcons = [icon, ...recent.filter(r => r !== icon)].slice(0, 24);
+				new IconPickerModal(this.app, recentIcons(this.app), icon => {
+					rememberIcon(this.app, icon);
 					rule.icon = icon;
 					void save(true);
 				}).open();
@@ -810,7 +816,11 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 			.setDesc('The default when adding properties; you can change it in the form each time.')
 			.addDropdown(dd => dd
 				.addOptions({ ignore: 'Leave it as it is', overwrite: 'Replace its value', append: 'Add to its list of values' })
-				.setValue(s.existingMode).onChange(v => { s.existingMode = v as typeof s.existingMode; void save(); }));
+				.setValue(s.existingMode).onChange(v => {
+					s.existingMode = v as typeof s.existingMode;
+					this.app.saveLocalStorage(BULK_MODE_KEY, null);
+					void save();
+				}));
 		new Setting(el).setName('Include subfolders')
 			.setDesc('When working on a folder, also change the notes in the folders inside it.')
 			.addToggle(t => t.setValue(s.includeSubfolders).onChange(v => { s.includeSubfolders = v; void save(); }));
@@ -841,11 +851,19 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		new Setting(el).setName('Record format')
 			.addDropdown(dd => dd
 				.addOptions({ table: 'Markdown table', colon: 'property: value', dataview: 'property:: value' })
-				.setValue(s.recordFormat).onChange(v => { s.recordFormat = v as typeof s.recordFormat; void save(); }));
+				.setValue(s.recordFormat).onChange(v => {
+					s.recordFormat = v as typeof s.recordFormat;
+					this.app.saveLocalStorage(CLEANER_RECORD_KEY, null);
+					void save();
+				}));
 		new Setting(el).setName('Record location')
 			.addDropdown(dd => dd
 				.addOptions({ top: 'Top of note', bottom: 'Bottom of note', heading: 'Under a heading' })
-				.setValue(s.recordLocation).onChange(v => { s.recordLocation = v as typeof s.recordLocation; void save(true); }));
+				.setValue(s.recordLocation).onChange(v => {
+					s.recordLocation = v as typeof s.recordLocation;
+					this.app.saveLocalStorage(CLEANER_RECORD_KEY, null);
+					void save(true);
+				}));
 		if (s.recordLocation === 'heading') {
 			new Setting(el).setName('Heading text')
 				.setDesc('Created if the note doesn\'t have it yet.')

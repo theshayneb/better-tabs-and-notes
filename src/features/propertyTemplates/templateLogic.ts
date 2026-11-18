@@ -16,12 +16,15 @@ export interface TemplateProperty {
 }
 
 export interface TemplateRule {
+	/** Stable id, so edits on different devices merge per rule (see shared/editLog.ts). */
+	id?: string;
 	type: RuleType;
 	match: string;
 	properties: TemplateProperty[];
 }
 
 export interface PropertyChoices {
+	id?: string;
 	property: string;
 	/** The values offered, separated by commas. */
 	options: string;

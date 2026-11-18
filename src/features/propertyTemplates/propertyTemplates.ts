@@ -98,6 +98,12 @@ export class PropertyTemplatesFeature extends Feature {
 	async insert(file: TFile, quiet = false): Promise<number> {
 		const template = this.templateOf(file);
 		let added = 0;
+		// Nothing to add: don't rewrite the note at all.
+		const fm = this.app.metadataCache.getFileCache(file)?.frontmatter;
+		if (missingProperties(fm, template).length === 0) {
+			if (!quiet) new Notice('Nothing to add.');
+			return 0;
+		}
 		await this.app.fileManager.processFrontMatter(file, (fm: Record<string, unknown>) => {
 			added = insertMissing(fm, template, p => templateValue(p.value, this.propertyType(p.name)));
 		});

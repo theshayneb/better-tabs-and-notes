@@ -3,6 +3,7 @@
 
 import { Events, TFile, debounce, parseFrontMatterAliases, type Command, type EventRef, type WorkspaceLeaf } from 'obsidian';
 import { Feature } from '../../feature';
+import { RECENT_FILES_KEY, loadStrings, saveStrings } from '../../shared/deviceMemory';
 import { closeOtherTabs } from '../../shared/closeTabs';
 import type { HomeTabSettings } from '../../settings';
 import { HOME_CODE_BLOCK, HOME_VIEW_TYPE, LEGACY_HOME_CODE_BLOCK } from './constants';
@@ -64,7 +65,8 @@ export class HomeTabFeature extends Feature {
 
 	override onload(): void {
 		const { workspace, vault, metadataCache } = this.app;
-		this.recent = this.settings.storeRecentFiles ? [...this.settings.recentFiles] : [];
+		// Kept on this device only: opening notes never changes the synced settings.
+		this.recent = this.settings.storeRecentFiles ? loadStrings(this.app, RECENT_FILES_KEY) ?? [] : [];
 
 		const invalidate = () => { this.index = null; };
 		this.registerEvent(vault.on('create', invalidate));
@@ -113,6 +115,7 @@ export class HomeTabFeature extends Feature {
 
 	override onSettingsChange(): void {
 		this.recent = this.recent.slice(0, this.settings.maxRecentFiles);
+		if (!this.settings.storeRecentFiles) saveStrings(this.app, RECENT_FILES_KEY, null);
 		this.index = null;
 		this.events.trigger('settings-changed');
 	}
@@ -206,8 +209,7 @@ export class HomeTabFeature extends Feature {
 	}
 
 	private saveRecent = debounce(() => {
-		this.settings.recentFiles = this.settings.storeRecentFiles ? [...this.recent] : [];
-		void this.plugin.saveSettings();
+		saveStrings(this.app, RECENT_FILES_KEY, this.settings.storeRecentFiles ? this.recent : null);
 	}, 2000, true);
 
 	private recentChanged(): void {

@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.0.35] - 2026-11-18
+
+Safe with Obsidian Sync across devices that sync at different times.
+
+### Added
+- "Run background tasks on this device" (top of the settings, not synced; on for desktop, off for phones and tablets by default). Only that device creates today's daily note on its own and repairs synced settings.
+- Settings changed on different devices are merged by when each change was made, not by which device saved last. Hidden commands, pinned tab icon rules, link icon rules and property templates merge item by item. If Sync brings back an older copy of the settings from a device that was offline, the background device puts the newer changes back once Sync has settled.
+
+### Changed
+- Pinned daily note: if today's note isn't there yet, it waits for Sync to settle first (a quiet minute), showing "Waiting for sync…" with a "Create now" button. Then the background device creates it, and a phone or tablet shows "Create today's note" instead of creating it (and opens the note by itself if it arrives). Opening it by hand creates it once Sync has settled. This replaces the 8-second wait at startup, and also applies to opening it at startup.
+- Recent notes (home tab), recent icons, and the last choices in bulk properties and the property cleaner are now kept on each device instead of in the synced settings. Recent notes and icons from before are moved over on each device.
+
+### Fixed
+- Opening a note no longer rewrites the plugin's settings file (the recent notes list was saved there), which let a phone that was offline bring back old settings when it synced.
+- Settings are only written when something actually changed.
+- Settings that arrive from another device while the settings page is open now show there, instead of later edits going to the old copy and being lost.
+- "Insert missing template properties" no longer rewrites a note when nothing is missing.
+
 ## [0.0.34] - 2026-11-15
 
 ### Changed

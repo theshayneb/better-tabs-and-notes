@@ -1038,3 +1038,31 @@
 	height: var(--icon-xs);
 	vertical-align: middle;
 }
+
+/* ===== Pinned daily note: waiting for sync / create ===== */
+
+.btn-dn-prompt {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-4-2);
+	align-items: center;
+	padding: var(--size-4-2) var(--size-4-4);
+	border-bottom: 1px solid var(--background-modifier-border);
+	background-color: var(--background-secondary);
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+.notice .btn-dn-prompt-text {
+	display: block;
+	margin-bottom: var(--size-4-2);
+}
+
+.btn-dn-prompt-icon {
+	display: flex;
+	color: var(--text-faint);
+}
+
+.btn-dn-prompt-text {
+	flex: 1 1 12em;
+}

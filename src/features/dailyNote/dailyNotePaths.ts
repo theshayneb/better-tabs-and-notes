@@ -53,3 +53,17 @@ export function applyTemplate(template: string, title: string, date: Moment, dat
 			return shifted.format(format ? format.slice(1).trim() : fallback);
 		});
 }
+
+/**
+ * What to do about today's daily note.
+ * open: it's there. wait: let Sync settle first, it may be on its way.
+ * create: make it (asked for by hand, or this device runs background tasks).
+ * ask: show a "Create today's note" button instead of creating it.
+ */
+export type DailyStep = 'open' | 'wait' | 'create' | 'ask';
+
+export function dailyStep(state: { exists: boolean; settled: boolean; byHand: boolean; background: boolean }): DailyStep {
+	if (state.exists) return 'open';
+	if (!state.settled) return 'wait';
+	return state.byHand || state.background ? 'create' : 'ask';
+}
