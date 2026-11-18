@@ -25,6 +25,8 @@ declare module 'obsidian' {
 		viewRegistry: {
 			getTypeByExtension(extension: string): string | undefined;
 		};
+		/** The settings window. */
+		setting?: { open(): void; openTabById(id: string): void };
 		loadLocalStorage(key: string): unknown;
 		saveLocalStorage(key: string, value: unknown): void;
 	}
@@ -88,6 +90,11 @@ declare module 'obsidian' {
 	interface Vault {
 		getConfig(key: string): unknown;
 		setConfig(key: string, value: unknown): void;
+	}
+
+	interface WorkspaceRibbon {
+		/** Drops a ribbon icon's record (id `<plugin id>:<title>`), so it can be added again without a restart. */
+		removeRibbonAction?(id: string): void;
 	}
 
 	interface Workspace {

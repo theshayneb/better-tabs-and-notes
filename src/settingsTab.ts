@@ -11,6 +11,9 @@ import { FilePickerModal, FolderPickerModal, IconPickerModal, PatternEditorModal
 import { DEFAULT_LINK_ICON_RULES, cleanRules } from './features/linkIcons/linkIconRules';
 import { RULE_TYPE_LABELS, findConflicts, ruleMatches } from './features/pinnedIcons/rules';
 import { renderIcon } from './features/pinnedIcons/pinnedIcons';
+import { DEFAULT_MENU_ICON, DEFAULT_NOTE_ICON, createDivider, createNote, displayTitle, moveItem, type PinnedNote } from './features/pinnedNotes/pinnedNotesLogic';
+import { fromPicker, isUnknownIconName, renderNoteIcon } from './features/pinnedNotes/pinnedNotesIcons';
+import { FileSuggest, IconSuggest } from './features/pinnedNotes/pinnedNotesModals';
 import { cleanIds, describeHidden, matchNames, searchCommands, type CommandFilter } from './features/hideCommands/hideLogic';
 
 /** How many commands the "All commands" list shows at once. */
@@ -72,6 +75,10 @@ const FEATURE_INFO: Record<FeatureId, { name: string; desc: string }> = {
 	propertyTemplates: {
 		name: 'Property templates',
 		desc: 'Give notes in a folder, with a tag or with a matching name a set of properties in a set order, and give properties a list of values to pick from.',
+	},
+	pinnedNotes: {
+		name: 'Pinned notes',
+		desc: 'Pin notes to the ribbon, each as its own icon with dividers between them, or to one menu button.',
 	},
 };
 
@@ -149,6 +156,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		this.section('hideCommands', el => this.renderHideCommands(el));
 		this.section('linkIcons', el => this.renderLinkIcons(el));
 		this.section('propertyTemplates', el => this.renderPropertyTemplates(el));
+		this.section('pinnedNotes', el => this.renderPinnedNotes(el));
 	}
 
 	/** The start page for this device only, overriding the synced "open on start" settings. */
@@ -667,6 +675,111 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 			s.choices.push({ property: '', options: '' });
 			void save(true);
 		}));
+	}
+
+	private renderPinnedNotes(el: HTMLElement): void {
+		const s = this.plugin.settings.pinnedNotes;
+		const feature = this.plugin.features.pinnedNotes;
+		const save = (redraw = false) => this.save('pinnedNotes', redraw);
+
+		new Setting(el).setName('Pinned notes and dividers')
+			.setDesc('They appear in the ribbon and the menu in this order. Leave the title empty to use the file name. You can also pin a file from its right-click menu, and drag the icons around in the ribbon.');
+		if (s.items.length === 0) el.createDiv({ cls: 'btn-hc-empty', text: 'No pinned notes yet.' });
+		s.items.forEach((item, index) => {
+			const setting = new Setting(el);
+			if (item.type === 'note') {
+				setting.setClass('btn-pn-note-row');
+				const iconEl = setting.nameEl.createSpan({ cls: 'btn-pn-icon-preview' });
+				const titleEl = setting.nameEl.createSpan();
+				const refresh = () => {
+					renderNoteIcon(iconEl, item.icon);
+					titleEl.setText(displayTitle(item));
+					const problems: string[] = [];
+					if (!item.path.trim()) problems.push('Choose a note.');
+					else if (!feature.resolveNote(item)) problems.push('Note not found.');
+					if (isUnknownIconName(item.icon)) problems.push(`Unknown icon "${item.icon.trim()}".`);
+					setting.setDesc(problems.join(' '));
+					setting.descEl.toggleClass('btn-pn-warning', problems.length > 0);
+				};
+				refresh();
+				const update = (change: Partial<Pick<PinnedNote, 'title' | 'path' | 'icon'>>) => {
+					Object.assign(item, change);
+					refresh();
+					void save();
+				};
+				setting
+					.addText(t => t.setPlaceholder('Title').setValue(item.title).onChange(v => update({ title: v })))
+					.addText(t => {
+						t.setPlaceholder('Path').setValue(item.path).onChange(v => update({ path: v }));
+						t.inputEl.addClass('btn-pn-path-input');
+						new FileSuggest(this.app, t.inputEl, file => update({ path: file.path }));
+					})
+					.addText(t => {
+						t.setPlaceholder(`Icon (${DEFAULT_NOTE_ICON})`).setValue(item.icon).onChange(v => update({ icon: v.trim() }));
+						t.inputEl.addClass('btn-pn-icon-input');
+						new IconSuggest(this.app, t.inputEl, icon => update({ icon }));
+					})
+					.addExtraButton(b => b.setIcon('smile-plus').setTooltip('Choose an icon').onClick(() => {
+						new IconPickerModal(this.app, recentIcons(this.app), icon => {
+							rememberIcon(this.app, icon);
+							item.icon = fromPicker(icon);
+							void save(true);
+						}).open();
+					}));
+			} else {
+				setting.setClass('btn-pn-divider-row').setName('Divider');
+			}
+			// The buttons act on the item's id, so a list changed by a sync can't move or remove the wrong one.
+			const id = item.id;
+			setting
+				.addExtraButton(b => b.setIcon('arrow-up').setTooltip('Move up').setDisabled(index === 0)
+					.onClick(() => { s.items = moveItem(s.items, id, -1); void save(true); }))
+				.addExtraButton(b => b.setIcon('arrow-down').setTooltip('Move down').setDisabled(index === s.items.length - 1)
+					.onClick(() => { s.items = moveItem(s.items, id, 1); void save(true); }))
+				.addExtraButton(b => b.setIcon('trash-2').setTooltip('Remove')
+					.onClick(() => { s.items = s.items.filter(i => i.id !== id); void save(true); }));
+		});
+		new Setting(el)
+			.addButton(b => b.setButtonText('Add note').setCta().onClick(() => { s.items.push(createNote('')); void save(true); }))
+			.addButton(b => b.setButtonText('Add divider').onClick(() => { s.items.push(createDivider()); void save(true); }));
+
+		new Setting(el).setName('Show notes in the ribbon')
+			.setDesc('Each pinned note and divider as its own ribbon icon. Dividers aren\'t shown on phones.')
+			.addToggle(t => t.setValue(s.showRibbonIcons).onChange(v => { s.showRibbonIcons = v; void save(); }));
+		new Setting(el).setName('Show menu button')
+			.setDesc('One ribbon button that opens a menu of all pinned notes, with dividers as separators.')
+			.addToggle(t => t.setValue(s.showMenuButton).onChange(v => { s.showMenuButton = v; void save(true); }));
+		if (s.showMenuButton) {
+			const menuIcon = new Setting(el).setName('Menu button icon').setDesc('Any icon name from lucide.dev that Obsidian includes.');
+			const preview = menuIcon.controlEl.createSpan({ cls: 'btn-pn-icon-preview' });
+			const setMenuIcon = (value: string) => {
+				s.menuIcon = value.trim() || DEFAULT_MENU_ICON;
+				renderNoteIcon(preview, s.menuIcon);
+				void save();
+			};
+			renderNoteIcon(preview, s.menuIcon);
+			menuIcon.addText(t => {
+				t.setPlaceholder(DEFAULT_MENU_ICON).setValue(s.menuIcon).onChange(setMenuIcon);
+				new IconSuggest(this.app, t.inputEl, setMenuIcon);
+			});
+		}
+
+		// eslint-disable-next-line obsidianmd/ui/sentence-case -- plugin names are proper nouns
+		new Setting(el).setName('Import from Pinned Notes Menu')
+			// eslint-disable-next-line obsidianmd/ui/sentence-case -- plugin names are proper nouns
+			.setDesc('Copy the pinned notes, dividers and ribbon settings of Pinned Notes Menu, which this feature replaces. The device that runs background tasks does this once by itself. Notes already pinned are skipped. Turn Pinned Notes Menu off afterwards, or every icon shows twice.')
+			.addButton(b => b.setButtonText('Import').onClick(async () => {
+				await feature.importPinnedNotesMenu();
+				this.redraw();
+			}));
+		// eslint-disable-next-line obsidianmd/ui/sentence-case -- plugin names are proper nouns
+		new Setting(el).setName('Import from Pinned Notes and Ribbon Divider')
+			// eslint-disable-next-line obsidianmd/ui/sentence-case -- plugin names are proper nouns
+			.setDesc('Copy notes from the original Pinned Notes plugin and dividers from Ribbon Divider. Notes already pinned are skipped; dividers are only added to a list without any, after the notes.')
+			.addButton(b => b.setButtonText('Import').onClick(async () => {
+				await feature.importOriginalPlugins();
+				this.redraw();
+			}));
 	}
 
 	private renderLinkIcons(el: HTMLElement): void {

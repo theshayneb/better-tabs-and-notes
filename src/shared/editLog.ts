@@ -31,6 +31,7 @@ export const ITEM_LISTS: Record<string, 'set' | 'items'> = {
 	'linkIcons.rules': 'items',
 	'propertyTemplates.rules': 'items',
 	'propertyTemplates.choices': 'items',
+	'pinnedNotes.items': 'items',
 };
 
 const FIRST = '^';

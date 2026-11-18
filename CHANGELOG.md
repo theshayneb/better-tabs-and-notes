@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.0.36] - 2026-11-18
+
+### Added
+- Pinned notes, replacing Pinned Notes Menu (which combined Pinned Notes and Ribbon Divider):
+  - Each pinned note is its own ribbon icon, with dividers between icons (not on phones). Middle-click opens a new tab.
+  - Optional menu button with all pinned notes, "Pin current note" and "Edit pinned notes".
+  - Commands "Open pinned note", "Pin current note" and "Unpin current note", and pin/unpin in a file's right-click menu.
+  - Notes open like a link click, so tab behaviour (new tab, no duplicate tabs) applies. Pinned Notes Menu's "Open notes in" and "Switch to open tab" settings are gone for that reason.
+  - Pinned notes follow renamed or moved notes and folders, on the device that runs background tasks once Sync has settled.
+  - The list syncs through the plugin's edit log, item by item.
+  - Import from Pinned Notes Menu (done once by itself on the device that runs background tasks, keeping each item's id so devices don't end up with duplicates), and from Pinned Notes and Ribbon Divider. Dividers keep the `ribbon-divider` classes, so CSS snippets keep working.
+- The settings warn while Pinned Notes Menu, Pinned Notes or Ribbon Divider is still turned on.
+
 ## [0.0.35] - 2026-11-18
 
 Safe with Obsidian Sync across devices that sync at different times.

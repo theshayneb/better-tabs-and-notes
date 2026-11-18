@@ -1,6 +1,6 @@
 # Better Tabs and Notes
 
-One Obsidian plugin that replaces twelve:
+One Obsidian plugin that replaces seventeen:
 
 | Feature | Replaces |
 | --- | --- |
@@ -18,6 +18,7 @@ One Obsidian plugin that replaces twelve:
 | **Hide commands**: hide commands from the command palette, keeping them working | [Command Block List](https://github.com/RyotaUshio/obsidian-command-block-list) |
 | **Link icons**: an icon before links to PDFs, images and other files, by file type | (new) |
 | **Property templates**: properties by folder or tag, inserted and ordered with a click, and values to pick from | Part of [Fileclass](https://github.com/mdelobelle/fileclass) (new code) |
+| **Pinned notes**: notes pinned to the ribbon, with dividers between icons, or to one menu button | [Pinned Notes Menu](https://github.com/theshayneb/pinned-notes-menu), which combined [Pinned Notes](https://github.com/vasilcoin002/pinned-notes-plugin-obsidian) and [Ribbon Divider](https://github.com/andrewmcgivery/obsidian-ribbon-divider) |
 
 Every feature can be turned on or off on its own in the settings, and also
 turned off on just one device (handy for desktop-only features like compact
@@ -47,7 +48,8 @@ now and then:
   you change one, and not at all when nothing changed.
 - Settings changed on different devices are merged by when each change was
   made, not by which device saved last. Lists (hidden commands, pinned tab
-  icon rules, link icon rules, property templates) merge item by item. If Sync
+  icon rules, link icon rules, property templates, pinned notes) merge item by
+  item. If Sync
   brings back an older copy from a device that was offline, the background
   device puts the newer changes back once Sync has settled.
 
@@ -281,6 +283,26 @@ now and then:
   the Properties panel of notes that rule matches, but stays in the note.
   **Show N hidden properties** under the panel shows them again for that note.
 
+### Pinned notes
+
+- Each pinned note is its own ribbon icon, in the order of the list in the
+  settings; dividers draw a thin line between ribbon icons (not on phones).
+  Middle-click opens a new tab. Notes open like a link click, so tab behaviour
+  (new tab, no duplicate tabs) applies.
+- Optional menu button: one ribbon button with all pinned notes, dividers as
+  separators, plus *Pin current note* and *Edit pinned notes*.
+- Commands *Open pinned note* (a picker), *Pin current note* and *Unpin current
+  note*, and *Pin to / Unpin from pinned notes* in a file's right-click menu.
+- In the settings: a title (optional, the file name by default), path and icon
+  (a Lucide name or an emoji) for each note, with warnings for a missing note
+  or an unknown icon.
+- Pinned notes follow their note or folder when it's renamed or moved (on the
+  device that runs background tasks, once Sync has settled).
+- Imports from Pinned Notes Menu (also done once by itself on the device that
+  runs background tasks), and from the original Pinned Notes and Ribbon
+  Divider plugins. CSS snippets for Ribbon Divider's `ribbon-divider` class
+  keep working.
+
 ## Development
 
 ```
@@ -320,6 +342,7 @@ src/
     hideCommands/      hide commands from the command palette
     linkIcons/         icons before links to non-note files
     propertyTemplates/ property templates and value choices
+    pinnedNotes/       pinned notes in the ribbon or a menu, ribbon dividers
   shared/editLog.ts    merging settings edits from several devices by edit time
   shared/syncSettle.ts waiting for Obsidian Sync to settle
   shared/deviceMemory.ts things kept on this device only (local storage)

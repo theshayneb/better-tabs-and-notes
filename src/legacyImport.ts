@@ -17,6 +17,9 @@ const LEGACY_IDS = {
 	tagWrangler: 'tag-wrangler',
 	frontmatterMarkdownLinks: 'frontmatter-markdown-links',
 	nestedProperties: 'nested-properties',
+	pinnedNotesMenu: 'pinned-notes-menu',
+	pinnedNotes: 'pinned-notes',
+	ribbonDivider: 'ribbon-divider',
 } as const;
 
 /** Plugin id and display name of each original plugin. */
@@ -34,6 +37,10 @@ export const LEGACY_PLUGINS: [string, string][] = [
 	[LEGACY_IDS.tagWrangler, 'Tag Wrangler'],
 	[LEGACY_IDS.frontmatterMarkdownLinks, 'Frontmatter Markdown Links'],
 	[LEGACY_IDS.nestedProperties, 'Nested Properties'],
+	// Imported from the pinned notes settings instead; listed so the settings warn while they're still on.
+	[LEGACY_IDS.pinnedNotesMenu, 'Pinned Notes Menu'],
+	[LEGACY_IDS.pinnedNotes, 'Pinned Notes'],
+	[LEGACY_IDS.ribbonDivider, 'Ribbon Divider'],
 ];
 
 type Json = Record<string, unknown>;

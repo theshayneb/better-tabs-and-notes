@@ -1066,3 +1066,70 @@
 .btn-dn-prompt-text {
 	flex: 1 1 12em;
 }
+
+/* ===== Pinned notes ===== */
+
+/* Ribbon dividers (from Ribbon Divider, via Pinned Notes Menu). */
+.side-dock-actions .side-dock-ribbon-action.pnm-ribbon-divider {
+	width: 70%;
+	height: 1px;
+	padding: 4px 0;
+	cursor: default;
+}
+
+.side-dock-actions .side-dock-ribbon-action.pnm-ribbon-divider:hover {
+	background-color: transparent;
+}
+
+.side-dock-actions .side-dock-ribbon-action.pnm-ribbon-divider::before {
+	content: "";
+	display: block;
+	width: 100%;
+	height: 1px;
+	background-color: var(--icon-color);
+	opacity: 0.5;
+}
+
+.btn-pn-emoji {
+	font-size: var(--icon-size);
+	line-height: 1;
+}
+
+.btn-pn-icon-preview {
+	display: inline-flex;
+	align-items: center;
+	margin-inline-end: var(--size-4-2);
+	color: var(--icon-color);
+	vertical-align: middle;
+}
+
+.btn-pn-icon-preview svg {
+	width: var(--icon-s);
+	height: var(--icon-s);
+}
+
+.btn-pn-suggestion {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-1);
+}
+
+.btn-pn-note-row .setting-item-control {
+	flex-wrap: wrap;
+}
+
+.btn-pn-note-row .setting-item-control input[type="text"] {
+	width: 9em;
+}
+
+.btn-pn-note-row .setting-item-control input.btn-pn-path-input {
+	width: 14em;
+}
+
+.btn-pn-note-row .setting-item-description.btn-pn-warning {
+	color: var(--text-warning);
+}
+
+.btn-pn-divider-row .setting-item-name {
+	color: var(--text-muted);
+}

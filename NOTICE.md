@@ -1,8 +1,8 @@
 # Third-party notices
 
-Better Tabs and Notes combines the features of twelve Obsidian plugins. It is
+Better Tabs and Notes combines the features of seventeen Obsidian plugins. It is
 licensed under the GNU General Public License v3.0 (see `LICENSE`), because
-one of them, Edit mode switch, is GPL-3.0. The other eleven are under permissive
+one of them, Edit mode switch, is GPL-3.0. The other sixteen are under permissive
 licenses whose notices are reproduced below as they require.
 
 | Feature here | Original plugin | Author | License |
@@ -21,6 +21,9 @@ licenses whose notices are reproduced below as they require.
 | Hide commands (the approach) | [obsidian-command-block-list](https://github.com/RyotaUshio/obsidian-command-block-list) | Ryota Ushio | MIT |
 | Property templates (the idea only; no code was copied) | [fileclass](https://github.com/mdelobelle/fileclass) | mdelobelle | MIT |
 | Nested properties | [obsidian-nested-properties](https://github.com/mnaoumov/obsidian-nested-properties) | Michael Naumov | MIT |
+| Pinned notes | [pinned-notes-menu](https://github.com/theshayneb/pinned-notes-menu), which combined the two below | theshayneb | MIT |
+| Pinned notes (pinned notes in the ribbon) | [pinned-notes-plugin-obsidian](https://github.com/vasilcoin002/pinned-notes-plugin-obsidian) | vasilcoin002 | MIT |
+| Pinned notes (ribbon dividers) | [obsidian-ribbon-divider](https://github.com/andrewmcgivery/obsidian-ribbon-divider) | Andrew McGivery | MIT |
 
 ---
 
@@ -307,6 +310,89 @@ monkey-around, without unregistering anything. The code was written anew.
 MIT License
 
 Copyright (c) 2024 Ryota Ushio
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## pinned-notes-menu
+
+Pinned notes is ported from it, including the parts it took from Pinned Notes
+and Ribbon Divider (below).
+
+MIT License
+
+Copyright (c) 2026 theshayneb
+Copyright (c) 2024 vasilcoin002 (Pinned Notes)
+Copyright (c) 2023 andrewmcgivery (Ribbon Divider)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## pinned-notes-plugin-obsidian
+
+MIT License
+
+Copyright (c) 2024 vasilcoin002
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## obsidian-ribbon-divider
+
+MIT License
+
+Copyright (c) 2023 andrewmcgivery
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

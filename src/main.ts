@@ -24,6 +24,7 @@ import { NestedPropertiesFeature } from './features/nestedProperties/nestedPrope
 import { HideCommandsFeature } from './features/hideCommands/hideCommands';
 import { LinkIconsFeature } from './features/linkIcons/linkIcons';
 import { PropertyTemplatesFeature } from './features/propertyTemplates/propertyTemplates';
+import { PinnedNotesFeature } from './features/pinnedNotes/pinnedNotes';
 
 const DEVICE_DISABLED_PREFIX = 'better-tabs-and-notes:disabled-on-device:';
 const DEVICE_TABS_KEY = 'better-tabs-and-notes:device-tab-settings';
@@ -53,6 +54,7 @@ export default class BetterTabsPlugin extends Plugin {
 		hideCommands: HideCommandsFeature;
 		linkIcons: LinkIconsFeature;
 		propertyTemplates: PropertyTemplatesFeature;
+		pinnedNotes: PinnedNotesFeature;
 	};
 
 	override async onload(): Promise<void> {
@@ -76,6 +78,7 @@ export default class BetterTabsPlugin extends Plugin {
 			hideCommands: new HideCommandsFeature(this),
 			linkIcons: new LinkIconsFeature(this),
 			propertyTemplates: new PropertyTemplatesFeature(this),
+			pinnedNotes: new PinnedNotesFeature(this),
 		};
 
 		// Register the settings tab first, so it's there even if a feature fails.

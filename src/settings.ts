@@ -1,9 +1,10 @@
 // All settings live in the plugin's data.json. Each feature owns one section.
 
 import { DEFAULT_LINK_ICON_RULES, type LinkIconRule } from './features/linkIcons/linkIconRules';
+import { DEFAULT_MENU_ICON, cleanItems, type PinnedItem } from './features/pinnedNotes/pinnedNotesLogic';
 import { moveChoicesIntoRules, type PropertyChoices, type TemplateRule } from './features/propertyTemplates/templateLogic';
 
-export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'tagRename', 'frontmatterLinks', 'nestedProperties', 'hideCommands', 'linkIcons', 'propertyTemplates'] as const;
+export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'tagRename', 'frontmatterLinks', 'nestedProperties', 'hideCommands', 'linkIcons', 'propertyTemplates', 'pinnedNotes'] as const;
 export type FeatureId = typeof FEATURE_IDS[number];
 
 // ---------------------------------------------------------------------------
@@ -254,6 +255,19 @@ export interface PropertyTemplateSettings {
 }
 
 // ---------------------------------------------------------------------------
+// Pinned notes (Pinned Notes Menu)
+
+export interface PinnedNotesSettings {
+	/** Notes and dividers, in ribbon and menu order. */
+	items: PinnedItem[];
+	/** Show each pinned note and divider as its own ribbon icon. */
+	showRibbonIcons: boolean;
+	/** Show one ribbon button that opens a menu of all pinned notes. */
+	showMenuButton: boolean;
+	menuIcon: string;
+}
+
+// ---------------------------------------------------------------------------
 
 export interface PluginSettings {
 	features: Record<FeatureId, boolean>;
@@ -269,6 +283,7 @@ export interface PluginSettings {
 	hideCommands: HideCommandsSettings;
 	linkIcons: LinkIconSettings;
 	propertyTemplates: PropertyTemplateSettings;
+	pinnedNotes: PinnedNotesSettings;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -287,6 +302,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		hideCommands: true,
 		linkIcons: true,
 		propertyTemplates: true,
+		pinnedNotes: true,
 	},
 	tabs: {
 		openInNewTab: true,
@@ -399,10 +415,16 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		optionsInRules: true,
 		showButtons: true,
 	},
+	pinnedNotes: {
+		items: [],
+		showRibbonIcons: true,
+		showMenuButton: false,
+		menuIcon: DEFAULT_MENU_ICON,
+	},
 };
 
 type Section = Exclude<keyof PluginSettings, 'features'>;
-const SECTIONS: Section[] = ['tabs', 'homeTab', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'nestedProperties', 'hideCommands', 'linkIcons', 'propertyTemplates'];
+const SECTIONS: Section[] = ['tabs', 'homeTab', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'nestedProperties', 'hideCommands', 'linkIcons', 'propertyTemplates', 'pinnedNotes'];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -442,6 +464,8 @@ export function mergeSettings(stored: unknown): PluginSettings {
 		const t = result.propertyTemplates;
 		if (Array.isArray(t.rules) && Array.isArray(t.choices)) t.choices = moveChoicesIntoRules(t.rules, t.choices);
 	}
+	result.pinnedNotes.items = cleanItems(result.pinnedNotes.items);
+	if (!result.pinnedNotes.menuIcon.trim()) result.pinnedNotes.menuIcon = DEFAULT_MENU_ICON;
 	return result;
 }
 
