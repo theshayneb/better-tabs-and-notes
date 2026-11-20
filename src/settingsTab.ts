@@ -14,6 +14,7 @@ import { renderIcon } from './features/pinnedIcons/pinnedIcons';
 import { DEFAULT_MENU_ICON, DEFAULT_NOTE_ICON, createDivider, createNote, displayTitle, moveItem, type PinnedNote } from './features/pinnedNotes/pinnedNotesLogic';
 import { fromPicker, isUnknownIconName, renderNoteIcon } from './features/pinnedNotes/pinnedNotesIcons';
 import { FileSuggest, IconSuggest } from './features/pinnedNotes/pinnedNotesModals';
+import { parsePathList } from './features/taskSweeper/sweepLogic';
 import { cleanIds, describeHidden, matchNames, searchCommands, type CommandFilter } from './features/hideCommands/hideLogic';
 
 /** How many commands the "All commands" list shows at once. */
@@ -79,6 +80,10 @@ const FEATURE_INFO: Record<FeatureId, { name: string; desc: string }> = {
 	pinnedNotes: {
 		name: 'Pinned notes',
 		desc: 'Pin notes to the ribbon, each as its own icon with dividers between them, or to one menu button.',
+	},
+	taskSweeper: {
+		name: 'Task sweeper',
+		desc: 'Move completed tasks, with their subtasks, to a "Done" section at the bottom of the note, dated. Run "Sweep completed tasks to bottom of note", or sweep automatically when you check a task off.',
 	},
 };
 
@@ -157,6 +162,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		this.section('linkIcons', el => this.renderLinkIcons(el));
 		this.section('propertyTemplates', el => this.renderPropertyTemplates(el));
 		this.section('pinnedNotes', el => this.renderPinnedNotes(el));
+		this.section('taskSweeper', el => this.renderTaskSweeper(el));
 	}
 
 	/** The start page for this device only, overriding the synced "open on start" settings. */
@@ -780,6 +786,38 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 				await feature.importOriginalPlugins();
 				this.redraw();
 			}));
+	}
+
+	private renderTaskSweeper(el: HTMLElement): void {
+		const s = this.plugin.settings.taskSweeper;
+		const save = (redraw = false) => this.save('taskSweeper', redraw);
+
+		new Setting(el).setName('Auto sweep completed tasks')
+			.setDesc('Sweep the note right after you check off a top-level task in it. Undo puts the tasks back.')
+			.addToggle(t => t.setValue(s.autoSweep).onChange(v => { s.autoSweep = v; void save(); }));
+		new Setting(el).setName('Notes to sweep')
+			.setDesc('Every note, or only the files and folders listed below. The command to add the current file to the task sweeper scope adds a note to the list.')
+			.addDropdown(dd => dd.addOptions({ global: 'Every note', selective: 'Selected files and folders' }).setValue(s.scope)
+				.onChange(v => { s.scope = v === 'selective' ? 'selective' : 'global'; void save(true); }));
+		if (s.scope !== 'selective') return;
+		// Saved when leaving the box, so half-typed paths aren't stored (and synced) along the way.
+		const pathList = (name: string, desc: string, placeholder: string, get: () => string[], set: (paths: string[]) => void) => {
+			new Setting(el).setName(name).setDesc(desc).setClass('btn-ts-paths').addTextArea(t => {
+				t.setPlaceholder(placeholder).setValue(get().join('\n'));
+				t.inputEl.rows = 5;
+				t.inputEl.addEventListener('blur', () => {
+					const paths = parsePathList(t.getValue());
+					t.setValue(paths.join('\n'));
+					if (JSON.stringify(paths) === JSON.stringify(get())) return;
+					set(paths);
+					void save();
+				});
+			});
+		};
+		pathList('Selected files', 'One note path per line, like projects/to-do.md.', 'projects/to-do.md',
+			() => s.includedFiles, paths => { s.includedFiles = paths; });
+		pathList('Selected folders', 'One folder path per line. Every note inside is swept, subfolders included.', 'projects',
+			() => s.includedFolders, paths => { s.includedFolders = paths; });
 	}
 
 	private renderLinkIcons(el: HTMLElement): void {

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.37] - 2026-11-20
+
+### Added
+- Task sweeper, replacing Task Sweeper by Bryan Hogan: "Sweep completed tasks to bottom of note" moves completed top-level tasks, with their subtasks and notes, to a "## Done" section at the bottom of the note and dates them. Optional auto sweep right after a task is checked off (undo puts it back). Works in every note or only in chosen files and folders ("Add current file to task sweeper scope"). The chosen files and folders sync item by item.
+- The settings warn while Task Sweeper is still turned on.
+
 ## [0.0.36] - 2026-11-18
 
 ### Added

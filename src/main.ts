@@ -25,6 +25,7 @@ import { HideCommandsFeature } from './features/hideCommands/hideCommands';
 import { LinkIconsFeature } from './features/linkIcons/linkIcons';
 import { PropertyTemplatesFeature } from './features/propertyTemplates/propertyTemplates';
 import { PinnedNotesFeature } from './features/pinnedNotes/pinnedNotes';
+import { TaskSweeperFeature } from './features/taskSweeper/taskSweeper';
 
 const DEVICE_DISABLED_PREFIX = 'better-tabs-and-notes:disabled-on-device:';
 const DEVICE_TABS_KEY = 'better-tabs-and-notes:device-tab-settings';
@@ -55,6 +56,7 @@ export default class BetterTabsPlugin extends Plugin {
 		linkIcons: LinkIconsFeature;
 		propertyTemplates: PropertyTemplatesFeature;
 		pinnedNotes: PinnedNotesFeature;
+		taskSweeper: TaskSweeperFeature;
 	};
 
 	override async onload(): Promise<void> {
@@ -79,6 +81,7 @@ export default class BetterTabsPlugin extends Plugin {
 			linkIcons: new LinkIconsFeature(this),
 			propertyTemplates: new PropertyTemplatesFeature(this),
 			pinnedNotes: new PinnedNotesFeature(this),
+			taskSweeper: new TaskSweeperFeature(this),
 		};
 
 		// Register the settings tab first, so it's there even if a feature fails.
@@ -102,6 +105,7 @@ export default class BetterTabsPlugin extends Plugin {
 		// itself, and must exist before the workspace restores saved tabs.
 		this.features.homeTab.registerPluginParts();
 		this.features.linkIcons.registerPluginParts();
+		this.features.taskSweeper.registerPluginParts();
 
 		for (const feature of Object.values(this.features) as Feature[]) {
 			try {

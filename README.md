@@ -1,6 +1,6 @@
 # Better Tabs and Notes
 
-One Obsidian plugin that replaces seventeen:
+One Obsidian plugin that replaces eighteen:
 
 | Feature | Replaces |
 | --- | --- |
@@ -18,6 +18,7 @@ One Obsidian plugin that replaces seventeen:
 | **Hide commands**: hide commands from the command palette, keeping them working | [Command Block List](https://github.com/RyotaUshio/obsidian-command-block-list) |
 | **Link icons**: an icon before links to PDFs, images and other files, by file type | (new) |
 | **Property templates**: properties by folder or tag, inserted and ordered with a click, and values to pick from | Part of [Fileclass](https://github.com/mdelobelle/fileclass) (new code) |
+| **Task sweeper**: completed tasks move to a dated Done section at the bottom of the note | [Task Sweeper](https://github.com/BryanHogan/task-sweeper) |
 | **Pinned notes**: notes pinned to the ribbon, with dividers between icons, or to one menu button | [Pinned Notes Menu](https://github.com/theshayneb/pinned-notes-menu), which combined [Pinned Notes](https://github.com/vasilcoin002/pinned-notes-plugin-obsidian) and [Ribbon Divider](https://github.com/andrewmcgivery/obsidian-ribbon-divider) |
 
 Every feature can be turned on or off on its own in the settings, and also
@@ -303,6 +304,22 @@ now and then:
   Divider plugins. CSS snippets for Ribbon Divider's `ribbon-divider` class
   keep working.
 
+### Task sweeper
+
+- *Sweep completed tasks to bottom of note* moves completed top-level tasks,
+  with everything indented under them (subtasks, notes, code), to a `## Done`
+  section at the bottom of the note, and adds the date they were swept
+  `(YYYY-MM-DD)` to any that don't have one. Open tasks stay where they are.
+- Optional auto sweep, right after you check a task off. Undo puts it back.
+- Works in every note, or only in chosen files and folders (*Add current file
+  to task sweeper scope* adds the open note).
+- Only `- [x]` / `- [X]` tasks that aren't indented count; other statuses
+  (`[-]`, `[/]`), numbered tasks, frontmatter and code blocks are left alone,
+  and nothing is swept while a code block is unclosed. Block ids (`^abc`) stay
+  at the end of the line. A `## Done` heading followed by other sections is
+  yours: a new one is made at the bottom.
+- Everything stays plain Markdown.
+
 ## Development
 
 ```
@@ -343,6 +360,7 @@ src/
     linkIcons/         icons before links to non-note files
     propertyTemplates/ property templates and value choices
     pinnedNotes/       pinned notes in the ribbon or a menu, ribbon dividers
+    taskSweeper/       move completed tasks to a Done section
   shared/editLog.ts    merging settings edits from several devices by edit time
   shared/syncSettle.ts waiting for Obsidian Sync to settle
   shared/deviceMemory.ts things kept on this device only (local storage)

@@ -1133,3 +1133,10 @@
 .btn-pn-divider-row .setting-item-name {
 	color: var(--text-muted);
 }
+
+/* ===== Task sweeper ===== */
+
+.btn-ts-paths textarea {
+	width: 100%;
+	min-width: 16em;
+}

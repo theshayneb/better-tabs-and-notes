@@ -32,6 +32,8 @@ export const ITEM_LISTS: Record<string, 'set' | 'items'> = {
 	'propertyTemplates.rules': 'items',
 	'propertyTemplates.choices': 'items',
 	'pinnedNotes.items': 'items',
+	'taskSweeper.includedFiles': 'set',
+	'taskSweeper.includedFolders': 'set',
 };
 
 const FIRST = '^';

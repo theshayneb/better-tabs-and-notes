@@ -1,8 +1,8 @@
 # Third-party notices
 
-Better Tabs and Notes combines the features of seventeen Obsidian plugins. It is
+Better Tabs and Notes combines the features of eighteen Obsidian plugins. It is
 licensed under the GNU General Public License v3.0 (see `LICENSE`), because
-one of them, Edit mode switch, is GPL-3.0. The other sixteen are under permissive
+one of them, Edit mode switch, is GPL-3.0. The other seventeen are under permissive
 licenses whose notices are reproduced below as they require.
 
 | Feature here | Original plugin | Author | License |
@@ -24,6 +24,7 @@ licenses whose notices are reproduced below as they require.
 | Pinned notes | [pinned-notes-menu](https://github.com/theshayneb/pinned-notes-menu), which combined the two below | theshayneb | MIT |
 | Pinned notes (pinned notes in the ribbon) | [pinned-notes-plugin-obsidian](https://github.com/vasilcoin002/pinned-notes-plugin-obsidian) | vasilcoin002 | MIT |
 | Pinned notes (ribbon dividers) | [obsidian-ribbon-divider](https://github.com/andrewmcgivery/obsidian-ribbon-divider) | Andrew McGivery | MIT |
+| Task sweeper | [task-sweeper](https://github.com/BryanHogan/task-sweeper) | Bryan Hogan | 0BSD |
 
 ---
 
@@ -411,6 +412,16 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+## task-sweeper
+
+Copyright (C) 2026 Bryan Hogan
+
+Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
