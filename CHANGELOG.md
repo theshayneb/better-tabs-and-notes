@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.39] - 2026-11-20
+
+### Changed
+- Task sweeper: tasks marked `- [0]` count as done too, so they're swept (and auto swept when checked off) just like `- [x]`.
+
 ## [0.0.38] - 2026-11-20
 
 ### Added

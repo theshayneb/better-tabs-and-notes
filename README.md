@@ -314,7 +314,7 @@ now and then:
 - Optional auto sweep, right after you check a task off. Undo puts it back.
 - Works in every note, or only in chosen files and folders (*Add current file
   to task sweeper scope* adds the open note).
-- Only `- [x]` / `- [X]` tasks that aren't indented count; other statuses
+- Only `- [x]`, `- [X]` and `- [0]` tasks that aren't indented count; other statuses
   (`[-]`, `[/]`), numbered tasks, frontmatter and code blocks are left alone,
   and nothing is swept while a code block is unclosed. Block ids (`^abc`) stay
   at the end of the line. A `## Done` heading followed by other sections is

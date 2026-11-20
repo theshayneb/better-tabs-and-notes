@@ -41,6 +41,15 @@ describe('task sweeper: sweeping', () => {
 		expect(result.totalCompletedCount).toBe(0);
 	});
 
+	it('sweeps [0] tasks as done too, the same way', () => {
+		const result = sweep('## Today\n\n- [0] check #a\n  - [ ] sub\n- [ ] open\n- [0] dated (2026-01-01)\n');
+		expect(result.content).toBe('## Today\n\n- [ ] open\n\n## Done\n\n- [0] check #a (2026-11-20)\n  - [ ] sub\n- [0] dated (2026-01-01)\n');
+		expect(result.movedCount).toBe(2);
+		expect(isCompletionToggle('- [ ] check', '- [0] check')).toBe(true);
+		// Other numbers and statuses aren't done.
+		expect(sweep('- [1] one\n- [o] o\n').didChange).toBe(false);
+	});
+
 	it('keeps Windows line endings', () => {
 		expect(sweep('- [x] a\r\n- [ ] b\r\n').content).toBe('- [ ] b\r\n\r\n## Done\r\n\r\n- [x] a (2026-11-20)\r\n');
 	});

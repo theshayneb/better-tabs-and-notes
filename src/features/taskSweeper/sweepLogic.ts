@@ -6,7 +6,8 @@
 export const DONE_HEADING = '## Done';
 
 const DONE_HEADING_PATTERN = /^## Done\s*$/;
-const COMPLETED_TASK_PATTERN = /^[-*+] \[[xX]\].*$/;
+// [x] and [X] are done, and so is [0] (the owner's own status for done).
+const COMPLETED_TASK_PATTERN = /^[-*+] \[[xX0]\].*$/;
 const OPEN_TASK_PATTERN = /^[-*+] \[ \].*$/;
 const INDENTED_LINE_PATTERN = /^[ \t]/;
 export const BLOCK_ID_PATTERN = /\s+\^[A-Za-z0-9-]+$/;

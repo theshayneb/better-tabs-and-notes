@@ -1,7 +1,7 @@
 {
 	"id": "better-tabs-and-notes",
 	"name": "Better Tabs and Notes",
-	"version": "0.0.38",
+	"version": "0.0.39",
 	"minAppVersion": "1.8.7",
 	"description": "Home tab, smarter tab opening, one tab per note, an edit mode button, a pinned daily note, custom pinned tab icons, pinned notes, ribbon dividers, a task sweeper and a floating note window in one plugin.",
 	"author": "theshayneb",
