@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.38] - 2026-11-20
+
+### Added
+- Floating note (desktop only), replacing PopNote by JD: Alt+P, from any app, shows the note you're on in its own small window that floats over other apps, and hides it again. Pin it on top, fade it, or pick another note from the "⋯" button in its tab strip; optional tray icon. The note, window size and position, pin, opacity and shortcut are remembered on each computer only, so they never sync. The window is kept out of Obsidian's saved layout, so it doesn't come back after a restart. The note it shows follows renames.
+- The settings warn while PopNote is still turned on.
+
 ## [0.0.37] - 2026-11-20
 
 ### Added

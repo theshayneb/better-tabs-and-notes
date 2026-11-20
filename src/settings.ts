@@ -5,7 +5,7 @@ import { parsePathList, type SweepScope } from './features/taskSweeper/sweepLogi
 import { DEFAULT_MENU_ICON, cleanItems, type PinnedItem } from './features/pinnedNotes/pinnedNotesLogic';
 import { moveChoicesIntoRules, type PropertyChoices, type TemplateRule } from './features/propertyTemplates/templateLogic';
 
-export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'tagRename', 'frontmatterLinks', 'nestedProperties', 'hideCommands', 'linkIcons', 'propertyTemplates', 'pinnedNotes', 'taskSweeper'] as const;
+export const FEATURE_IDS = ['homeTab', 'tabs', 'editMode', 'dailyNote', 'pinnedIcons', 'scrollButtons', 'frontmatterCleaner', 'bulkProperties', 'tagRename', 'frontmatterLinks', 'nestedProperties', 'hideCommands', 'linkIcons', 'propertyTemplates', 'pinnedNotes', 'taskSweeper', 'floatingNote'] as const;
 export type FeatureId = typeof FEATURE_IDS[number];
 
 // ---------------------------------------------------------------------------
@@ -318,6 +318,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 		propertyTemplates: true,
 		pinnedNotes: true,
 		taskSweeper: true,
+		floatingNote: true,
 	},
 	tabs: {
 		openInNewTab: true,

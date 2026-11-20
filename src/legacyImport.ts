@@ -21,6 +21,7 @@ const LEGACY_IDS = {
 	pinnedNotes: 'pinned-notes',
 	ribbonDivider: 'ribbon-divider',
 	taskSweeper: 'task-sweeper',
+	popNote: 'popnote',
 } as const;
 
 /** Plugin id and display name of each original plugin. */
@@ -43,6 +44,7 @@ export const LEGACY_PLUGINS: [string, string][] = [
 	[LEGACY_IDS.pinnedNotes, 'Pinned Notes'],
 	[LEGACY_IDS.ribbonDivider, 'Ribbon Divider'],
 	[LEGACY_IDS.taskSweeper, 'Task Sweeper'],
+	[LEGACY_IDS.popNote, 'PopNote'],
 ];
 
 type Json = Record<string, unknown>;

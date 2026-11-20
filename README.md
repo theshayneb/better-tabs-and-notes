@@ -1,6 +1,6 @@
 # Better Tabs and Notes
 
-One Obsidian plugin that replaces eighteen:
+One Obsidian plugin that replaces nineteen:
 
 | Feature | Replaces |
 | --- | --- |
@@ -19,6 +19,7 @@ One Obsidian plugin that replaces eighteen:
 | **Link icons**: an icon before links to PDFs, images and other files, by file type | (new) |
 | **Property templates**: properties by folder or tag, inserted and ordered with a click, and values to pick from | Part of [Fileclass](https://github.com/mdelobelle/fileclass) (new code) |
 | **Task sweeper**: completed tasks move to a dated Done section at the bottom of the note | [Task Sweeper](https://github.com/BryanHogan/task-sweeper) |
+| **Floating note**: a note in a small window over any app, shown and hidden with Alt+P from anywhere (desktop) | [PopNote](https://github.com/iijarrett/popnote) |
 | **Pinned notes**: notes pinned to the ribbon, with dividers between icons, or to one menu button | [Pinned Notes Menu](https://github.com/theshayneb/pinned-notes-menu), which combined [Pinned Notes](https://github.com/vasilcoin002/pinned-notes-plugin-obsidian) and [Ribbon Divider](https://github.com/andrewmcgivery/obsidian-ribbon-divider) |
 
 Every feature can be turned on or off on its own in the settings, and also
@@ -320,6 +321,24 @@ now and then:
   yours: a new one is made at the bottom.
 - Everything stays plain Markdown.
 
+### Floating note (desktop only)
+
+- **Alt+P**, from any app while Obsidian is running, shows the note you're on in
+  its own small window (an Obsidian pop-out, so it looks like your theme), and
+  hides it again. While it runs, Alt+P does nothing else on that computer;
+  change the shortcut in the settings.
+- The **⋯** button in the window's tab strip: pick another note, pin the window
+  on top of other apps, or fade it (opacity).
+- Optional tray icon: click to show or hide, right-click for pin, opacity and
+  recent notes. Optionally on all desktops (macOS Spaces).
+- Commands: *Show or hide the floating note*, *Show the current note in the
+  floating note* and *Show the floating note controls*.
+- The note, size, position, pin, opacity and settings are remembered on each
+  computer only (not synced). The window is kept out of Obsidian's saved layout,
+  so it doesn't come back as a stray window after a restart.
+- It uses parts of Electron that Obsidian doesn't document. If one is missing,
+  just that part turns off, with a notice.
+
 ## Development
 
 ```
@@ -361,6 +380,7 @@ src/
     propertyTemplates/ property templates and value choices
     pinnedNotes/       pinned notes in the ribbon or a menu, ribbon dividers
     taskSweeper/       move completed tasks to a Done section
+    floatingNote/      a note in a floating desktop window (from PopNote)
   shared/editLog.ts    merging settings edits from several devices by edit time
   shared/syncSettle.ts waiting for Obsidian Sync to settle
   shared/deviceMemory.ts things kept on this device only (local storage)

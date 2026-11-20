@@ -1,8 +1,8 @@
 # Third-party notices
 
-Better Tabs and Notes combines the features of eighteen Obsidian plugins. It is
+Better Tabs and Notes combines the features of nineteen Obsidian plugins. It is
 licensed under the GNU General Public License v3.0 (see `LICENSE`), because
-one of them, Edit mode switch, is GPL-3.0. The other seventeen are under permissive
+one of them, Edit mode switch, is GPL-3.0. The other eighteen are under permissive
 licenses whose notices are reproduced below as they require.
 
 | Feature here | Original plugin | Author | License |
@@ -25,6 +25,7 @@ licenses whose notices are reproduced below as they require.
 | Pinned notes (pinned notes in the ribbon) | [pinned-notes-plugin-obsidian](https://github.com/vasilcoin002/pinned-notes-plugin-obsidian) | vasilcoin002 | MIT |
 | Pinned notes (ribbon dividers) | [obsidian-ribbon-divider](https://github.com/andrewmcgivery/obsidian-ribbon-divider) | Andrew McGivery | MIT |
 | Task sweeper | [task-sweeper](https://github.com/BryanHogan/task-sweeper) | Bryan Hogan | 0BSD |
+| Floating note | [popnote](https://github.com/iijarrett/popnote) | JD (iijarrett) | MIT |
 
 ---
 
@@ -422,6 +423,37 @@ Copyright (C) 2026 Bryan Hogan
 Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted.
 
 THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+---
+
+## popnote
+
+Floating note is ported from it. PopNote credits two approaches it followed
+without copying their code: finding its native window by a unique title
+(Desktop Sticky Notes, MIT) and the fallback way of reaching Electron's remote
+module (Quick Tray, MIT).
+
+MIT License
+
+Copyright (c) 2026 JD
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 ---
 

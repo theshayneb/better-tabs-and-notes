@@ -1,4 +1,4 @@
-import { App, Notice, PluginSettingTab, Setting, setIcon } from 'obsidian';
+import { App, Notice, Platform, PluginSettingTab, Setting, setIcon } from 'obsidian';
 import type BetterTabsPlugin from './main';
 import {
 	DEFAULT_SETTINGS, MOD_CLICK_BEHAVIORS, NEW_TAB_GROUP_PLACEMENTS, NEW_TAB_PLACEMENTS,
@@ -85,6 +85,10 @@ const FEATURE_INFO: Record<FeatureId, { name: string; desc: string }> = {
 		name: 'Task sweeper',
 		desc: 'Move completed tasks, with their subtasks, to a "Done" section at the bottom of the note, dated. Run "Sweep completed tasks to bottom of note", or sweep automatically when you check a task off.',
 	},
+	floatingNote: {
+		name: 'Floating note',
+		desc: 'One note in its own small window that floats over other apps. A shortcut that works from any app (Alt+P) shows and hides it; pin it on top, fade it, or pick another note. Desktop only.',
+	},
 };
 
 const COLOR_OPTIONS: Record<ColorChoice, string> = { default: 'Theme default', accent: 'Accent color', custom: 'Custom' };
@@ -163,6 +167,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		this.section('propertyTemplates', el => this.renderPropertyTemplates(el));
 		this.section('pinnedNotes', el => this.renderPinnedNotes(el));
 		this.section('taskSweeper', el => this.renderTaskSweeper(el));
+		this.section('floatingNote', el => this.renderFloatingNote(el));
 	}
 
 	/** The start page for this device only, overriding the synced "open on start" settings. */
@@ -786,6 +791,39 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 				await feature.importOriginalPlugins();
 				this.redraw();
 			}));
+	}
+
+	private renderFloatingNote(el: HTMLElement): void {
+		const feature = this.plugin.features.floatingNote;
+		if (!feature.available) {
+			el.createDiv({ cls: 'setting-item-description btn-settings-note', text: 'Only on desktop; it does nothing on this device.' });
+			return;
+		}
+		el.createDiv({
+			cls: 'setting-item-description btn-settings-note',
+			text: 'Press the shortcut to show the note you\'re on in a floating window, then use the "⋯" button in its tab strip to pick another note, pin it on top or change its opacity. The settings below, the note, and the window\'s size and position are remembered on this computer only.',
+		});
+		let accelerator = feature.currentShortcut();
+		new Setting(el).setName('Shortcut')
+			.setDesc('Works from any app while Obsidian is running, so Alt+P does nothing else anywhere then. Write it without spaces, like Alt+P or Ctrl+Alt+P; use Super for the Windows key and Command on a Mac. A refused shortcut keeps the previous one.')
+			.addText(t => t.setValue(accelerator).onChange(v => { accelerator = v; }))
+			.addButton(b => b.setButtonText('Apply').onClick(() => feature.applyShortcut(accelerator)));
+		const current = feature.settingsSnapshot();
+		new Setting(el).setName('Show on all desktops')
+			// eslint-disable-next-line obsidianmd/ui/sentence-case -- key names
+			.setDesc('Spaces on a Mac and similar. Applies the next time the window opens.')
+			.addToggle(t => t.setValue(current.allSpaces).onChange(v => feature.setAllSpaces(v)));
+		new Setting(el).setName('Tray icon')
+			.setDesc('A tray or menu bar icon: click it to show or hide the window, right-click for pin, opacity and recent notes. Some Linux desktops have no tray.')
+			.addToggle(t => t.setValue(current.tray).onChange(v => {
+				if (!feature.setTray(v)) t.setValue(!v);
+			}));
+		if (Platform.isWin) {
+			el.createDiv({
+				cls: 'setting-item-description btn-settings-note',
+				text: 'Windows: if the window was left on another virtual desktop, the shortcut or tray icon brings it to the one you\'re on. To keep one window on every desktop instead, press Win+Tab, right-click it, then choose "Show this window on all desktops".',
+			});
+		}
 	}
 
 	private renderTaskSweeper(el: HTMLElement): void {

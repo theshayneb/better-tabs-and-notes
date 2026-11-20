@@ -1,0 +1,381 @@
+// Floating note: the Obsidian pop-out window that shows the note, and the tabs it owns.
+// Ported from PopNote by JD (iijarrett) (MIT); see NOTICE.md.
+
+import { WorkspaceWindow, type App, type TFile, type WorkspaceLeaf, type WorkspaceParent } from 'obsidian';
+import { withoutDedupe } from '../../shared/openFlags';
+import type { WorkspaceCompatibility } from './layoutGuard';
+
+type TabGroup = WorkspaceParent & {
+	containerEl: HTMLElement;
+	tabHeaderContainerEl: HTMLElement;
+	tabsContainerEl: HTMLElement;
+	children: WorkspaceLeaf[];
+	currentTab: number;
+};
+
+/** Tracks the tabs created by the floating note in one dedicated window. */
+export class FloatingWindow {
+	private leaf: WorkspaceLeaf | null = null;
+	private document: Document | null = null;
+	private container: WorkspaceWindow | null = null;
+	private controls: HTMLElement | null = null;
+	private controlsHost: HTMLElement | null = null;
+	private claimed = false;
+	private ownedLeaves = new Set<WorkspaceLeaf>();
+	private tabGroup?: TabGroup;
+	private addingTab = false;
+	private stopTabInput?: () => void;
+	private stopMenuGuard?: () => void;
+	private app: App;
+	private cancelAttachment?: () => void;
+
+	constructor(app: App, private compatibility: WorkspaceCompatibility,
+		private onRelease: (reason: string) => void = () => {}) {
+		this.app = app;
+	}
+
+	isOpen(): boolean {
+		if (this.addingTab) return false;
+		const open = this.checkOwnership() && !!this.leaf && !!this.document?.defaultView &&
+			!this.document.defaultView.closed && this.leaf.view.containerEl.isConnected &&
+			this.leaf.view.containerEl.ownerDocument === this.document;
+		if (!open && this.document) this.release('previous pop-out is unavailable');
+		return open;
+	}
+
+	/** Whether the window's page is showing on screen. False when it is hidden, on another virtual desktop, or fully covered. */
+	isShowing(): boolean {
+		return this.document?.visibilityState === 'visible';
+	}
+
+	private validContainer(container: WorkspaceWindow): boolean {
+		const main = this.app.workspace.containerEl.ownerDocument;
+		return container.doc !== main && container.win !== main.defaultView && !container.win.closed &&
+			container.win.document === container.doc && container.doc.defaultView === container.win;
+	}
+
+	private leavesIn(container: WorkspaceWindow): WorkspaceLeaf[] {
+		const leaves: WorkspaceLeaf[] = [];
+		this.app.workspace.iterateAllLeaves((leaf) => { if (leaf.getContainer() === container) leaves.push(leaf); });
+		return leaves;
+	}
+
+	checkOwnership(): boolean {
+		if (this.addingTab || !this.leaf || !this.container) return false;
+		try {
+			const container = this.container;
+			const group = this.tabGroup;
+			const host = group?.tabHeaderContainerEl ?? (this.leaf.view as { contentEl?: HTMLElement }).contentEl;
+			const controlsAttached = !this.controls || (host === this.controlsHost && host?.isConnected &&
+				this.controls.isConnected && this.controls.parentElement === host &&
+				this.controls.ownerDocument === this.document);
+			const present = new Set<WorkspaceLeaf>();
+			let moved = false;
+			this.app.workspace.iterateAllLeaves((leaf) => {
+				if (leaf.getContainer() === container) present.add(leaf);
+				else if (this.ownedLeaves.has(leaf)) moved = true;
+			});
+			if (controlsAttached && !moved && present.size && this.validContainer(container) &&
+				[...present].every((leaf) => this.ownedLeaves.has(leaf) && (!group || (leaf.parent as unknown) === group) &&
+					(!this.claimed || this.compatibility.owns(leaf)))) {
+				if (!present.has(this.leaf)) this.leaf = present.values().next().value!;
+				const closed = [...this.ownedLeaves].filter((leaf) => !present.has(leaf));
+				for (const leaf of closed) this.ownedLeaves.delete(leaf);
+				for (const leaf of closed) this.compatibility.release(leaf);
+				return true;
+			}
+		} catch { /* Unknown ownership is never authority to control or detach a window. */ }
+		this.release('window is no longer exclusively owned');
+		return false;
+	}
+
+	ownsDocument(document: Document): boolean {
+		return this.document === document && (this.addingTab || this.isOpen());
+	}
+
+	private release(reason: string, detach = false): void {
+		if (!this.leaf) return;
+		const { container, controls, controlsHost, ownedLeaves, stopTabInput, stopMenuGuard, cancelAttachment } = this;
+		this.leaf = null;
+		this.container = null;
+		this.document = null;
+		this.controls = null;
+		this.controlsHost = null;
+		this.claimed = false;
+		this.ownedLeaves = new Set();
+		this.tabGroup = undefined;
+		this.stopTabInput = undefined;
+		this.stopMenuGuard = undefined;
+
+		stopTabInput?.();
+		stopMenuGuard?.();
+		cancelAttachment?.();
+		// Unregister focus handlers before removing a root that may contain focus.
+		try { this.onRelease(reason); }
+		catch { /* Cleanup continues with the remaining steps. */ }
+		try { if (controls?.parentElement) controls.remove(); }
+		catch { /* Cleanup continues with the remaining steps. */ }
+		controlsHost?.classList.remove('btn-float-host');
+
+		// Keep the markers through detach so a synchronous save excludes these tabs.
+		if (detach && container) {
+			try {
+				const present = this.leavesIn(container);
+				if (this.validContainer(container) && present.every((leaf) => ownedLeaves.has(leaf))) {
+					for (const leaf of present) {
+						if (leaf.getContainer() !== container || this.leavesIn(container).some((tab) => !ownedLeaves.has(tab))) break;
+						leaf.detach();
+					}
+				}
+			} catch { /* A window that cannot be detached is left for the user to close. */ }
+		}
+		for (const leaf of ownedLeaves) this.compatibility.release(leaf);
+	}
+
+	/**
+	 * In a small window Obsidian's long 'More options' menu is pushed up over the button that opened it, so the button cannot be
+	 * pressed again to close it. When a menu lands on that button, move it just below the button and let it scroll.
+	 */
+	private keepMenuClear(document: Document): () => void {
+		const view = document.defaultView;
+		if (!view || typeof MutationObserver !== 'function') return () => {};
+		const MARGIN = 4;
+		const adjust = (menu: HTMLElement) => {
+			try {
+				const buttons = document.querySelectorAll('.view-header .view-actions .view-action');
+				const button = buttons[buttons.length - 1];
+				if (!button || !menu.isConnected) return;
+				const target = button.getBoundingClientRect();
+				const box = menu.getBoundingClientRect();
+				const overlaps = box.left < target.right && box.right > target.left && box.top < target.bottom && box.bottom > target.top;
+				if (!overlaps) return;
+				const top = Math.round(target.bottom + MARGIN);
+				menu.setCssProps({ '--btn-float-menu-shift': `${top - Math.round(box.top)}px`, '--btn-float-menu-height': `${Math.max(80, view.innerHeight - top - MARGIN)}px` });
+				menu.classList.add('btn-float-menu-clear');
+			} catch { /* The menu stays where Obsidian put it. */ }
+		};
+		const observer = new MutationObserver((records) => {
+			for (const record of records) {
+				record.addedNodes.forEach((node) => {
+					if (node.nodeType === 1 && (node as HTMLElement).classList.contains('menu')) view.requestAnimationFrame(() => adjust(node as HTMLElement));
+				});
+			}
+		});
+		try { observer.observe(document.body, { childList: true }); }
+		catch { return () => {}; }
+		return () => observer.disconnect();
+	}
+
+	private bindNewTabCommand(document: Document): () => void {
+		type NewTabCommand = { checkCallback?: (checking: boolean) => boolean | void };
+		const app = this.app as App & { commands?: { findCommand?: (id: string) => NewTabCommand | undefined } };
+		const workspace = this.app.workspace;
+		const command = app.commands?.findCommand?.('workspace:new-tab');
+		const original = command?.checkCallback;
+		if (!command || typeof original !== 'function') return () => {};
+		// Obsidian handles the hotkey on window capture before DOM listeners run.
+		const delegate = original;
+		let enabled = true;
+		const intercept = (checking: boolean): boolean => {
+			if (!enabled || checking || !document.hasFocus() || !this.ownsDocument(document)) return false;
+			const active = workspace.getMostRecentLeaf();
+			return !!active && this.ownedLeaves.has(active) && !!this.addTab();
+		};
+		function wrapped(this: NewTabCommand, checking: boolean): boolean | void {
+			if (intercept(checking)) return true;
+			return delegate.call(this, checking);
+		}
+		try { command.checkCallback = wrapped; }
+		catch { return () => {}; }
+		return () => {
+			enabled = false;
+			if (command.checkCallback === wrapped) command.checkCallback = original;
+		};
+	}
+
+	addTab(): boolean {
+		const workspace = this.app.workspace as App['workspace'] & {
+			createLeafInTabGroup?: (group: WorkspaceParent) => WorkspaceLeaf;
+		};
+		if (!this.isOpen() || !this.leaf?.parent || !workspace.createLeafInTabGroup) return false;
+		const group = this.leaf.parent;
+		const container = this.container;
+		const existing = new Set<WorkspaceLeaf>();
+		workspace.iterateAllLeaves((leaf) => existing.add(leaf));
+		let created: WorkspaceLeaf | undefined;
+		this.addingTab = true;
+		try {
+			const leaf = workspace.createLeafInTabGroup(group);
+			if (leaf.parent === group && leaf.getContainer() === container &&
+				(this.ownedLeaves.has(leaf) || (!existing.has(leaf) && (!this.claimed || this.compatibility.claim(leaf))))) {
+				this.ownedLeaves.add(leaf);
+				created = leaf;
+			}
+		} catch { /* No tab was added. */ }
+		finally { this.addingTab = false; }
+		if (!this.checkOwnership() || !created) return false;
+		try { workspace.setActiveLeaf(created, { focus: true }); }
+		catch { /* The tab exists even if focusing it failed. */ }
+		return true;
+	}
+
+	noteLabel(): string | undefined {
+		if (!this.isOpen()) return;
+		const group = this.tabGroup;
+		const leaf = group?.children[group.currentTab] ?? this.leaf!;
+		const file = leaf.getViewState?.().state?.file;
+		return typeof file === 'string' ? file : leaf.view.getDisplayText?.();
+	}
+
+	/** Puts the typing cursor in the note of the window's current tab, so typing works as soon as it is shown. */
+	focusEditor(): void {
+		if (!this.isOpen()) return;
+		const group = this.tabGroup;
+		const leaf = group?.children[group.currentTab] ?? this.leaf!;
+		try {
+			const editor = (leaf.view as { editor?: { focus?: () => void } }).editor;
+			if (typeof editor?.focus === 'function') editor.focus();
+			else this.app.workspace.setActiveLeaf(leaf, { focus: true });
+		} catch { /* Focus is a convenience; the window is already shown. */ }
+	}
+
+	/** Shows another note in the window's current floating note tab. */
+	async showNote(file: TFile): Promise<boolean> {
+		if (!this.isOpen()) return false;
+		const group = this.tabGroup;
+		const leaf = group?.children[group.currentTab] ?? this.leaf!;
+		if (!this.ownedLeaves.has(leaf)) return false;
+		// The floating window must show it, not the tab where the note is already open.
+		try { await withoutDedupe(() => leaf.openFile(file)); }
+		catch { return false; }
+		return this.isOpen();
+	}
+
+	async open(file: TFile): Promise<Document> {
+		if (this.isOpen()) return this.document!;
+		this.release('previous pop-out is unavailable');
+		const workspace = this.app.workspace;
+		if (!workspace.layoutReady) throw new Error('the workspace is still loading');
+		if (typeof workspace.openPopoutLeaf !== 'function') {
+			throw new Error('Obsidian pop-out API is unavailable.');
+		}
+		// The verified API is synchronous: claim identity before the first await.
+		const leaf = workspace.openPopoutLeaf();
+		const container = leaf.getContainer();
+		const mainDocument = workspace.containerEl.ownerDocument;
+		const separate = container instanceof WorkspaceWindow && container.doc !== mainDocument &&
+			container.win !== mainDocument.defaultView && container.win.document === container.doc &&
+			container.doc.defaultView === container.win;
+		// Container identity is available before queued DOM adoption. Never claim or detach a main-window leaf.
+		if (!separate || !this.validContainer(container) || this.leavesIn(container).length !== 1 || leaf.getContainer() !== container) throw new Error('Obsidian did not return a separate pop-out with one leaf.');
+		this.leaf = leaf;
+		this.ownedLeaves.add(leaf);
+		this.container = container;
+		try {
+			// Restart protection is a convenience. If it is unavailable the window still opens;
+			// it is then ordinary workspace content and may restore after a restart.
+			if (this.compatibility.claim(leaf)) this.claimed = true;
+			// The floating window must show it, not the tab where the note is already open.
+			await withoutDedupe(() => leaf.openFile(file));
+			if (this.leaf !== leaf) throw new Error('Pop-out was closed while opening.');
+			const document = await this.waitForAttachment(leaf, container);
+			if (this.attachedDocument(leaf, container) !== document) throw new Error('Pop-out attachment changed while opening.');
+			this.document = document;
+			return document;
+		} catch (error) {
+			if (this.leaf === leaf) this.close();
+			throw error;
+		}
+	}
+
+	private attachedDocument(leaf: WorkspaceLeaf, container: WorkspaceWindow): Document | null {
+		if (this.leaf !== leaf || container.win.closed) throw new Error('Pop-out was closed while awaiting attachment.');
+		if (!this.checkOwnership()) throw new Error('Pop-out ownership was released while opening.');
+		if (leaf.getContainer() !== container) throw new Error('Pop-out moved while awaiting attachment.');
+		const element = leaf.view.containerEl;
+		return element.ownerDocument === container.doc && element.isConnected ? container.doc : null;
+	}
+
+	private waitForAttachment(leaf: WorkspaceLeaf, container: WorkspaceWindow): Promise<Document> {
+		const document = this.attachedDocument(leaf, container);
+		if (document) return Promise.resolve(document);
+		return new Promise((resolve, reject) => {
+			let finished = false;
+			let observer: MutationObserver | undefined;
+			let timer: number | undefined;
+			const finish = (error?: unknown, attached?: Document) => {
+				if (finished) return;
+				finished = true;
+				observer?.disconnect();
+				window.clearTimeout(timer);
+				container.win.removeEventListener('pagehide', cancel);
+				if (this.cancelAttachment === cancel) this.cancelAttachment = undefined;
+				if (error) reject(error instanceof Error ? error : new Error('Pop-out attachment failed.'));
+				else resolve(attached!);
+			};
+			const cancel = () => finish(new Error('Pop-out was closed while awaiting attachment.'));
+			const check = () => {
+				try {
+					const attached = this.attachedDocument(leaf, container);
+					if (attached) finish(undefined, attached);
+				} catch (error) { finish(error); }
+			};
+			this.cancelAttachment = cancel;
+			try {
+				observer = new MutationObserver(check);
+				observer.observe(container.doc, { childList: true, subtree: true });
+				container.win.addEventListener('pagehide', cancel);
+				timer = window.setTimeout(() => finish(new Error('Pop-out did not attach to its separate document within 5 seconds.')), 5000);
+				check();
+			} catch (error) { finish(error); }
+		});
+	}
+
+	mountControls(): HTMLElement {
+		if (!this.isOpen() || !this.leaf || !this.document) throw new Error('Pop-out is closed or ownership was released.');
+		const leaf = this.leaf;
+		const document = this.document;
+		const group = leaf.parent as unknown as TabGroup | undefined;
+		const stableGroup = group?.tabsContainerEl?.parentElement === group?.containerEl &&
+			group?.tabHeaderContainerEl?.parentElement === group?.containerEl && group?.containerEl?.ownerDocument === document;
+		const host = stableGroup ? group.tabHeaderContainerEl : (leaf.view as { contentEl?: HTMLElement }).contentEl;
+		if (!host || host.ownerDocument !== document || (!stableGroup && !leaf.view.containerEl.contains(host))) {
+			throw new Error('Note content container is unavailable; standard window controls remain available.');
+		}
+		const controls = host.createDiv({ cls: 'btn-float' });
+		this.controls = controls;
+		this.stopMenuGuard = this.keepMenuClear(document);
+		this.controlsHost = host;
+		host.classList.add('btn-float-host');
+		if (stableGroup) {
+			this.tabGroup = group;
+			controls.classList.add('btn-float-in-tab-header');
+			host.append(controls);
+			const click = (event: MouseEvent) => {
+				const button = (event.target as Element | null)?.closest?.('.workspace-tab-header-new-tab');
+				if (event.button === 0 && button && group.tabHeaderContainerEl.contains(button)) openTab(event);
+			};
+			const openTab = (event: MouseEvent) => {
+				const workspace = this.app.workspace as { createLeafInTabGroup?: unknown };
+				if (!event.isTrusted || event.defaultPrevented || typeof workspace.createLeafInTabGroup !== 'function' ||
+					!this.ownsDocument(document)) return;
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				this.addTab();
+			};
+			const restoreCommand = this.bindNewTabCommand(document);
+			document.addEventListener('click', click, true);
+			this.stopTabInput = () => {
+				document.removeEventListener('click', click, true);
+				restoreCommand();
+			};
+		} else if (typeof host.prepend === 'function') host.prepend(controls);
+		else host.append(controls);
+		return controls;
+	}
+
+	close(): void {
+		const detach = this.checkOwnership();
+		this.release('closed', detach);
+	}
+}

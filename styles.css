@@ -1140,3 +1140,230 @@
 	width: 100%;
 	min-width: 16em;
 }
+
+/* ===== Floating note (from PopNote) ===== */
+
+.btn-float {
+	position: relative;
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	gap: var(--size-4-1);
+	block-size: calc(var(--input-height) + var(--size-4-1));
+	padding-inline: var(--size-4-2);
+	color: var(--text-normal);
+	font-family: var(--font-interface);
+	font-size: var(--font-ui-small);
+	-webkit-app-region: no-drag;
+}
+
+.btn-float-in-tab-header {
+	flex: none;
+	block-size: 100%;
+	padding-inline: var(--size-4-1);
+}
+
+.btn-float-in-tab-header .btn-float-note {
+	display: none;
+}
+
+/* The opacity slider opens as a popover under the tab strip, so it never competes with the controls for room. */
+.btn-float-in-tab-header .btn-float-panel {
+	position: fixed;
+	z-index: var(--layer-popover);
+	inset-block-start: var(--header-height);
+	inset-inline-end: var(--size-4-2);
+	inline-size: min(16rem, calc(100vw - var(--size-4-4)));
+	max-inline-size: none;
+	padding: var(--size-4-2);
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	box-shadow: var(--shadow-s);
+	pointer-events: auto;
+}
+
+.btn-float-in-tab-header .btn-float-range {
+	inline-size: 100%;
+}
+
+.btn-float .btn-float-notes {
+	flex-direction: column;
+	align-items: stretch;
+}
+
+.btn-float-in-tab-header .btn-float-notes {
+	inline-size: min(20rem, calc(100vw - var(--size-4-4)));
+	max-block-size: calc(100vh - var(--header-height) - var(--size-4-4));
+}
+
+.btn-float-search {
+	inline-size: 100%;
+}
+
+.btn-float-results {
+	display: flex;
+	flex-direction: column;
+	min-block-size: 0;
+	overflow-y: auto;
+}
+
+.btn-float .btn-float-result {
+	inline-size: 100%;
+	display: block;
+	justify-content: flex-start;
+	block-size: auto;
+	min-block-size: 0;
+	padding: var(--size-4-1) var(--size-4-2);
+	overflow: hidden;
+	color: var(--text-normal);
+	font: inherit;
+	text-align: start;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	background: transparent;
+	border: none;
+	border-radius: var(--radius-s);
+	box-shadow: none;
+}
+
+.btn-float .btn-float-result:hover,
+.btn-float .btn-float-result:focus-visible {
+	background: var(--background-modifier-hover);
+}
+
+.btn-float-empty {
+	padding: var(--size-4-1) var(--size-4-2);
+	color: var(--text-muted);
+}
+
+/* Keep a grab area: the tab strip is how the window is moved, so its empty part never shrinks away. */
+.btn-float-host .workspace-tab-header-spacer {
+	flex: 1 0 var(--size-4-8);
+	min-inline-size: var(--size-4-8);
+	-webkit-app-region: drag;
+}
+
+/* Narrow windows: the note title is already shown in the view header, so the tab strip steps aside.
+	 What stays is the grab area, the floating note buttons and the window controls. */
+@media (max-width: 32rem) {
+	.btn-float-host .workspace-tab-header-container-inner,
+	.btn-float-host .workspace-tab-header-new-tab,
+	.btn-float-host .workspace-tab-header-tab-list,
+	.btn-float-in-tab-header .btn-float-drag {
+		display: none;
+	}
+}
+
+@media (max-width: 22rem) {
+	.btn-float-in-tab-header .btn-float-button {
+		padding-inline: var(--size-4-1);
+	}
+}
+
+.btn-float,
+.btn-float * {
+	box-sizing: border-box;
+}
+
+.btn-float [hidden] {
+	display: none;
+}
+
+.btn-float-recovery,
+.btn-float-button {
+	flex: none;
+	block-size: var(--input-height);
+	padding-inline: var(--size-4-2);
+	color: var(--text-normal);
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	font: inherit;
+	-webkit-app-region: no-drag;
+}
+
+.btn-float-recovery {
+	position: relative;
+	order: 1;
+	margin-inline-start: auto;
+	inline-size: var(--input-height);
+	padding: 0;
+}
+
+.btn-float-bar,
+.btn-float-panel {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-1);
+	min-inline-size: 0;
+}
+
+.btn-float-bar {
+	position: relative;
+	flex: 1;
+	pointer-events: none;
+}
+
+.btn-float-bar > :not(.btn-float-note) {
+	pointer-events: auto;
+}
+
+.btn-float-note {
+	flex: 1;
+	min-inline-size: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.btn-float-drag {
+	flex: none;
+	inline-size: var(--size-4-5);
+	text-align: center;
+	user-select: none;
+	cursor: move;
+	-webkit-app-region: drag;
+}
+
+.btn-float-panel {
+	flex: 1 1 8rem;
+	max-inline-size: 12rem;
+}
+
+.btn-float-range {
+	flex: 1;
+	min-inline-size: 0;
+}
+
+.btn-float-label,
+.btn-float-value {
+	position: absolute;
+	inline-size: 1px;
+	block-size: 1px;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.btn-float :focus-visible {
+	outline: 2px solid var(--interactive-accent);
+	outline-offset: 2px;
+}
+
+/* No focus ring on the three-dots button unless the keyboard is in use (see overlay.ts). */
+.btn-float:not(.btn-float-keyboard) button.btn-float-recovery:focus-visible {
+	outline: none;
+	box-shadow: none;
+}
+
+.btn-float-button[aria-pressed="true"] {
+	color: var(--text-on-accent);
+	background: var(--interactive-accent);
+}
+
+/* A menu that was moved clear of its button in a small window sits just below the button and scrolls. Obsidian sets the menu's top inline, so the menu is shifted with translate instead. */
+.menu.btn-float-menu-clear {
+	translate: 0 var(--btn-float-menu-shift);
+	max-height: var(--btn-float-menu-height);
+	overflow-y: auto;
+}

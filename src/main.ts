@@ -1,4 +1,4 @@
-import { MarkdownView, Notice, Plugin, type Command, type WorkspaceLeaf } from 'obsidian';
+import { MarkdownView, Notice, Platform, Plugin, type Command, type WorkspaceLeaf } from 'obsidian';
 import type { Feature } from './feature';
 import { DEFAULT_SETTINGS, FEATURE_IDS, mergeSettings, type FeatureId, type PluginSettings } from './settings';
 import { BetterTabsSettingTab } from './settingsTab';
@@ -26,6 +26,8 @@ import { LinkIconsFeature } from './features/linkIcons/linkIcons';
 import { PropertyTemplatesFeature } from './features/propertyTemplates/propertyTemplates';
 import { PinnedNotesFeature } from './features/pinnedNotes/pinnedNotes';
 import { TaskSweeperFeature } from './features/taskSweeper/taskSweeper';
+import { FloatingNoteFeature } from './features/floatingNote/floatingNote';
+import { WorkspaceCompatibility } from './features/floatingNote/layoutGuard';
 
 const DEVICE_DISABLED_PREFIX = 'better-tabs-and-notes:disabled-on-device:';
 const DEVICE_TABS_KEY = 'better-tabs-and-notes:device-tab-settings';
@@ -57,9 +59,26 @@ export default class BetterTabsPlugin extends Plugin {
 		propertyTemplates: PropertyTemplatesFeature;
 		pinnedNotes: PinnedNotesFeature;
 		taskSweeper: TaskSweeperFeature;
+		floatingNote: FloatingNoteFeature;
 	};
 
+	/**
+	 * Keeps the floating note's window out of the saved layout, so it can't come back as a stray window after a
+	 * restart. Desktop only. Installed at the very start of onload, before anything awaits, so it sees the layout
+	 * Obsidian restores at startup; it only removes the floating note's own marked tabs, so it's harmless when off.
+	 */
+	floatingLayout: WorkspaceCompatibility | null = null;
+
 	override async onload(): Promise<void> {
+		// Before the first await (see floatingLayout).
+		if (Platform.isDesktopApp) {
+			const layout = this.floatingLayout = new WorkspaceCompatibility(this.app.workspace,
+				message => new Notice(message),
+				() => this.features?.floatingNote?.checkOwnership());
+			layout.install();
+			this.register(() => layout.dispose());
+			this.app.workspace.onLayoutReady(() => layout.finishStartup());
+		}
 		this.syncWatcher = this.addChild(new SyncWatcher(this.app));
 		const stored: unknown = await this.loadData();
 		this.moveDeviceListsOut(stored);
@@ -82,6 +101,7 @@ export default class BetterTabsPlugin extends Plugin {
 			propertyTemplates: new PropertyTemplatesFeature(this),
 			pinnedNotes: new PinnedNotesFeature(this),
 			taskSweeper: new TaskSweeperFeature(this),
+			floatingNote: new FloatingNoteFeature(this),
 		};
 
 		// Register the settings tab first, so it's there even if a feature fails.
