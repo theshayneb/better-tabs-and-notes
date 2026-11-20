@@ -801,7 +801,7 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 		}
 		el.createDiv({
 			cls: 'setting-item-description btn-settings-note',
-			text: 'Press the shortcut to show the note you\'re on in a floating window, then use the "⋯" button in its tab strip to pick another note, pin it on top or change its opacity. The settings below, the note, and the window\'s size and position are remembered on this computer only.',
+			text: 'Press the shortcut to show the note you\'re on in a floating window, and again to hide it. The "⋯" button in its tab strip picks another note, pins it on top or changes its opacity. The settings below, the note, and the window\'s size and position are remembered on this computer only.',
 		});
 		let accelerator = feature.currentShortcut();
 		new Setting(el).setName('Shortcut')
@@ -809,6 +809,9 @@ export class BetterTabsSettingTab extends PluginSettingTab {
 			.addText(t => t.setValue(accelerator).onChange(v => { accelerator = v; }))
 			.addButton(b => b.setButtonText('Apply').onClick(() => feature.applyShortcut(accelerator)));
 		const current = feature.settingsSnapshot();
+		new Setting(el).setName('Show the note you\'re on')
+			.setDesc('Each time the shortcut brings the window up, it shows the note you were on in Obsidian. Turn off to keep showing the note it showed last (pick it with the "⋯" button), like a checklist that stays put.')
+			.addToggle(t => t.setValue(current.followActive).onChange(v => feature.setFollowActive(v)));
 		new Setting(el).setName('Show on all desktops')
 			// eslint-disable-next-line obsidianmd/ui/sentence-case -- key names
 			.setDesc('Spaces on a Mac and similar. Applies the next time the window opens.')

@@ -135,9 +135,15 @@ export class FloatingNoteFeature extends Feature {
 		return this.state ? shortcutOf(this.state) : shortcutOf(cleanState(this.app.loadLocalStorage(STATE_KEY), { allSpaces: false }));
 	}
 
-	settingsSnapshot(): { allSpaces: boolean; tray: boolean } {
+	settingsSnapshot(): { allSpaces: boolean; tray: boolean; followActive: boolean } {
 		const state = this.state ?? cleanState(this.app.loadLocalStorage(STATE_KEY), { allSpaces: Platform.isMacOS });
-		return { allSpaces: state.allSpaces, tray: state.tray };
+		return { allSpaces: state.allSpaces, tray: state.tray, followActive: state.followActive };
+	}
+
+	setFollowActive(value: boolean): void {
+		const state = this.state ?? cleanState(this.app.loadLocalStorage(STATE_KEY), { allSpaces: Platform.isMacOS });
+		state.followActive = value;
+		this.app.saveLocalStorage(STATE_KEY, state);
 	}
 
 	/** Register a new shortcut; a refused one keeps the previous one. */
@@ -342,28 +348,40 @@ export class FloatingNoteFeature extends Feature {
 		const open = popout.isOpen();
 		this.busy = true;
 		const operation = ++this.operation;
+		// The note you're on, read before the window comes up and takes the focus.
+		const focused = this.state.followActive ? this.app.workspace.getActiveFile() : null;
+		// An open window that comes up again switches to it first.
+		const follow = async () => {
+			if (focused && focused.path !== popout.noteLabel()) await this.chooseNote(focused.path);
+		};
 		try {
 			if (open && Platform.isWin && !popout.isShowing() && !native.justShown()) {
 				// A visible window whose page isn't showing was left on another virtual desktop. Showing it as usual would
 				// switch back to that desktop, so it's hidden and shown again on this one.
 				if (await native.showOnThisDesktop()) {
-					if (!this.stopped && popout.isOpen()) this.focusNote();
+					if (!this.stopped && popout.isOpen()) {
+						await follow();
+						this.focusNote();
+					}
 					return;
 				}
 			}
 			if (open) {
 				// On Windows a tray click takes focus from the window, so a visible window hides whatever its focus.
 				const action = native.toggle(source === 'tray' && !Platform.isMacOS ? 'hide-if-visible' : 'toggle');
-				if (action === 'shown' || action === 'focused') this.focusNote();
+				if (action === 'shown' || action === 'focused') {
+					await follow();
+					this.focusNote();
+				}
 				return;
 			}
 			const saved = this.state.notePath ? this.app.vault.getAbstractFileByPath(this.state.notePath) : null;
-			const file = saved instanceof TFile ? saved : this.firstNote();
+			const file = focused ?? (saved instanceof TFile ? saved : this.firstNote());
 			if (!(file instanceof TFile)) {
 				new Notice('Floating note: this vault has no notes to show yet.');
 				return;
 			}
-			if (this.state.notePath && !(saved instanceof TFile)) {
+			if (!focused && this.state.notePath && !(saved instanceof TFile)) {
 				new Notice(`Floating note: ${this.state.notePath} isn't there any more, so showing ${file.path} instead.`);
 			}
 			const document = await popout.open(file);

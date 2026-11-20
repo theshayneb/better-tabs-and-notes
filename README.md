@@ -325,7 +325,8 @@ now and then:
 
 - **Alt+P**, from any app while Obsidian is running, shows the note you're on in
   its own small window (an Obsidian pop-out, so it looks like your theme), and
-  hides it again. While it runs, Alt+P does nothing else on that computer;
+  hides it again. Each time it comes up it switches to the note you're on;
+  turn *Show the note you're on* off to keep one note there instead. While it runs, Alt+P does nothing else on that computer;
   change the shortcut in the settings.
 - The **⋯** button in the window's tab strip: pick another note, pin the window
   on top of other apps, or fade it (opacity).

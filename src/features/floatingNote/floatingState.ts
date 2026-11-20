@@ -13,6 +13,8 @@ export interface FloatingBounds {
 export interface FloatingState {
 	/** The note the window shows. */
 	notePath: string | null;
+	/** Show the note you're on each time the window comes up (else the note it showed last, as PopNote did). */
+	followActive: boolean;
 	bounds: FloatingBounds | null;
 	pinned: boolean;
 	/** 0.3 to 1. */
@@ -43,6 +45,7 @@ export function cleanState(raw: unknown, defaults: { allSpaces: boolean }): Floa
 	}
 	return {
 		notePath: typeof data.notePath === 'string' && data.notePath.trim() ? data.notePath : null,
+		followActive: data.followActive !== false,
 		bounds,
 		pinned: data.pinned === true,
 		opacity: finite(data.opacity) ? Math.min(1, Math.max(MIN_OPACITY, data.opacity)) : 1,

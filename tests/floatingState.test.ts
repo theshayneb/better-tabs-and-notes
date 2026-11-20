@@ -7,9 +7,14 @@ describe('floating note: what each computer remembers', () => {
 		expect(DEFAULT_SHORTCUT).toBe('Alt+P');
 		expect(shortcutOf(state)).toBe('Alt+P');
 		expect(state).toEqual({
-			notePath: null, bounds: null, pinned: false, opacity: 1, shortcut: '', allSpaces: false, tray: false, helpShown: false,
+			notePath: null, followActive: true, bounds: null, pinned: false, opacity: 1, shortcut: '', allSpaces: false, tray: false, helpShown: false,
 		});
 		expect(cleanState(undefined, { allSpaces: true }).allSpaces).toBe(true);
+	});
+
+	it('follows the note you\'re on unless turned off', () => {
+		expect(cleanState({ followActive: false }, { allSpaces: false }).followActive).toBe(false);
+		expect(cleanState({ notePath: 'A.md' }, { allSpaces: false }).followActive).toBe(true);
 	});
 
 	it('keeps a shortcut chosen on this computer', () => {

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.40] - 2026-11-20
+
+### Fixed
+- Floating note: Alt+P showed the note the window showed last time instead of the note you're on. It now shows the note you're on each time it brings the window up, whether it opens, comes back from hidden or comes to the front. "Show the note you're on" (on by default, per computer) turns this off to keep one note there, as PopNote did.
+
 ## [0.0.39] - 2026-11-20
 
 ### Changed
